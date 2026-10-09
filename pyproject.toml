@@ -1,0 +1,20 @@
+[project]
+name = "fxval-python"
+version = "0.1.0"
+description = "Data download scripts and, later, Python bindings for fx-model-validation"
+requires-python = ">=3.10"
+dependencies = []
+
+[tool.pytest.ini_options]
+testpaths = ["python/tests"]
+pythonpath = ["python"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "S", "SIM", "C4"]
+
+[tool.ruff.lint.per-file-ignores]
+"python/tests/*" = ["S101"]  # assert is how pytest tests work
