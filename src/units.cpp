@@ -66,6 +66,13 @@ Result<Years> Years::from_years(double years) {
   return Years{years};
 }
 
+Result<Spot> Spot::from_value(double spot) {
+  if (!std::isfinite(spot) || spot <= 0.0) {
+    return out_of_domain("spot", "finite and strictly positive", spot);
+  }
+  return Spot{spot};
+}
+
 Result<Strike> Strike::from_value(double strike) {
   if (!std::isfinite(strike) || strike <= 0.0) {
     return out_of_domain("strike", "finite and strictly positive", strike);

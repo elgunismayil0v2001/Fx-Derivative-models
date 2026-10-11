@@ -1,15 +1,15 @@
 # Architecture
 
-Status: week 1. Only the `core` layer exists. The rest is the planned structure so that each
-module added later has an obvious place and an obvious set of allowed dependencies.
+Status: week 2. The `core` and `pricing` layers exist. The rest is the planned structure so that
+each module added later has an obvious place and an obvious set of allowed dependencies.
 
 ## Layers and dependency rule
 
 Each layer may depend only on layers above it in this list. Nothing depends on `apps`.
 
 ```
-core          errors, typed units, limits, tolerances, contracts   (implemented)
-pricing       Garman-Kohlhagen, Black-76, closed-form barriers     (week 2, 9)
+core          errors, typed units, day count, limits, contracts    (implemented)
+pricing       Garman-Kohlhagen (Greeks); Black-76 and barriers later (week 2, 9)
 models        GBM, Heston, semi-analytic Heston                    (week 3)
 mc            engine, schemes, random streams, thread pool         (weeks 4-5)
 smile         delta quotes, interpolation, arbitrage checks        (week 7)

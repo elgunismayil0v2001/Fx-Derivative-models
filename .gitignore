@@ -1,0 +1,39 @@
+# Build trees (CMake presets write to build/<preset>)
+/build/
+/cmake-build-*/
+/out/
+
+# Generated compile database copies
+compile_commands.json
+.cache/
+
+# Install prefixes used by local checks
+/opt/
+/tmp-fxval-install/
+
+# Python
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Coverage / sanitizer artefacts
+*.gcda
+*.gcno
+*.gcov
+coverage.xml
+coverage.info
+
+# Data downloads (regenerated; provenance stays with the CSVs you commit)
+/data/raw/
+
+# Editors and OS
+.idea/
+.vs/
+.DS_Store
+*.swp
+*~

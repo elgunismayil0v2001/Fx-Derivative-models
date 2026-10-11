@@ -65,6 +65,15 @@ class Years final : public detail::StrongDouble<Years> {
   explicit constexpr Years(double years) noexcept : StrongDouble(years) {}
 };
 
+// Spot FX quoted as domestic per one unit of foreign. Strictly positive.
+class Spot final : public detail::StrongDouble<Spot> {
+ public:
+  [[nodiscard]] static Result<Spot> from_value(double spot);
+
+ private:
+  explicit constexpr Spot(double spot) noexcept : StrongDouble(spot) {}
+};
+
 // Option strike in domestic currency per unit of foreign currency. Strictly positive.
 class Strike final : public detail::StrongDouble<Strike> {
  public:
