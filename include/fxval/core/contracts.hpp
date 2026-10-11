@@ -14,9 +14,9 @@ namespace fxval::detail {
 }  // namespace fxval::detail
 
 #if defined(FXVAL_ENABLE_CONTRACTS)
-#define FXVAL_EXPECTS(condition) \
-  (static_cast<bool>(condition)  \
-       ? static_cast<void>(0)    \
+#define FXVAL_EXPECTS(condition)                                                                   \
+  (static_cast<bool>(condition)                                                                    \
+       ? static_cast<void>(0)                                                                      \
        : ::fxval::detail::contract_violation(#condition, __FILE__, __LINE__))
 #else
 // sizeof keeps the expression compiled (so it cannot rot) without evaluating it.

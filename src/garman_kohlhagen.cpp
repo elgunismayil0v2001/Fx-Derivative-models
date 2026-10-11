@@ -32,13 +32,17 @@ Kernel to_kernel(const VanillaFx& market, OptionType type) {
   };
 }
 
-[[nodiscard]] bool is_call(OptionType type) noexcept { return type == OptionType::call; }
+[[nodiscard]] bool is_call(OptionType type) noexcept {
+  return type == OptionType::call;
+}
 
 [[nodiscard]] double norm_pdf(double x) {
   return std::exp(-0.5 * x * x) / std::sqrt(2.0 * std::numbers::pi);
 }
 
-[[nodiscard]] double norm_cdf(double x) { return 0.5 * std::erfc(-x / std::numbers::sqrt2); }
+[[nodiscard]] double norm_cdf(double x) {
+  return 0.5 * std::erfc(-x / std::numbers::sqrt2);
+}
 
 [[nodiscard]] double forward(const Kernel& k) {
   return k.spot * std::exp((k.domestic - k.foreign) * k.expiry);
@@ -76,21 +80,11 @@ struct DTerms {
   };
 }
 
-[[nodiscard]] double digital_call(double fwd, double strike) {
-  if (fwd > strike) {
-    return 1.0;
-  }
-  if (fwd < strike) {
-    return 0.0;
-  }
-  return 0.5;
-}
-
 [[nodiscard]] Result<double> price_deterministic(const Kernel& k) {
   const double df_d = std::exp(-k.domestic * k.expiry);
   const double fwd = (k.expiry <= 0.0) ? k.spot : forward(k);
-  const double intrinsic = is_call(k.type) ? std::max(fwd - k.strike, 0.0)
-                                           : std::max(k.strike - fwd, 0.0);
+  const double intrinsic =
+      is_call(k.type) ? std::max(fwd - k.strike, 0.0) : std::max(k.strike - fwd, 0.0);
   const double value = df_d * intrinsic;
   if (!std::isfinite(value)) {
     return Error{ErrorCode::numerical_failure, "Garman-Kohlhagen price is not finite"};
@@ -102,45 +96,13 @@ struct DTerms {
   const DTerms d = d_terms(k);
   const double df_f = std::exp(-k.foreign * k.expiry);
   const double df_d = std::exp(-k.domestic * k.expiry);
-  const double value = is_call(k.type) ? k.spot * df_f * d.n_d1 - k.strike * df_d * d.n_d2
-                                       : k.strike * df_d * d.n_minus_d2 - k.spot * df_f * d.n_minus_d1;
+  const double value = is_call(k.type)
+                           ? k.spot * df_f * d.n_d1 - k.strike * df_d * d.n_d2
+                           : k.strike * df_d * d.n_minus_d2 - k.spot * df_f * d.n_minus_d1;
   if (!std::isfinite(value)) {
     return Error{ErrorCode::numerical_failure, "Garman-Kohlhagen price is not finite"};
   }
   return value;
-}
-
-[[nodiscard]] Result<GarmanKohlhagenGreeks> greeks_deterministic(const Kernel& k) {
-  const double df_f = std::exp(-k.foreign * k.expiry);
-  const double df_d = std::exp(-k.domestic * k.expiry);
-  const double fwd = (k.expiry <= 0.0) ? k.spot : forward(k);
-  const double in_the_money = digital_call(fwd, k.strike);
-  const double put_in_the_money = 1.0 - in_the_money;
-
-  GarmanKohlhagenGreeks g{};
-  if (is_call(k.type)) {
-    g.spot_delta = df_f * in_the_money;
-    g.forward_delta = in_the_money;
-    if (fwd > k.strike) {
-      g.theta = k.foreign * k.spot * df_f - k.domestic * k.strike * df_d;
-      g.rho_domestic = k.strike * k.expiry * df_d;
-      g.rho_foreign = -k.spot * k.expiry * df_f;
-    }
-  } else {
-    g.spot_delta = -df_f * put_in_the_money;
-    g.forward_delta = -put_in_the_money;
-    if (fwd < k.strike) {
-      g.theta = -k.domestic * k.strike * df_d + k.foreign * k.spot * df_f;
-      g.rho_domestic = -k.strike * k.expiry * df_d;
-      g.rho_foreign = k.spot * k.expiry * df_f;
-    }
-  }
-
-  if (!std::isfinite(g.spot_delta) || !std::isfinite(g.theta) || !std::isfinite(g.rho_domestic) ||
-      !std::isfinite(g.rho_foreign)) {
-    return Error{ErrorCode::numerical_failure, "Garman-Kohlhagen Greeks are not finite"};
-  }
-  return g;
 }
 
 [[nodiscard]] Result<GarmanKohlhagenGreeks> greeks_smooth(const Kernel& k) {
@@ -162,7 +124,8 @@ struct DTerms {
     g.spot_delta = -df_f * d.n_minus_d1;
     g.forward_delta = -d.n_minus_d1;
     g.theta = -k.spot * df_f * d.density_d1 * k.vol / (2.0 * sqrt_t) -
-              k.foreign * k.spot * df_f * d.n_minus_d1 + k.domestic * k.strike * df_d * d.n_minus_d2;
+              k.foreign * k.spot * df_f * d.n_minus_d1 +
+              k.domestic * k.strike * df_d * d.n_minus_d2;
     g.rho_domestic = -k.strike * k.expiry * df_d * d.n_minus_d2;
     g.rho_foreign = k.spot * k.expiry * df_f * d.n_minus_d1;
   }
@@ -188,7 +151,13 @@ Result<double> garman_kohlhagen_price(const VanillaFx& market, OptionType type) 
 
 Result<GarmanKohlhagenGreeks> garman_kohlhagen_greeks(const VanillaFx& market, OptionType type) {
   const Kernel k = to_kernel(market, type);
-  return is_deterministic(k) ? greeks_deterministic(k) : greeks_smooth(k);
+  if (is_deterministic(k)) {
+    // The payoff is not differentiable here: gamma and vega are undefined (infinite at the money),
+    // and every Greek divides by sigma * sqrt(T). Returning 0 would look like a valid answer.
+    return Error{ErrorCode::invalid_argument,
+                 "Garman-Kohlhagen Greeks are undefined when volatility or expiry is zero"};
+  }
+  return greeks_smooth(k);
 }
 
 }  // namespace fxval::pricing

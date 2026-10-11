@@ -27,10 +27,14 @@ endfunction()
 
 fxval_add_test_executable(fxval_unit_tests unit/test_error.cpp unit/test_units.cpp
                           unit/test_version.cpp unit/test_daycount.cpp
-                          unit/test_garman_kohlhagen.cpp)
+                          unit/test_garman_kohlhagen.cpp unit/test_garman_kohlhagen_errors.cpp)
 
 fxval_add_test_executable(fxval_validation_tests validation/test_catalogue_consistency.cpp
-                          validation/test_v01_put_call_parity.cpp validation/test_v02_greeks_fd.cpp)
+                          validation/test_v01_put_call_parity.cpp validation/test_v02_greeks_fd.cpp
+                          validation/test_gk_reference.cpp)
 target_compile_definitions(
   fxval_validation_tests
-  PRIVATE "FXVAL_TEST_CATALOGUE_PATH=\"${PROJECT_SOURCE_DIR}/docs/test_catalogue.md\"")
+  PRIVATE "FXVAL_TEST_CATALOGUE_PATH=\"${PROJECT_SOURCE_DIR}/docs/test_catalogue.md\""
+          "FXVAL_GK_REFERENCE_PATH=\"${PROJECT_SOURCE_DIR}/tests/validation/data/gk_reference.csv\"")
+target_include_directories(fxval_unit_tests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+target_include_directories(fxval_validation_tests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})

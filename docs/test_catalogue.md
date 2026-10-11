@@ -11,8 +11,8 @@ duplicated, or outside V-01 to V-21.
 
 | ID | Test | Pass criterion | Planned week | Status | Notes |
 |---|---|---|---|---|---|
-| V-01 | Put-call parity (Garman-Kohlhagen) | Error below 1e-12 | 2 | passing | `tests/validation/test_v01_put_call_parity.cpp` |
-| V-02 | GK Greeks vs finite differences | Relative error below 1e-6 (central difference) | 2 | passing | `tests/validation/test_v02_greeks_fd.cpp`; Richardson-extrapolated stencils for second-order Greeks |
+| V-01 | Put-call parity (Garman-Kohlhagen) | Error below 1e-12 | 2 | passing | `tests/validation/test_v01_put_call_parity.cpp`. 8000 markets (5 spots x 5 strikes at 0.6-1.8 of spot x 4 domestic x 4 foreign rates from -1% to 8% x vol 1%-100% x expiry 1 day-30 years). Worst relative error 4.0e-16. |
+| V-02 | GK Greeks vs finite differences | Relative error below 1e-6 (central difference) | 2 | passing | `tests/validation/test_v02_greeks_fd.cpp`. 120 points, 5-point fourth-order stencils. Worst: delta 1.8e-7, gamma 6.9e-8, vega 2.3e-8, volga 1.1e-7, vanna 2.3e-7, theta 6.6e-8, rho 2e-10. Volga is differenced from the analytic vega because a second difference of the price is limited by rounding noise (eps/h^2). |
 | V-03 | Heston semi-analytic vs GK as vol-of-vol goes to 0 | Prices agree within 1e-6 | 3 | planned | |
 | V-04 | Heston semi-analytic robustness over long maturities and extreme parameters | No branch-cut or discontinuity errors over a parameter grid | 3 | planned | |
 | V-05 | Heston Monte Carlo (each scheme) vs semi-analytic | Within 3 standard errors; bias vs step size reported | 4 | planned | |
@@ -33,7 +33,16 @@ duplicated, or outside V-01 to V-21.
 | V-20 | CVA: Monte Carlo exposure vs nested simulation on a small case | Agreement within stated tolerance | 11 | planned | |
 | V-21 | Look-ahead and leakage check in backtests | Proof that VaR at date t uses data up to t-1 only | 10 | planned | |
 
+## Other validation evidence (not a V-number)
+
+* **GK-REF** (`tests/validation/test_gk_reference.cpp`): C++ price and Greeks against an
+  independent Python (SciPy) implementation, 616 rows in `tests/validation/data/gk_reference.csv`
+  (8 boundary cases plus 300 random markets, call and put, seed 20261010). Tolerance 1e-11; worst
+  difference 6.6e-14. CI regenerates the table and fails if it differs from the committed file.
+
 ## Tests that are not part of the V-series
 
-Unit tests (`tests/unit/`) cover the library's own behaviour: the error type, typed units and
-version. They are not validation evidence about the models and are not listed here.
+Unit tests (`tests/unit/`) cover the library's own behaviour: the error type, typed units, day
+count, known GK values, degenerate inputs and error paths. They protect the code from regressions
+and are not validation evidence about the models, so they are not listed here. See
+`docs/adr/0003-testing-strategy.md`.

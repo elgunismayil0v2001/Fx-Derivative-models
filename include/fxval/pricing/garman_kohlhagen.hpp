@@ -36,6 +36,9 @@ struct GarmanKohlhagenGreeks {
 
 [[nodiscard]] Result<double> garman_kohlhagen_price(const VanillaFx& market, OptionType type);
 
+// Greeks are not defined when volatility or expiry is zero (invalid_argument); a non-finite value
+// returns numerical_failure. The price is defined there (discounted intrinsic value of the
+// forward).
 [[nodiscard]] Result<GarmanKohlhagenGreeks> garman_kohlhagen_greeks(const VanillaFx& market,
                                                                     OptionType type);
 

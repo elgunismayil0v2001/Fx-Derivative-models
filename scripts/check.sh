@@ -39,9 +39,13 @@ done
 step "clang-tidy (library sources)"
 clang-tidy -p build/debug --quiet src/*.cpp
 
-step "python: ruff and pytest"
+step "python: ruff, reference table, pytest (needs: pip install numpy scipy pytest ruff)"
 ruff check python
 ruff format --check python
+regen="$(mktemp)"
+python3 python/gen_gk_reference.py "$regen"
+cmp "$regen" tests/validation/data/gk_reference.csv
+rm -f "$regen"
 pytest -q
 
 echo

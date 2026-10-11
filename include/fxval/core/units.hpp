@@ -19,15 +19,15 @@ namespace detail {
 
 template <class Derived>
 class StrongDouble {
- public:
+public:
   [[nodiscard]] constexpr double value() const noexcept { return value_; }
 
   friend constexpr auto operator<=>(const StrongDouble&, const StrongDouble&) = default;
 
- protected:
+protected:
   explicit constexpr StrongDouble(double value) noexcept : value_(value) {}
 
- private:
+private:
   double value_;
 };
 
@@ -35,61 +35,61 @@ class StrongDouble {
 
 // Implied or model volatility as a decimal, in [0, limits::max_volatility].
 class Volatility final : public detail::StrongDouble<Volatility> {
- public:
+public:
   [[nodiscard]] static Result<Volatility> from_decimal(double sigma);
   [[nodiscard]] static Result<Volatility> from_percent(double percent);
   [[nodiscard]] constexpr double percent() const noexcept { return value() * 100.0; }
 
- private:
+private:
   explicit constexpr Volatility(double sigma) noexcept : StrongDouble(sigma) {}
 };
 
 // Continuously compounded interest rate as a decimal, |r| <= limits::max_abs_rate.
 // Negative rates are allowed.
 class Rate final : public detail::StrongDouble<Rate> {
- public:
+public:
   [[nodiscard]] static Result<Rate> from_decimal(double rate);
   [[nodiscard]] static Result<Rate> from_percent(double percent);
   [[nodiscard]] constexpr double percent() const noexcept { return value() * 100.0; }
 
- private:
+private:
   explicit constexpr Rate(double rate) noexcept : StrongDouble(rate) {}
 };
 
 // Time to expiry as a year fraction, in [0, limits::max_years].
 class Years final : public detail::StrongDouble<Years> {
- public:
+public:
   [[nodiscard]] static Result<Years> from_years(double years);
 
- private:
+private:
   explicit constexpr Years(double years) noexcept : StrongDouble(years) {}
 };
 
 // Spot FX quoted as domestic per one unit of foreign. Strictly positive.
 class Spot final : public detail::StrongDouble<Spot> {
- public:
+public:
   [[nodiscard]] static Result<Spot> from_value(double spot);
 
- private:
+private:
   explicit constexpr Spot(double spot) noexcept : StrongDouble(spot) {}
 };
 
 // Option strike in domestic currency per unit of foreign currency. Strictly positive.
 class Strike final : public detail::StrongDouble<Strike> {
- public:
+public:
   [[nodiscard]] static Result<Strike> from_value(double strike);
 
- private:
+private:
   explicit constexpr Strike(double strike) noexcept : StrongDouble(strike) {}
 };
 
 // Notional amount in foreign currency. Strictly positive; direction (long or short) is a
 // separate property of a trade.
 class Notional final : public detail::StrongDouble<Notional> {
- public:
+public:
   [[nodiscard]] static Result<Notional> from_value(double notional);
 
- private:
+private:
   explicit constexpr Notional(double notional) noexcept : StrongDouble(notional) {}
 };
 

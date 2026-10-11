@@ -17,12 +17,8 @@ using fxval::pricing::garman_kohlhagen_price;
 using fxval::pricing::OptionType;
 using fxval::pricing::VanillaFx;
 
-VanillaFx market(double spot,
-                 double strike,
-                 double domestic,
-                 double foreign,
-                 double years,
-                 double vol) {
+VanillaFx market(
+    double spot, double strike, double domestic, double foreign, double years, double vol) {
   return VanillaFx{
       Spot::from_value(spot).value(),
       Strike::from_value(strike).value(),
