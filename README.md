@@ -4,20 +4,21 @@ A C++20 library that prices FX options and measures FX portfolio market and coun
 together with an **independent validation** of those models: exact benchmarks, numerical tests,
 model comparison, and a written validation report.
 
-> **Status: week 1 of a 14-week plan. No model is implemented yet.** What exists is the
-> engineering foundation: build, tests, CI definitions, error policy, typed units, data download
-> scripts and the documentation skeleton. Results will be added here as they are produced.
+> **Status: week 2 of a 14-week plan.** The engineering foundation is in place and the
+> Garman-Kohlhagen benchmark (price and Greeks) is implemented and checked by V-01 and V-02.
+> Heston, Monte Carlo, smile, risk and CVA are not started.
 
 ## What exists today
 
 | Area | State |
 |---|---|
 | Build (CMake presets, install and export, `find_package(fxval)`) | working |
-| Error policy (`Result<T>`, contract checks) and typed units (`Volatility`, `Rate`, `Years`, `Strike`, `Notional`) | working, tested |
-| Unit tests and the validation-catalogue consistency test | 22 tests passing |
-| CI workflow (compilers, sanitizers, clang-tidy, coverage, install check, Python, Docker) | written; see "Not yet verified" |
+| Error policy (`Result<T>`, contract checks) and typed units (`Spot`, `Volatility`, `Rate`, `Years`, `Strike`, `Notional`) | working, tested |
+| Garman-Kohlhagen price and Greeks, ACT/365 fixed | working; V-01 and V-02 passing |
+| Unit tests and the validation-catalogue consistency test | included in `ctest` |
+| CI (format, four compilers, sanitizers, clang-tidy, coverage, install check, Python, Docker) | `.github/workflows/ci.yml` |
 | Data download scripts (NBP, ECB, FRED) with provenance files | parsers tested offline |
-| Pricing, Monte Carlo, smile, risk, CVA | not started (see `docs/test_catalogue.md` for the plan) |
+| Heston, Monte Carlo, smile, risk, CVA | not started (see `docs/test_catalogue.md`) |
 
 ## Build and test
 
@@ -67,7 +68,7 @@ See `docs/model_documentation.md`, section 11.
 
 ## Limitations
 
-* No financial result exists yet. Do not read anything here as a pricing or risk claim.
+* Only the Garman-Kohlhagen closed form is implemented. Do not read later roadmap items as results.
 * Interest rates will be deterministic in v1.0, and default probabilities in CVA are assumptions.
 
 ## Licence

@@ -11,8 +11,8 @@ duplicated, or outside V-01 to V-21.
 
 | ID | Test | Pass criterion | Planned week | Status | Notes |
 |---|---|---|---|---|---|
-| V-01 | Put-call parity (Garman-Kohlhagen) | Error below 1e-12 | 2 | planned | |
-| V-02 | GK Greeks vs finite differences | Relative error below 1e-6 (central difference) | 2 | planned | |
+| V-01 | Put-call parity (Garman-Kohlhagen) | Error below 1e-12 | 2 | passing | `tests/validation/test_v01_put_call_parity.cpp` |
+| V-02 | GK Greeks vs finite differences | Relative error below 1e-6 (central difference) | 2 | passing | `tests/validation/test_v02_greeks_fd.cpp`; Richardson-extrapolated stencils for second-order Greeks |
 | V-03 | Heston semi-analytic vs GK as vol-of-vol goes to 0 | Prices agree within 1e-6 | 3 | planned | |
 | V-04 | Heston semi-analytic robustness over long maturities and extreme parameters | No branch-cut or discontinuity errors over a parameter grid | 3 | planned | |
 | V-05 | Heston Monte Carlo (each scheme) vs semi-analytic | Within 3 standard errors; bias vs step size reported | 4 | planned | |

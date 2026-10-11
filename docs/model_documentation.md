@@ -1,13 +1,13 @@
 # Model documentation
 
-Status: **draft, week 1.** Sections marked *planned* are placeholders that name the week in
-which they are written. Nothing here is a result yet: no model is implemented.
+Status: **draft, week 2.** Sections marked *planned* are placeholders that name the week in
+which they are written. Garman-Kohlhagen is implemented and checked by V-01 and V-02.
 
 | Section | Status |
 |---|---|
 | 1. Purpose and scope | draft |
 | 2. Notation and conventions | draft |
-| 3. Garman-Kohlhagen (benchmark) | derivation drafted, implementation in week 2 |
+| 3. Garman-Kohlhagen (benchmark) | implemented; V-01 and V-02 passing |
 | 4. Heston | specification only, formulas written in week 3 |
 | 5. Monte Carlo schemes | planned, weeks 4-5 |
 | 6. FX smile from delta quotes | planned, week 7 |
@@ -34,8 +34,9 @@ local-stochastic-volatility model. See `ROADMAP.md`.
   currency**. For EUR/PLN, PLN is domestic and EUR is foreign.
 * `r_d`, `r_f` are continuously compounded domestic and foreign interest rates. They are
   deterministic and constant in the first version of each model.
-* `T` is the time to expiry in years. The day-count convention (ACT/365 fixed is the working
-  assumption) is fixed and tested in week 2.
+* `T` is the time to expiry in years. The day-count convention is **ACT/365 fixed**:
+  `(end - start)` calendar days divided by 365, including in leap years. Implemented as
+  `fxval::act365_fixed`.
 * `sigma` and all volatilities are **decimals** (0.08 means 8%). The typed units in
   `include/fxval/core/units.hpp` enforce this.
 * `W` denotes a Brownian motion under the domestic risk-neutral measure `Q_d`, unless a measure
@@ -84,9 +85,14 @@ Equivalent Black form: `Call = e^{-r_d T} [ F N(d1) - K N(d2) ]`, with
 | Vega | `S e^{-r_f T} phi(d1) sqrt(T)` |
 | Vanna (`d Delta / d sigma`) | `-e^{-r_f T} phi(d1) d2 / sigma` |
 | Volga (`d Vega / d sigma`) | `Vega * d1 d2 / sigma` |
+| Theta (`dV/dt`) | Call: `-S e^{-r_f T} phi(d1) sigma / (2 sqrt(T)) + r_f S e^{-r_f T} N(d1) - r_d K e^{-r_d T} N(d2)` |
+| Rho domestic (`dV/dr_d`) | Call: `K T e^{-r_d T} N(d2)`; put: `-K T e^{-r_d T} N(-d2)` |
+| Rho foreign (`dV/dr_f`) | Call: `-S T e^{-r_f T} N(d1)`; put: `S T e^{-r_f T} N(-d1)` |
 
-Theta and rho formulas are added in week 2 together with their tests. The formulas above were
-derived by hand (for vanna, `d d1 / d sigma = -d2 / sigma`); the test suite is what confirms them.
+Put theta replaces `N(d1)` / `N(d2)` with `-N(-d1)` / `-N(-d2)` on the carry terms and keeps the
+common first term. The formulas were derived by hand (for vanna, `d d1 / d sigma = -d2 / sigma`);
+V-02 confirms them against central finite differences. Degenerate limits (`T = 0` or
+`sigma sqrt(T) ~ 0`) use the discounted forward intrinsic and its derivatives.
 
 ### 3.6 Pricing PDE
 
@@ -148,7 +154,8 @@ fails, simulation schemes can misbehave. Test V-06 measures how.
 * Interest rates are deterministic in v1.0. Long-dated exposure is therefore understated
   relative to a model with stochastic rates (planned for v1.1).
 * Default probabilities in the CVA calculation are an assumption, not market-implied.
-* No result in this repository has been produced yet.
+* Independent validation of Garman-Kohlhagen so far is put-call parity and finite-difference
+  Greeks (V-01, V-02), not a market-price comparison.
 
 ## 12. References
 

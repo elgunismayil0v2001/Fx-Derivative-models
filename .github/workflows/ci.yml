@@ -1,0 +1,135 @@
+name: CI
+
+on:
+  push:
+    branches: [main, "feature/**", "fix/**"]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  format:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install clang-format
+        run: sudo apt-get update && sudo apt-get install -y clang-format
+      - name: C++ format
+        run: git ls-files '*.cpp' '*.hpp' | xargs clang-format --dry-run --Werror
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Python format and lint
+        run: |
+          pip install ruff
+          ruff check python
+          ruff format --check python
+
+  python:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Pytest (offline)
+        run: |
+          pip install pytest
+          pytest -q
+
+  test:
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - cxx: g++-13
+            cc: gcc-13
+            packages: g++-13
+          - cxx: g++-14
+            cc: gcc-14
+            packages: g++-14
+          - cxx: clang++-17
+            cc: clang-17
+            packages: clang-17
+          - cxx: clang++-18
+            cc: clang-18
+            packages: clang-18
+    env:
+      CC: ${{ matrix.cc }}
+      CXX: ${{ matrix.cxx }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install toolchain
+        run: sudo apt-get update && sudo apt-get install -y cmake ninja-build ${{ matrix.packages }}
+      - name: Configure, build, test (release)
+        run: |
+          cmake --preset release
+          cmake --build --preset release
+          ctest --preset release --output-on-failure
+
+  sanitizers:
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        preset: [asan-ubsan, tsan]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install toolchain
+        run: sudo apt-get update && sudo apt-get install -y cmake ninja-build g++
+      - name: ${{ matrix.preset }}
+        run: |
+          cmake --preset ${{ matrix.preset }}
+          cmake --build --preset ${{ matrix.preset }}
+          ctest --preset ${{ matrix.preset }} --output-on-failure
+
+  clang-tidy:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install toolchain
+        run: sudo apt-get update && sudo apt-get install -y cmake ninja-build clang-tidy g++
+      - name: Configure debug (compile_commands.json)
+        run: cmake --preset debug
+      - name: clang-tidy on library sources
+        run: clang-tidy -p build/debug --quiet src/*.cpp
+
+  coverage:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install toolchain
+        run: sudo apt-get update && sudo apt-get install -y cmake ninja-build g++ gcovr
+      - name: Coverage build and tests
+        run: |
+          cmake --preset coverage
+          cmake --build --preset coverage
+          ctest --preset coverage --output-on-failure
+      - name: Enforce line coverage on src/
+        run: |
+          gcovr --filter 'src/' --fail-under-line 85 --print-summary
+
+  install-consume:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install toolchain
+        run: sudo apt-get update && sudo apt-get install -y cmake ninja-build g++
+      - name: Install fxval and build examples/consumer
+        run: |
+          cmake --preset release
+          cmake --build --preset release
+          cmake --install build/release --prefix "$HOME/fxval-install"
+          cmake -S examples/consumer -B build/consumer -DCMAKE_PREFIX_PATH="$HOME/fxval-install"
+          cmake --build build/consumer
+          ./build/consumer/consumer
+
+  docker:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build image (compiles and runs tests)
+        run: docker build -t fxval .

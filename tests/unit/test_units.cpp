@@ -12,6 +12,7 @@ namespace {
 using fxval::ErrorCode;
 using fxval::Notional;
 using fxval::Rate;
+using fxval::Spot;
 using fxval::Strike;
 using fxval::Volatility;
 using fxval::Years;
@@ -26,6 +27,8 @@ concept EqualityComparable = requires(A a, B b) { a == b; };
 static_assert(EqualityComparable<Volatility, Volatility>);
 static_assert(!EqualityComparable<Volatility, Rate>);
 static_assert(!EqualityComparable<Strike, Notional>);
+static_assert(!EqualityComparable<Spot, Strike>);
+static_assert(!std::is_convertible_v<double, Spot>);
 static_assert(!std::is_convertible_v<double, Volatility>);
 static_assert(!std::is_convertible_v<Volatility, double>);
 static_assert(!std::is_constructible_v<Volatility, double>);
@@ -114,7 +117,15 @@ TEST(Years, RejectsNegativeNonFiniteAndHuge) {
   expect_invalid(Years::from_years(fxval::limits::max_years + 1.0));
 }
 
-// ---- Strike and Notional ----
+// ---- Spot, Strike and Notional ----
+TEST(Spot, MustBeStrictlyPositiveAndFinite) {
+  EXPECT_DOUBLE_EQ(Spot::from_value(4.3512).value().value(), 4.3512);
+  expect_invalid(Spot::from_value(0.0));
+  expect_invalid(Spot::from_value(-1.0));
+  expect_invalid(Spot::from_value(nan));
+  expect_invalid(Spot::from_value(inf));
+}
+
 TEST(Strike, MustBeStrictlyPositiveAndFinite) {
   EXPECT_DOUBLE_EQ(Strike::from_value(1.0850).value().value(), 1.0850);
   expect_invalid(Strike::from_value(0.0));

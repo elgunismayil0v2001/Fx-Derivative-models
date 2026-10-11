@@ -26,9 +26,11 @@ function(fxval_add_test_executable name)
 endfunction()
 
 fxval_add_test_executable(fxval_unit_tests unit/test_error.cpp unit/test_units.cpp
-                          unit/test_version.cpp)
+                          unit/test_version.cpp unit/test_daycount.cpp
+                          unit/test_garman_kohlhagen.cpp)
 
-fxval_add_test_executable(fxval_validation_tests validation/test_catalogue_consistency.cpp)
+fxval_add_test_executable(fxval_validation_tests validation/test_catalogue_consistency.cpp
+                          validation/test_v01_put_call_parity.cpp validation/test_v02_greeks_fd.cpp)
 target_compile_definitions(
   fxval_validation_tests
   PRIVATE "FXVAL_TEST_CATALOGUE_PATH=\"${PROJECT_SOURCE_DIR}/docs/test_catalogue.md\"")
