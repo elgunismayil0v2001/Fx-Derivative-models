@@ -15,7 +15,7 @@ model comparison, and a written validation report.
 | Build (CMake presets, install and export, `find_package(fxval)`) | working |
 | Error policy (`Result<T>`, contract checks) and typed units (`Spot`, `Volatility`, `Rate`, `Years`, `Strike`, `Notional`) | working, tested |
 | Garman-Kohlhagen price and Greeks, ACT/365 fixed | working; V-01 and V-02 passing |
-| Unit tests and the validation-catalogue consistency test | included in `ctest` |
+| Unit tests, V-01, V-02, independent Python reference (616 rows), catalogue consistency test | 43 tests in `ctest` |
 | CI (format, four compilers, sanitizers, clang-tidy, coverage, install check, Python, Docker) | `.github/workflows/ci.yml` |
 | Data download scripts (NBP, ECB, FRED) with provenance files | parsers tested offline |
 | Heston, Monte Carlo, smile, risk, CVA | not started (see `docs/test_catalogue.md`) |
@@ -60,6 +60,7 @@ See `docs/model_documentation.md`, section 11.
 
 ## Documentation
 
+* `docs/repo_guide.md`: what every folder and file is for
 * `docs/model_documentation.md`: model specification and derivations (draft)
 * `docs/test_catalogue.md`: the 21 planned validation tests (V-01 to V-21) and their status
 * `docs/architecture.md`: layers and rules

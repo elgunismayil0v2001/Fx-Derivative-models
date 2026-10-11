@@ -31,8 +31,8 @@ bool in_closed_interval(double x, double low, double high) {
 
 Result<Volatility> Volatility::from_decimal(double sigma) {
   if (!in_closed_interval(sigma, 0.0, limits::max_volatility)) {
-    return out_of_domain("volatility (decimal)", closed_interval(0.0, limits::max_volatility),
-                         sigma);
+    return out_of_domain(
+        "volatility (decimal)", closed_interval(0.0, limits::max_volatility), sigma);
   }
   return Volatility{sigma};
 }
@@ -46,8 +46,8 @@ Result<Volatility> Volatility::from_percent(double percent) {
 
 Result<Rate> Rate::from_decimal(double rate) {
   if (!in_closed_interval(rate, -limits::max_abs_rate, limits::max_abs_rate)) {
-    return out_of_domain("rate (decimal)",
-                         closed_interval(-limits::max_abs_rate, limits::max_abs_rate), rate);
+    return out_of_domain(
+        "rate (decimal)", closed_interval(-limits::max_abs_rate, limits::max_abs_rate), rate);
   }
   return Rate{rate};
 }

@@ -8,6 +8,18 @@ All notable changes are recorded here. The format follows
 
 ### Added
 
+- Independent Python reference for Garman-Kohlhagen (`python/gen_gk_reference.py`, 616-row table)
+  and a C++ test comparing against it; CI regenerates the table.
+- V-01 on 8000 markets and V-02 on 120 points with 5-point stencils, recording worst errors.
+- Unit tests for degenerate inputs and error paths. ADR 0003 (testing strategy), `docs/repo_guide.md`.
+
+### Changed
+
+- `garman_kohlhagen_greeks` returns `invalid_argument` when volatility or expiry is zero, instead
+  of zeros (this also removes a wrong-sign put theta in the old zero-volatility branch).
+- `.clang-format` now sets `SpacesBeforeTrailingComments: 2`, and all sources were reformatted so
+  the CI format job passes. Build output and `.DS_Store` files are no longer tracked.
+
 - Garman-Kohlhagen European FX price and Greeks, `Spot` unit, and ACT/365 fixed year fractions.
   Validation tests V-01 (put-call parity) and V-02 (Greeks vs finite differences).
 - GitHub Actions CI, `.clang-format`, `.clang-tidy`, `.pre-commit-config.yaml`, and `.gitignore`.

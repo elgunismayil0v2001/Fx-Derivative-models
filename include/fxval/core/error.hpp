@@ -32,7 +32,7 @@ struct Error {
 // (C++20 has no std::expected; this is the small subset the library needs.)
 template <class T>
 class [[nodiscard]] Result {
- public:
+public:
   Result(T value) : data_(std::in_place_index<0>, std::move(value)) {}
   Result(Error error) : data_(std::in_place_index<1>, std::move(error)) {}
 
@@ -62,7 +62,7 @@ class [[nodiscard]] Result {
     return has_value() ? std::get<0>(data_) : static_cast<T>(std::forward<U>(fallback));
   }
 
- private:
+private:
   std::variant<T, Error> data_;
 };
 

@@ -5,6 +5,11 @@ description = "Data download scripts and, later, Python bindings for fx-model-va
 requires-python = ">=3.10"
 dependencies = []
 
+[project.optional-dependencies]
+# Needed by python/gen_gk_reference.py (the independent reference for the C++ validation tests).
+reference = ["numpy", "scipy"]
+dev = ["pytest", "ruff", "numpy", "scipy"]
+
 [tool.pytest.ini_options]
 testpaths = ["python/tests"]
 pythonpath = ["python"]

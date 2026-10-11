@@ -58,8 +58,11 @@ TEST(Result, ErrorsCompareByCodeAndMessage) {
 }
 
 TEST(ErrorCode, EveryCodeHasADistinctName) {
-  const ErrorCode all[] = {ErrorCode::invalid_argument, ErrorCode::numerical_failure,
-                           ErrorCode::not_converged, ErrorCode::parse_error, ErrorCode::io_error};
+  const ErrorCode all[] = {ErrorCode::invalid_argument,
+                           ErrorCode::numerical_failure,
+                           ErrorCode::not_converged,
+                           ErrorCode::parse_error,
+                           ErrorCode::io_error};
   for (std::size_t i = 0; i < std::size(all); ++i) {
     EXPECT_NE(fxval::to_string(all[i]), "unknown");
     for (std::size_t j = i + 1; j < std::size(all); ++j) {

@@ -91,8 +91,7 @@ Equivalent Black form: `Call = e^{-r_d T} [ F N(d1) - K N(d2) ]`, with
 
 Put theta replaces `N(d1)` / `N(d2)` with `-N(-d1)` / `-N(-d2)` on the carry terms and keeps the
 common first term. The formulas were derived by hand (for vanna, `d d1 / d sigma = -d2 / sigma`);
-V-02 confirms them against central finite differences. Degenerate limits (`T = 0` or
-`sigma sqrt(T) ~ 0`) use the discounted forward intrinsic and its derivatives.
+V-02 confirms them against finite differences, and an independent Python table confirms them again.
 
 ### 3.6 Pricing PDE
 
@@ -103,7 +102,16 @@ The value `V(t, S)` of a European claim satisfies
 with the payoff as terminal condition. This is the link to Feynman-Kac used in the Monte Carlo
 tests: the discounted expected payoff under `Q_d` solves this PDE.
 
-### 3.7 Assumptions and known limitations
+### 3.7 Degenerate cases
+
+* `sigma sqrt(T) = 0`: the **price** is the discounted intrinsic value of the forward,
+  `e^{-r_d T} max(w (F - K), 0)`; at `T = 0` it is the intrinsic value of spot.
+* The **Greeks** are not defined there (they divide by `sigma sqrt(T)`; gamma and vega at the money
+  are infinite) and `garman_kohlhagen_greeks` returns `ErrorCode::invalid_argument`. Returning
+  zeros would look like a valid answer (ADR 0001).
+* A non-finite result (overflow in `exp`) returns `ErrorCode::numerical_failure`.
+
+### 3.8 Assumptions and known limitations
 
 * Constant volatility: it produces no smile or skew, so it misprices options away from the money
   relative to the market. This is the reason the project compares it with Heston and Vanna-Volga.

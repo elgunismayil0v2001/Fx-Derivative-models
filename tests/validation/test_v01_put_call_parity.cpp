@@ -1,70 +1,66 @@
-#include <gtest/gtest.h>
+// V-01: put-call parity on a grid of 8000 markets (see docs/test_catalogue.md).
+// Evidence about the model implementation: parity is an exact no-arbitrage identity.
 
-#include <cmath>
-#include <vector>
+#include <gtest/gtest.h>
 
 #include "fxval/core/limits.hpp"
 #include "fxval/pricing/garman_kohlhagen.hpp"
+#include "support/gk_test_support.hpp"
+#include <algorithm>
+#include <cmath>
+#include <iomanip>
+#include <sstream>
+#include <string>
 
 namespace {
 
-using fxval::Rate;
-using fxval::Spot;
-using fxval::Strike;
-using fxval::Volatility;
-using fxval::Years;
-using fxval::pricing::garman_kohlhagen_price;
+using fxval::pricing::GarmanKohlhagenGreeks;
 using fxval::pricing::OptionType;
-using fxval::pricing::VanillaFx;
+using fxval::testing::gk_all;
+using fxval::testing::gk_value;
 
-VanillaFx market(double spot,
-                 double strike,
-                 double domestic,
-                 double foreign,
-                 double years,
-                 double vol) {
-  return VanillaFx{
-      Spot::from_value(spot).value(),
-      Strike::from_value(strike).value(),
-      Rate::from_decimal(domestic).value(),
-      Rate::from_decimal(foreign).value(),
-      Years::from_years(years).value(),
-      Volatility::from_decimal(vol).value(),
-  };
+// Scientific notation for the recorded worst errors (std::to_string would print 0.000000).
+std::string sci(double x) {
+  std::ostringstream out;
+  out << std::scientific << std::setprecision(2) << x;
+  return out.str();
 }
 
-struct Case {
-  double spot;
-  double strike;
-  double domestic;
-  double foreign;
-  double years;
-  double vol;
-};
-
-TEST(V01, PutCallParityGarmanKohlhagen) {
-  const std::vector<Case> cases = {
-      {1.10, 1.10, 0.03, 0.01, 1.00, 0.10},
-      {4.35, 4.00, 0.05, 0.03, 0.25, 0.12},
-      {4.35, 4.80, 0.05, 0.03, 2.00, 0.20},
-      {0.85, 0.90, 0.00, 0.02, 0.50, 0.08},
-      {1.25, 1.25, -0.005, 0.01, 5.00, 0.15},
-      {1.00, 1.20, 0.04, 0.04, 0.01, 0.30},
-      {1.10, 1.10, 0.03, 0.01, 0.00, 0.10},
-      {1.10, 1.10, 0.03, 0.01, 1.00, 0.00},
-  };
-
-  for (const auto& c : cases) {
-    const auto m = market(c.spot, c.strike, c.domestic, c.foreign, c.years, c.vol);
-    const auto call = garman_kohlhagen_price(m, OptionType::call);
-    const auto put = garman_kohlhagen_price(m, OptionType::put);
-    ASSERT_TRUE(call.has_value()) << "call failed for spot=" << c.spot;
-    ASSERT_TRUE(put.has_value()) << "put failed for spot=" << c.spot;
-    const double rhs = c.spot * std::exp(-c.foreign * c.years) -
-                       c.strike * std::exp(-c.domestic * c.years);
-    EXPECT_NEAR(call.value() - put.value(), rhs, fxval::tol::put_call_parity)
-        << "spot=" << c.spot << " strike=" << c.strike << " T=" << c.years << " vol=" << c.vol;
+// ---------------------------------------------------------------------------------------------
+// V-01: put-call parity.  Call - Put = S e^{-r_f T} - K e^{-r_d T}
+// Error is measured relative to the larger of the two discounted amounts, so the tolerance means
+// the same thing for a spot near 1 and a spot near 100.
+// ---------------------------------------------------------------------------------------------
+TEST(V01_PutCallParity, HoldsOnAGridOfMarkets) {
+  int checked = 0;
+  double worst = 0.0;
+  for (double s : {0.8, 1.0, 1.1, 4.3, 100.0}) {
+    for (double moneyness : {0.6, 0.9, 1.0, 1.1, 1.8}) {
+      for (double rd : {-0.01, 0.0, 0.03, 0.08}) {
+        for (double rf : {-0.01, 0.0, 0.02, 0.08}) {
+          for (double sigma : {0.01, 0.08, 0.25, 1.0}) {
+            for (double t : {1.0 / 365.0, 0.25, 1.0, 5.0, 30.0}) {
+              const double k = s * moneyness;
+              const double call = gk_value(OptionType::call, s, k, rd, rf, sigma, t);
+              const double put = gk_value(OptionType::put, s, k, rd, rf, sigma, t);
+              const double lhs = call - put;
+              const double rhs = s * std::exp(-rf * t) - k * std::exp(-rd * t);
+              const double scale = std::max(s * std::exp(-rf * t), k * std::exp(-rd * t));
+              const double err = std::abs(lhs - rhs) / scale;
+              worst = std::max(worst, err);
+              ASSERT_LT(err, fxval::tol::put_call_parity)
+                  << "s=" << s << " k=" << k << " rd=" << rd << " rf=" << rf << " sigma=" << sigma
+                  << " t=" << t;
+              ++checked;
+            }
+          }
+        }
+      }
+    }
   }
+  RecordProperty("cases", checked);
+  RecordProperty("worst_relative_error", sci(worst));
+  EXPECT_EQ(checked, 8000);  // 5 spots x 5 strikes x 4 r_d x 4 r_f x 4 sigmas x 5 expiries
 }
 
 }  // namespace
