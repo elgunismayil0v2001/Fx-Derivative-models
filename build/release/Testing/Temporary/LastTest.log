@@ -1,3 +1,1947 @@
-Start testing: Oct 09 22:54 +04
+Start testing: Oct 13 22:42 +04
 ----------------------------------------------------------
-End testing: Oct 09 22:54 +04
+1/72 Testing: ResultDeathTest.ReadingTheValueOfAnErrorIsRejected
+1/72 Test: ResultDeathTest.ReadingTheValueOfAnErrorIsRejected
+Command: "/Users/elgun/Desktop/fx-derivative-models/build/release/tests/fxval_unit_tests" "--gtest_filter=ResultDeathTest.ReadingTheValueOfAnErrorIsRejected" "--gtest_also_run_disabled_tests"
+Directory: /Users/elgun/Desktop/fx-derivative-models/build/release/tests
+"ResultDeathTest.ReadingTheValueOfAnErrorIsRejected" start time: Oct 13 22:42 +04
+Output:
+----------------------------------------------------------
+Running main() from /Users/elgun/Desktop/fx-derivative-models/build/release/_deps/googletest-src/googletest/src/gtest_main.cc
+Note: Google Test filter = ResultDeathTest.ReadingTheValueOfAnErrorIsRejected
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from ResultDeathTest
+[ RUN      ] ResultDeathTest.ReadingTheValueOfAnErrorIsRejected
+[       OK ] ResultDeathTest.ReadingTheValueOfAnErrorIsRejected (0 ms)
+[----------] 1 test from ResultDeathTest (0 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (0 ms total)
+[  PASSED  ] 1 test.
+<end of output>
+Test time =   0.03 sec
+----------------------------------------------------------
+Test Passed.
+"ResultDeathTest.ReadingTheValueOfAnErrorIsRejected" end time: Oct 13 22:42 +04
+"ResultDeathTest.ReadingTheValueOfAnErrorIsRejected" time elapsed: 00:00:00
+----------------------------------------------------------
+
+2/72 Testing: ResultDeathTest.ReadingTheErrorOfAValueIsRejected
+2/72 Test: ResultDeathTest.ReadingTheErrorOfAValueIsRejected
+Command: "/Users/elgun/Desktop/fx-derivative-models/build/release/tests/fxval_unit_tests" "--gtest_filter=ResultDeathTest.ReadingTheErrorOfAValueIsRejected" "--gtest_also_run_disabled_tests"
+Directory: /Users/elgun/Desktop/fx-derivative-models/build/release/tests
+"ResultDeathTest.ReadingTheErrorOfAValueIsRejected" start time: Oct 13 22:42 +04
+Output:
+----------------------------------------------------------
+Running main() from /Users/elgun/Desktop/fx-derivative-models/build/release/_deps/googletest-src/googletest/src/gtest_main.cc
+Note: Google Test filter = ResultDeathTest.ReadingTheErrorOfAValueIsRejected
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from ResultDeathTest
+[ RUN      ] ResultDeathTest.ReadingTheErrorOfAValueIsRejected
+[       OK ] ResultDeathTest.ReadingTheErrorOfAValueIsRejected (0 ms)
+[----------] 1 test from ResultDeathTest (0 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (0 ms total)
+[  PASSED  ] 1 test.
+<end of output>
+Test time =   0.00 sec
+----------------------------------------------------------
+Test Passed.
+"ResultDeathTest.ReadingTheErrorOfAValueIsRejected" end time: Oct 13 22:42 +04
+"ResultDeathTest.ReadingTheErrorOfAValueIsRejected" time elapsed: 00:00:00
+----------------------------------------------------------
+
+3/72 Testing: Result.HoldsAValue
+3/72 Test: Result.HoldsAValue
+Command: "/Users/elgun/Desktop/fx-derivative-models/build/release/tests/fxval_unit_tests" "--gtest_filter=Result.HoldsAValue" "--gtest_also_run_disabled_tests"
+Directory: /Users/elgun/Desktop/fx-derivative-models/build/release/tests
+"Result.HoldsAValue" start time: Oct 13 22:42 +04
+Output:
+----------------------------------------------------------
+Running main() from /Users/elgun/Desktop/fx-derivative-models/build/release/_deps/googletest-src/googletest/src/gtest_main.cc
+Note: Google Test filter = Result.HoldsAValue
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from Result
+[ RUN      ] Result.HoldsAValue
+[       OK ] Result.HoldsAValue (0 ms)
+[----------] 1 test from Result (0 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (0 ms total)
+[  PASSED  ] 1 test.
+<end of output>
+Test time =   0.00 sec
+----------------------------------------------------------
+Test Passed.
+"Result.HoldsAValue" end time: Oct 13 22:42 +04
+"Result.HoldsAValue" time elapsed: 00:00:00
+----------------------------------------------------------
+
+4/72 Testing: Result.HoldsAnError
+4/72 Test: Result.HoldsAnError
+Command: "/Users/elgun/Desktop/fx-derivative-models/build/release/tests/fxval_unit_tests" "--gtest_filter=Result.HoldsAnError" "--gtest_also_run_disabled_tests"
+Directory: /Users/elgun/Desktop/fx-derivative-models/build/release/tests
+"Result.HoldsAnError" start time: Oct 13 22:42 +04
+Output:
+----------------------------------------------------------
+Running main() from /Users/elgun/Desktop/fx-derivative-models/build/release/_deps/googletest-src/googletest/src/gtest_main.cc
+Note: Google Test filter = Result.HoldsAnError
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from Result
+[ RUN      ] Result.HoldsAnError
+[       OK ] Result.HoldsAnError (0 ms)
+[----------] 1 test from Result (0 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (0 ms total)
+[  PASSED  ] 1 test.
+<end of output>
+Test time =   0.00 sec
+----------------------------------------------------------
+Test Passed.
+"Result.HoldsAnError" end time: Oct 13 22:42 +04
+"Result.HoldsAnError" time elapsed: 00:00:00
+----------------------------------------------------------
+
+5/72 Testing: Result.ValueOrReturnsFallbackOnlyOnError
+5/72 Test: Result.ValueOrReturnsFallbackOnlyOnError
+Command: "/Users/elgun/Desktop/fx-derivative-models/build/release/tests/fxval_unit_tests" "--gtest_filter=Result.ValueOrReturnsFallbackOnlyOnError" "--gtest_also_run_disabled_tests"
+Directory: /Users/elgun/Desktop/fx-derivative-models/build/release/tests
+"Result.ValueOrReturnsFallbackOnlyOnError" start time: Oct 13 22:42 +04
+Output:
+----------------------------------------------------------
+Running main() from /Users/elgun/Desktop/fx-derivative-models/build/release/_deps/googletest-src/googletest/src/gtest_main.cc
+Note: Google Test filter = Result.ValueOrReturnsFallbackOnlyOnError
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from Result
+[ RUN      ] Result.ValueOrReturnsFallbackOnlyOnError
+[       OK ] Result.ValueOrReturnsFallbackOnlyOnError (0 ms)
+[----------] 1 test from Result (0 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (0 ms total)
+[  PASSED  ] 1 test.
+<end of output>
+Test time =   0.00 sec
+----------------------------------------------------------
+Test Passed.
+"Result.ValueOrReturnsFallbackOnlyOnError" end time: Oct 13 22:42 +04
+"Result.ValueOrReturnsFallbackOnlyOnError" time elapsed: 00:00:00
+----------------------------------------------------------
+
+6/72 Testing: Result.SupportsMoveOnlyValues
+6/72 Test: Result.SupportsMoveOnlyValues
+Command: "/Users/elgun/Desktop/fx-derivative-models/build/release/tests/fxval_unit_tests" "--gtest_filter=Result.SupportsMoveOnlyValues" "--gtest_also_run_disabled_tests"
+Directory: /Users/elgun/Desktop/fx-derivative-models/build/release/tests
+"Result.SupportsMoveOnlyValues" start time: Oct 13 22:42 +04
+Output:
+----------------------------------------------------------
+Running main() from /Users/elgun/Desktop/fx-derivative-models/build/release/_deps/googletest-src/googletest/src/gtest_main.cc
+Note: Google Test filter = Result.SupportsMoveOnlyValues
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from Result
+[ RUN      ] Result.SupportsMoveOnlyValues
+[       OK ] Result.SupportsMoveOnlyValues (0 ms)
+[----------] 1 test from Result (0 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (0 ms total)
+[  PASSED  ] 1 test.
+<end of output>
+Test time =   0.00 sec
+----------------------------------------------------------
+Test Passed.
+"Result.SupportsMoveOnlyValues" end time: Oct 13 22:42 +04
+"Result.SupportsMoveOnlyValues" time elapsed: 00:00:00
+----------------------------------------------------------
+
+7/72 Testing: Result.ErrorsCompareByCodeAndMessage
+7/72 Test: Result.ErrorsCompareByCodeAndMessage
+Command: "/Users/elgun/Desktop/fx-derivative-models/build/release/tests/fxval_unit_tests" "--gtest_filter=Result.ErrorsCompareByCodeAndMessage" "--gtest_also_run_disabled_tests"
+Directory: /Users/elgun/Desktop/fx-derivative-models/build/release/tests
+"Result.ErrorsCompareByCodeAndMessage" start time: Oct 13 22:42 +04
+Output:
+----------------------------------------------------------
+Running main() from /Users/elgun/Desktop/fx-derivative-models/build/release/_deps/googletest-src/googletest/src/gtest_main.cc
+Note: Google Test filter = Result.ErrorsCompareByCodeAndMessage
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from Result
+[ RUN      ] Result.ErrorsCompareByCodeAndMessage
+[       OK ] Result.ErrorsCompareByCodeAndMessage (0 ms)
+[----------] 1 test from Result (0 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (0 ms total)
+[  PASSED  ] 1 test.
+<end of output>
+Test time =   0.00 sec
+----------------------------------------------------------
+Test Passed.
+"Result.ErrorsCompareByCodeAndMessage" end time: Oct 13 22:42 +04
+"Result.ErrorsCompareByCodeAndMessage" time elapsed: 00:00:00
+----------------------------------------------------------
+
+8/72 Testing: ErrorCode.EveryCodeHasADistinctName
+8/72 Test: ErrorCode.EveryCodeHasADistinctName
+Command: "/Users/elgun/Desktop/fx-derivative-models/build/release/tests/fxval_unit_tests" "--gtest_filter=ErrorCode.EveryCodeHasADistinctName" "--gtest_also_run_disabled_tests"
+Directory: /Users/elgun/Desktop/fx-derivative-models/build/release/tests
+"ErrorCode.EveryCodeHasADistinctName" start time: Oct 13 22:42 +04
+Output:
+----------------------------------------------------------
+Running main() from /Users/elgun/Desktop/fx-derivative-models/build/release/_deps/googletest-src/googletest/src/gtest_main.cc
+Note: Google Test filter = ErrorCode.EveryCodeHasADistinctName
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from ErrorCode
+[ RUN      ] ErrorCode.EveryCodeHasADistinctName
+[       OK ] ErrorCode.EveryCodeHasADistinctName (0 ms)
+[----------] 1 test from ErrorCode (0 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (0 ms total)
+[  PASSED  ] 1 test.
+<end of output>
+Test time =   0.01 sec
+----------------------------------------------------------
+Test Passed.
+"ErrorCode.EveryCodeHasADistinctName" end time: Oct 13 22:42 +04
+"ErrorCode.EveryCodeHasADistinctName" time elapsed: 00:00:00
+----------------------------------------------------------
+
+9/72 Testing: Volatility.DecimalRoundTrips
+9/72 Test: Volatility.DecimalRoundTrips
+Command: "/Users/elgun/Desktop/fx-derivative-models/build/release/tests/fxval_unit_tests" "--gtest_filter=Volatility.DecimalRoundTrips" "--gtest_also_run_disabled_tests"
+Directory: /Users/elgun/Desktop/fx-derivative-models/build/release/tests
+"Volatility.DecimalRoundTrips" start time: Oct 13 22:42 +04
+Output:
+----------------------------------------------------------
+Running main() from /Users/elgun/Desktop/fx-derivative-models/build/release/_deps/googletest-src/googletest/src/gtest_main.cc
+Note: Google Test filter = Volatility.DecimalRoundTrips
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from Volatility
+[ RUN      ] Volatility.DecimalRoundTrips
+[       OK ] Volatility.DecimalRoundTrips (0 ms)
+[----------] 1 test from Volatility (0 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (0 ms total)
+[  PASSED  ] 1 test.
+<end of output>
+Test time =   0.00 sec
+----------------------------------------------------------
+Test Passed.
+"Volatility.DecimalRoundTrips" end time: Oct 13 22:42 +04
+"Volatility.DecimalRoundTrips" time elapsed: 00:00:00
+----------------------------------------------------------
+
+10/72 Testing: Volatility.PercentInputIsConvertedToDecimal
+10/72 Test: Volatility.PercentInputIsConvertedToDecimal
+Command: "/Users/elgun/Desktop/fx-derivative-models/build/release/tests/fxval_unit_tests" "--gtest_filter=Volatility.PercentInputIsConvertedToDecimal" "--gtest_also_run_disabled_tests"
+Directory: /Users/elgun/Desktop/fx-derivative-models/build/release/tests
+"Volatility.PercentInputIsConvertedToDecimal" start time: Oct 13 22:42 +04
+Output:
+----------------------------------------------------------
+Running main() from /Users/elgun/Desktop/fx-derivative-models/build/release/_deps/googletest-src/googletest/src/gtest_main.cc
+Note: Google Test filter = Volatility.PercentInputIsConvertedToDecimal
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from Volatility
+[ RUN      ] Volatility.PercentInputIsConvertedToDecimal
+[       OK ] Volatility.PercentInputIsConvertedToDecimal (0 ms)
+[----------] 1 test from Volatility (0 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (0 ms total)
+[  PASSED  ] 1 test.
+<end of output>
+Test time =   0.00 sec
+----------------------------------------------------------
+Test Passed.
+"Volatility.PercentInputIsConvertedToDecimal" end time: Oct 13 22:42 +04
+"Volatility.PercentInputIsConvertedToDecimal" time elapsed: 00:00:00
+----------------------------------------------------------
+
+11/72 Testing: Volatility.AcceptsBoundaryValues
+11/72 Test: Volatility.AcceptsBoundaryValues
+Command: "/Users/elgun/Desktop/fx-derivative-models/build/release/tests/fxval_unit_tests" "--gtest_filter=Volatility.AcceptsBoundaryValues" "--gtest_also_run_disabled_tests"
+Directory: /Users/elgun/Desktop/fx-derivative-models/build/release/tests
+"Volatility.AcceptsBoundaryValues" start time: Oct 13 22:42 +04
+Output:
+----------------------------------------------------------
+Running main() from /Users/elgun/Desktop/fx-derivative-models/build/release/_deps/googletest-src/googletest/src/gtest_main.cc
+Note: Google Test filter = Volatility.AcceptsBoundaryValues
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from Volatility
+[ RUN      ] Volatility.AcceptsBoundaryValues
+[       OK ] Volatility.AcceptsBoundaryValues (0 ms)
+[----------] 1 test from Volatility (0 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (0 ms total)
+[  PASSED  ] 1 test.
+<end of output>
+Test time =   0.00 sec
+----------------------------------------------------------
+Test Passed.
+"Volatility.AcceptsBoundaryValues" end time: Oct 13 22:42 +04
+"Volatility.AcceptsBoundaryValues" time elapsed: 00:00:00
+----------------------------------------------------------
+
+12/72 Testing: Volatility.RejectsNonFiniteNegativeAndUnitMistakes
+12/72 Test: Volatility.RejectsNonFiniteNegativeAndUnitMistakes
+Command: "/Users/elgun/Desktop/fx-derivative-models/build/release/tests/fxval_unit_tests" "--gtest_filter=Volatility.RejectsNonFiniteNegativeAndUnitMistakes" "--gtest_also_run_disabled_tests"
+Directory: /Users/elgun/Desktop/fx-derivative-models/build/release/tests
+"Volatility.RejectsNonFiniteNegativeAndUnitMistakes" start time: Oct 13 22:42 +04
+Output:
+----------------------------------------------------------
+Running main() from /Users/elgun/Desktop/fx-derivative-models/build/release/_deps/googletest-src/googletest/src/gtest_main.cc
+Note: Google Test filter = Volatility.RejectsNonFiniteNegativeAndUnitMistakes
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from Volatility
+[ RUN      ] Volatility.RejectsNonFiniteNegativeAndUnitMistakes
+[       OK ] Volatility.RejectsNonFiniteNegativeAndUnitMistakes (0 ms)
+[----------] 1 test from Volatility (0 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (0 ms total)
+[  PASSED  ] 1 test.
+<end of output>
+Test time =   0.00 sec
+----------------------------------------------------------
+Test Passed.
+"Volatility.RejectsNonFiniteNegativeAndUnitMistakes" end time: Oct 13 22:42 +04
+"Volatility.RejectsNonFiniteNegativeAndUnitMistakes" time elapsed: 00:00:00
+----------------------------------------------------------
+
+13/72 Testing: Volatility.ErrorMessageNamesTheQuantityAndTheValue
+13/72 Test: Volatility.ErrorMessageNamesTheQuantityAndTheValue
+Command: "/Users/elgun/Desktop/fx-derivative-models/build/release/tests/fxval_unit_tests" "--gtest_filter=Volatility.ErrorMessageNamesTheQuantityAndTheValue" "--gtest_also_run_disabled_tests"
+Directory: /Users/elgun/Desktop/fx-derivative-models/build/release/tests
+"Volatility.ErrorMessageNamesTheQuantityAndTheValue" start time: Oct 13 22:42 +04
+Output:
+----------------------------------------------------------
+Running main() from /Users/elgun/Desktop/fx-derivative-models/build/release/_deps/googletest-src/googletest/src/gtest_main.cc
+Note: Google Test filter = Volatility.ErrorMessageNamesTheQuantityAndTheValue
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from Volatility
+[ RUN      ] Volatility.ErrorMessageNamesTheQuantityAndTheValue
+[       OK ] Volatility.ErrorMessageNamesTheQuantityAndTheValue (0 ms)
+[----------] 1 test from Volatility (0 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (0 ms total)
+[  PASSED  ] 1 test.
+<end of output>
+Test time =   0.00 sec
+----------------------------------------------------------
+Test Passed.
+"Volatility.ErrorMessageNamesTheQuantityAndTheValue" end time: Oct 13 22:42 +04
+"Volatility.ErrorMessageNamesTheQuantityAndTheValue" time elapsed: 00:00:00
+----------------------------------------------------------
+
+14/72 Testing: Volatility.OrdersByValue
+14/72 Test: Volatility.OrdersByValue
+Command: "/Users/elgun/Desktop/fx-derivative-models/build/release/tests/fxval_unit_tests" "--gtest_filter=Volatility.OrdersByValue" "--gtest_also_run_disabled_tests"
+Directory: /Users/elgun/Desktop/fx-derivative-models/build/release/tests
+"Volatility.OrdersByValue" start time: Oct 13 22:42 +04
+Output:
+----------------------------------------------------------
+Running main() from /Users/elgun/Desktop/fx-derivative-models/build/release/_deps/googletest-src/googletest/src/gtest_main.cc
+Note: Google Test filter = Volatility.OrdersByValue
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from Volatility
+[ RUN      ] Volatility.OrdersByValue
+[       OK ] Volatility.OrdersByValue (0 ms)
+[----------] 1 test from Volatility (0 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (0 ms total)
+[  PASSED  ] 1 test.
+<end of output>
+Test time =   0.00 sec
+----------------------------------------------------------
+Test Passed.
+"Volatility.OrdersByValue" end time: Oct 13 22:42 +04
+"Volatility.OrdersByValue" time elapsed: 00:00:00
+----------------------------------------------------------
+
+15/72 Testing: Rate.AllowsNegativeRates
+15/72 Test: Rate.AllowsNegativeRates
+Command: "/Users/elgun/Desktop/fx-derivative-models/build/release/tests/fxval_unit_tests" "--gtest_filter=Rate.AllowsNegativeRates" "--gtest_also_run_disabled_tests"
+Directory: /Users/elgun/Desktop/fx-derivative-models/build/release/tests
+"Rate.AllowsNegativeRates" start time: Oct 13 22:42 +04
+Output:
+----------------------------------------------------------
+Running main() from /Users/elgun/Desktop/fx-derivative-models/build/release/_deps/googletest-src/googletest/src/gtest_main.cc
+Note: Google Test filter = Rate.AllowsNegativeRates
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from Rate
+[ RUN      ] Rate.AllowsNegativeRates
+[       OK ] Rate.AllowsNegativeRates (0 ms)
+[----------] 1 test from Rate (0 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (0 ms total)
+[  PASSED  ] 1 test.
+<end of output>
+Test time =   0.00 sec
+----------------------------------------------------------
+Test Passed.
+"Rate.AllowsNegativeRates" end time: Oct 13 22:42 +04
+"Rate.AllowsNegativeRates" time elapsed: 00:00:00
+----------------------------------------------------------
+
+16/72 Testing: Rate.RejectsNonFiniteAndUnitMistakes
+16/72 Test: Rate.RejectsNonFiniteAndUnitMistakes
+Command: "/Users/elgun/Desktop/fx-derivative-models/build/release/tests/fxval_unit_tests" "--gtest_filter=Rate.RejectsNonFiniteAndUnitMistakes" "--gtest_also_run_disabled_tests"
+Directory: /Users/elgun/Desktop/fx-derivative-models/build/release/tests
+"Rate.RejectsNonFiniteAndUnitMistakes" start time: Oct 13 22:42 +04
+Output:
+----------------------------------------------------------
+Running main() from /Users/elgun/Desktop/fx-derivative-models/build/release/_deps/googletest-src/googletest/src/gtest_main.cc
+Note: Google Test filter = Rate.RejectsNonFiniteAndUnitMistakes
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from Rate
+[ RUN      ] Rate.RejectsNonFiniteAndUnitMistakes
+[       OK ] Rate.RejectsNonFiniteAndUnitMistakes (0 ms)
+[----------] 1 test from Rate (0 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (0 ms total)
+[  PASSED  ] 1 test.
+<end of output>
+Test time =   0.00 sec
+----------------------------------------------------------
+Test Passed.
+"Rate.RejectsNonFiniteAndUnitMistakes" end time: Oct 13 22:42 +04
+"Rate.RejectsNonFiniteAndUnitMistakes" time elapsed: 00:00:00
+----------------------------------------------------------
+
+17/72 Testing: Years.AcceptsZeroAndTheMaximum
+17/72 Test: Years.AcceptsZeroAndTheMaximum
+Command: "/Users/elgun/Desktop/fx-derivative-models/build/release/tests/fxval_unit_tests" "--gtest_filter=Years.AcceptsZeroAndTheMaximum" "--gtest_also_run_disabled_tests"
+Directory: /Users/elgun/Desktop/fx-derivative-models/build/release/tests
+"Years.AcceptsZeroAndTheMaximum" start time: Oct 13 22:42 +04
+Output:
+----------------------------------------------------------
+Running main() from /Users/elgun/Desktop/fx-derivative-models/build/release/_deps/googletest-src/googletest/src/gtest_main.cc
+Note: Google Test filter = Years.AcceptsZeroAndTheMaximum
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from Years
+[ RUN      ] Years.AcceptsZeroAndTheMaximum
+[       OK ] Years.AcceptsZeroAndTheMaximum (0 ms)
+[----------] 1 test from Years (0 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (0 ms total)
+[  PASSED  ] 1 test.
+<end of output>
+Test time =   0.00 sec
+----------------------------------------------------------
+Test Passed.
+"Years.AcceptsZeroAndTheMaximum" end time: Oct 13 22:42 +04
+"Years.AcceptsZeroAndTheMaximum" time elapsed: 00:00:00
+----------------------------------------------------------
+
+18/72 Testing: Years.RejectsNegativeNonFiniteAndHuge
+18/72 Test: Years.RejectsNegativeNonFiniteAndHuge
+Command: "/Users/elgun/Desktop/fx-derivative-models/build/release/tests/fxval_unit_tests" "--gtest_filter=Years.RejectsNegativeNonFiniteAndHuge" "--gtest_also_run_disabled_tests"
+Directory: /Users/elgun/Desktop/fx-derivative-models/build/release/tests
+"Years.RejectsNegativeNonFiniteAndHuge" start time: Oct 13 22:42 +04
+Output:
+----------------------------------------------------------
+Running main() from /Users/elgun/Desktop/fx-derivative-models/build/release/_deps/googletest-src/googletest/src/gtest_main.cc
+Note: Google Test filter = Years.RejectsNegativeNonFiniteAndHuge
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from Years
+[ RUN      ] Years.RejectsNegativeNonFiniteAndHuge
+[       OK ] Years.RejectsNegativeNonFiniteAndHuge (0 ms)
+[----------] 1 test from Years (0 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (0 ms total)
+[  PASSED  ] 1 test.
+<end of output>
+Test time =   0.00 sec
+----------------------------------------------------------
+Test Passed.
+"Years.RejectsNegativeNonFiniteAndHuge" end time: Oct 13 22:42 +04
+"Years.RejectsNegativeNonFiniteAndHuge" time elapsed: 00:00:00
+----------------------------------------------------------
+
+19/72 Testing: Spot.MustBeStrictlyPositiveAndFinite
+19/72 Test: Spot.MustBeStrictlyPositiveAndFinite
+Command: "/Users/elgun/Desktop/fx-derivative-models/build/release/tests/fxval_unit_tests" "--gtest_filter=Spot.MustBeStrictlyPositiveAndFinite" "--gtest_also_run_disabled_tests"
+Directory: /Users/elgun/Desktop/fx-derivative-models/build/release/tests
+"Spot.MustBeStrictlyPositiveAndFinite" start time: Oct 13 22:42 +04
+Output:
+----------------------------------------------------------
+Running main() from /Users/elgun/Desktop/fx-derivative-models/build/release/_deps/googletest-src/googletest/src/gtest_main.cc
+Note: Google Test filter = Spot.MustBeStrictlyPositiveAndFinite
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from Spot
+[ RUN      ] Spot.MustBeStrictlyPositiveAndFinite
+[       OK ] Spot.MustBeStrictlyPositiveAndFinite (0 ms)
+[----------] 1 test from Spot (0 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (0 ms total)
+[  PASSED  ] 1 test.
+<end of output>
+Test time =   0.00 sec
+----------------------------------------------------------
+Test Passed.
+"Spot.MustBeStrictlyPositiveAndFinite" end time: Oct 13 22:42 +04
+"Spot.MustBeStrictlyPositiveAndFinite" time elapsed: 00:00:00
+----------------------------------------------------------
+
+20/72 Testing: Strike.MustBeStrictlyPositiveAndFinite
+20/72 Test: Strike.MustBeStrictlyPositiveAndFinite
+Command: "/Users/elgun/Desktop/fx-derivative-models/build/release/tests/fxval_unit_tests" "--gtest_filter=Strike.MustBeStrictlyPositiveAndFinite" "--gtest_also_run_disabled_tests"
+Directory: /Users/elgun/Desktop/fx-derivative-models/build/release/tests
+"Strike.MustBeStrictlyPositiveAndFinite" start time: Oct 13 22:42 +04
+Output:
+----------------------------------------------------------
+Running main() from /Users/elgun/Desktop/fx-derivative-models/build/release/_deps/googletest-src/googletest/src/gtest_main.cc
+Note: Google Test filter = Strike.MustBeStrictlyPositiveAndFinite
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from Strike
+[ RUN      ] Strike.MustBeStrictlyPositiveAndFinite
+[       OK ] Strike.MustBeStrictlyPositiveAndFinite (0 ms)
+[----------] 1 test from Strike (0 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (0 ms total)
+[  PASSED  ] 1 test.
+<end of output>
+Test time =   0.00 sec
+----------------------------------------------------------
+Test Passed.
+"Strike.MustBeStrictlyPositiveAndFinite" end time: Oct 13 22:42 +04
+"Strike.MustBeStrictlyPositiveAndFinite" time elapsed: 00:00:00
+----------------------------------------------------------
+
+21/72 Testing: Notional.MustBeStrictlyPositiveAndFinite
+21/72 Test: Notional.MustBeStrictlyPositiveAndFinite
+Command: "/Users/elgun/Desktop/fx-derivative-models/build/release/tests/fxval_unit_tests" "--gtest_filter=Notional.MustBeStrictlyPositiveAndFinite" "--gtest_also_run_disabled_tests"
+Directory: /Users/elgun/Desktop/fx-derivative-models/build/release/tests
+"Notional.MustBeStrictlyPositiveAndFinite" start time: Oct 13 22:42 +04
+Output:
+----------------------------------------------------------
+Running main() from /Users/elgun/Desktop/fx-derivative-models/build/release/_deps/googletest-src/googletest/src/gtest_main.cc
+Note: Google Test filter = Notional.MustBeStrictlyPositiveAndFinite
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from Notional
+[ RUN      ] Notional.MustBeStrictlyPositiveAndFinite
+[       OK ] Notional.MustBeStrictlyPositiveAndFinite (0 ms)
+[----------] 1 test from Notional (0 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (0 ms total)
+[  PASSED  ] 1 test.
+<end of output>
+Test time =   0.00 sec
+----------------------------------------------------------
+Test Passed.
+"Notional.MustBeStrictlyPositiveAndFinite" end time: Oct 13 22:42 +04
+"Notional.MustBeStrictlyPositiveAndFinite" time elapsed: 00:00:00
+----------------------------------------------------------
+
+22/72 Testing: Version.StringMatchesComponents
+22/72 Test: Version.StringMatchesComponents
+Command: "/Users/elgun/Desktop/fx-derivative-models/build/release/tests/fxval_unit_tests" "--gtest_filter=Version.StringMatchesComponents" "--gtest_also_run_disabled_tests"
+Directory: /Users/elgun/Desktop/fx-derivative-models/build/release/tests
+"Version.StringMatchesComponents" start time: Oct 13 22:42 +04
+Output:
+----------------------------------------------------------
+Running main() from /Users/elgun/Desktop/fx-derivative-models/build/release/_deps/googletest-src/googletest/src/gtest_main.cc
+Note: Google Test filter = Version.StringMatchesComponents
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from Version
+[ RUN      ] Version.StringMatchesComponents
+[       OK ] Version.StringMatchesComponents (0 ms)
+[----------] 1 test from Version (0 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (0 ms total)
+[  PASSED  ] 1 test.
+<end of output>
+Test time =   0.00 sec
+----------------------------------------------------------
+Test Passed.
+"Version.StringMatchesComponents" end time: Oct 13 22:42 +04
+"Version.StringMatchesComponents" time elapsed: 00:00:00
+----------------------------------------------------------
+
+23/72 Testing: Act365Fixed.SameDayIsZero
+23/72 Test: Act365Fixed.SameDayIsZero
+Command: "/Users/elgun/Desktop/fx-derivative-models/build/release/tests/fxval_unit_tests" "--gtest_filter=Act365Fixed.SameDayIsZero" "--gtest_also_run_disabled_tests"
+Directory: /Users/elgun/Desktop/fx-derivative-models/build/release/tests
+"Act365Fixed.SameDayIsZero" start time: Oct 13 22:42 +04
+Output:
+----------------------------------------------------------
+Running main() from /Users/elgun/Desktop/fx-derivative-models/build/release/_deps/googletest-src/googletest/src/gtest_main.cc
+Note: Google Test filter = Act365Fixed.SameDayIsZero
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from Act365Fixed
+[ RUN      ] Act365Fixed.SameDayIsZero
+[       OK ] Act365Fixed.SameDayIsZero (0 ms)
+[----------] 1 test from Act365Fixed (0 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (0 ms total)
+[  PASSED  ] 1 test.
+<end of output>
+Test time =   0.00 sec
+----------------------------------------------------------
+Test Passed.
+"Act365Fixed.SameDayIsZero" end time: Oct 13 22:42 +04
+"Act365Fixed.SameDayIsZero" time elapsed: 00:00:00
+----------------------------------------------------------
+
+24/72 Testing: Act365Fixed.CalendarDaysOver365
+24/72 Test: Act365Fixed.CalendarDaysOver365
+Command: "/Users/elgun/Desktop/fx-derivative-models/build/release/tests/fxval_unit_tests" "--gtest_filter=Act365Fixed.CalendarDaysOver365" "--gtest_also_run_disabled_tests"
+Directory: /Users/elgun/Desktop/fx-derivative-models/build/release/tests
+"Act365Fixed.CalendarDaysOver365" start time: Oct 13 22:42 +04
+Output:
+----------------------------------------------------------
+Running main() from /Users/elgun/Desktop/fx-derivative-models/build/release/_deps/googletest-src/googletest/src/gtest_main.cc
+Note: Google Test filter = Act365Fixed.CalendarDaysOver365
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from Act365Fixed
+[ RUN      ] Act365Fixed.CalendarDaysOver365
+[       OK ] Act365Fixed.CalendarDaysOver365 (0 ms)
+[----------] 1 test from Act365Fixed (0 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (0 ms total)
+[  PASSED  ] 1 test.
+<end of output>
+Test time =   0.00 sec
+----------------------------------------------------------
+Test Passed.
+"Act365Fixed.CalendarDaysOver365" end time: Oct 13 22:42 +04
+"Act365Fixed.CalendarDaysOver365" time elapsed: 00:00:00
+----------------------------------------------------------
+
+25/72 Testing: Act365Fixed.RejectsInvertedDates
+25/72 Test: Act365Fixed.RejectsInvertedDates
+Command: "/Users/elgun/Desktop/fx-derivative-models/build/release/tests/fxval_unit_tests" "--gtest_filter=Act365Fixed.RejectsInvertedDates" "--gtest_also_run_disabled_tests"
+Directory: /Users/elgun/Desktop/fx-derivative-models/build/release/tests
+"Act365Fixed.RejectsInvertedDates" start time: Oct 13 22:42 +04
+Output:
+----------------------------------------------------------
+Running main() from /Users/elgun/Desktop/fx-derivative-models/build/release/_deps/googletest-src/googletest/src/gtest_main.cc
+Note: Google Test filter = Act365Fixed.RejectsInvertedDates
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from Act365Fixed
+[ RUN      ] Act365Fixed.RejectsInvertedDates
+[       OK ] Act365Fixed.RejectsInvertedDates (0 ms)
+[----------] 1 test from Act365Fixed (0 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (0 ms total)
+[  PASSED  ] 1 test.
+<end of output>
+Test time =   0.01 sec
+----------------------------------------------------------
+Test Passed.
+"Act365Fixed.RejectsInvertedDates" end time: Oct 13 22:42 +04
+"Act365Fixed.RejectsInvertedDates" time elapsed: 00:00:00
+----------------------------------------------------------
+
+26/72 Testing: GarmanKohlhagen.AtExpiryEqualsIntrinsic
+26/72 Test: GarmanKohlhagen.AtExpiryEqualsIntrinsic
+Command: "/Users/elgun/Desktop/fx-derivative-models/build/release/tests/fxval_unit_tests" "--gtest_filter=GarmanKohlhagen.AtExpiryEqualsIntrinsic" "--gtest_also_run_disabled_tests"
+Directory: /Users/elgun/Desktop/fx-derivative-models/build/release/tests
+"GarmanKohlhagen.AtExpiryEqualsIntrinsic" start time: Oct 13 22:42 +04
+Output:
+----------------------------------------------------------
+Running main() from /Users/elgun/Desktop/fx-derivative-models/build/release/_deps/googletest-src/googletest/src/gtest_main.cc
+Note: Google Test filter = GarmanKohlhagen.AtExpiryEqualsIntrinsic
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from GarmanKohlhagen
+[ RUN      ] GarmanKohlhagen.AtExpiryEqualsIntrinsic
+[       OK ] GarmanKohlhagen.AtExpiryEqualsIntrinsic (0 ms)
+[----------] 1 test from GarmanKohlhagen (0 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (0 ms total)
+[  PASSED  ] 1 test.
+<end of output>
+Test time =   0.00 sec
+----------------------------------------------------------
+Test Passed.
+"GarmanKohlhagen.AtExpiryEqualsIntrinsic" end time: Oct 13 22:42 +04
+"GarmanKohlhagen.AtExpiryEqualsIntrinsic" time elapsed: 00:00:00
+----------------------------------------------------------
+
+27/72 Testing: GarmanKohlhagen.ZeroVolUsesDiscountedForwardIntrinsic
+27/72 Test: GarmanKohlhagen.ZeroVolUsesDiscountedForwardIntrinsic
+Command: "/Users/elgun/Desktop/fx-derivative-models/build/release/tests/fxval_unit_tests" "--gtest_filter=GarmanKohlhagen.ZeroVolUsesDiscountedForwardIntrinsic" "--gtest_also_run_disabled_tests"
+Directory: /Users/elgun/Desktop/fx-derivative-models/build/release/tests
+"GarmanKohlhagen.ZeroVolUsesDiscountedForwardIntrinsic" start time: Oct 13 22:42 +04
+Output:
+----------------------------------------------------------
+Running main() from /Users/elgun/Desktop/fx-derivative-models/build/release/_deps/googletest-src/googletest/src/gtest_main.cc
+Note: Google Test filter = GarmanKohlhagen.ZeroVolUsesDiscountedForwardIntrinsic
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from GarmanKohlhagen
+[ RUN      ] GarmanKohlhagen.ZeroVolUsesDiscountedForwardIntrinsic
+[       OK ] GarmanKohlhagen.ZeroVolUsesDiscountedForwardIntrinsic (0 ms)
+[----------] 1 test from GarmanKohlhagen (0 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (0 ms total)
+[  PASSED  ] 1 test.
+<end of output>
+Test time =   0.00 sec
+----------------------------------------------------------
+Test Passed.
+"GarmanKohlhagen.ZeroVolUsesDiscountedForwardIntrinsic" end time: Oct 13 22:42 +04
+"GarmanKohlhagen.ZeroVolUsesDiscountedForwardIntrinsic" time elapsed: 00:00:00
+----------------------------------------------------------
+
+28/72 Testing: GarmanKohlhagen.PutCallParityHoldsOnATypicalFxPoint
+28/72 Test: GarmanKohlhagen.PutCallParityHoldsOnATypicalFxPoint
+Command: "/Users/elgun/Desktop/fx-derivative-models/build/release/tests/fxval_unit_tests" "--gtest_filter=GarmanKohlhagen.PutCallParityHoldsOnATypicalFxPoint" "--gtest_also_run_disabled_tests"
+Directory: /Users/elgun/Desktop/fx-derivative-models/build/release/tests
+"GarmanKohlhagen.PutCallParityHoldsOnATypicalFxPoint" start time: Oct 13 22:42 +04
+Output:
+----------------------------------------------------------
+Running main() from /Users/elgun/Desktop/fx-derivative-models/build/release/_deps/googletest-src/googletest/src/gtest_main.cc
+Note: Google Test filter = GarmanKohlhagen.PutCallParityHoldsOnATypicalFxPoint
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from GarmanKohlhagen
+[ RUN      ] GarmanKohlhagen.PutCallParityHoldsOnATypicalFxPoint
+[       OK ] GarmanKohlhagen.PutCallParityHoldsOnATypicalFxPoint (0 ms)
+[----------] 1 test from GarmanKohlhagen (0 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (0 ms total)
+[  PASSED  ] 1 test.
+<end of output>
+Test time =   0.01 sec
+----------------------------------------------------------
+Test Passed.
+"GarmanKohlhagen.PutCallParityHoldsOnATypicalFxPoint" end time: Oct 13 22:42 +04
+"GarmanKohlhagen.PutCallParityHoldsOnATypicalFxPoint" time elapsed: 00:00:00
+----------------------------------------------------------
+
+29/72 Testing: GarmanKohlhagen.CallDeltaMinusPutDeltaIsForeignDiscount
+29/72 Test: GarmanKohlhagen.CallDeltaMinusPutDeltaIsForeignDiscount
+Command: "/Users/elgun/Desktop/fx-derivative-models/build/release/tests/fxval_unit_tests" "--gtest_filter=GarmanKohlhagen.CallDeltaMinusPutDeltaIsForeignDiscount" "--gtest_also_run_disabled_tests"
+Directory: /Users/elgun/Desktop/fx-derivative-models/build/release/tests
+"GarmanKohlhagen.CallDeltaMinusPutDeltaIsForeignDiscount" start time: Oct 13 22:42 +04
+Output:
+----------------------------------------------------------
+Running main() from /Users/elgun/Desktop/fx-derivative-models/build/release/_deps/googletest-src/googletest/src/gtest_main.cc
+Note: Google Test filter = GarmanKohlhagen.CallDeltaMinusPutDeltaIsForeignDiscount
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from GarmanKohlhagen
+[ RUN      ] GarmanKohlhagen.CallDeltaMinusPutDeltaIsForeignDiscount
+[       OK ] GarmanKohlhagen.CallDeltaMinusPutDeltaIsForeignDiscount (0 ms)
+[----------] 1 test from GarmanKohlhagen (0 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (0 ms total)
+[  PASSED  ] 1 test.
+<end of output>
+Test time =   0.00 sec
+----------------------------------------------------------
+Test Passed.
+"GarmanKohlhagen.CallDeltaMinusPutDeltaIsForeignDiscount" end time: Oct 13 22:42 +04
+"GarmanKohlhagen.CallDeltaMinusPutDeltaIsForeignDiscount" time elapsed: 00:00:00
+----------------------------------------------------------
+
+30/72 Testing: GarmanKohlhagen.DeepInTheMoneyCallDeltaApproachesForeignDiscount
+30/72 Test: GarmanKohlhagen.DeepInTheMoneyCallDeltaApproachesForeignDiscount
+Command: "/Users/elgun/Desktop/fx-derivative-models/build/release/tests/fxval_unit_tests" "--gtest_filter=GarmanKohlhagen.DeepInTheMoneyCallDeltaApproachesForeignDiscount" "--gtest_also_run_disabled_tests"
+Directory: /Users/elgun/Desktop/fx-derivative-models/build/release/tests
+"GarmanKohlhagen.DeepInTheMoneyCallDeltaApproachesForeignDiscount" start time: Oct 13 22:42 +04
+Output:
+----------------------------------------------------------
+Running main() from /Users/elgun/Desktop/fx-derivative-models/build/release/_deps/googletest-src/googletest/src/gtest_main.cc
+Note: Google Test filter = GarmanKohlhagen.DeepInTheMoneyCallDeltaApproachesForeignDiscount
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from GarmanKohlhagen
+[ RUN      ] GarmanKohlhagen.DeepInTheMoneyCallDeltaApproachesForeignDiscount
+[       OK ] GarmanKohlhagen.DeepInTheMoneyCallDeltaApproachesForeignDiscount (0 ms)
+[----------] 1 test from GarmanKohlhagen (0 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (0 ms total)
+[  PASSED  ] 1 test.
+<end of output>
+Test time =   0.00 sec
+----------------------------------------------------------
+Test Passed.
+"GarmanKohlhagen.DeepInTheMoneyCallDeltaApproachesForeignDiscount" end time: Oct 13 22:42 +04
+"GarmanKohlhagen.DeepInTheMoneyCallDeltaApproachesForeignDiscount" time elapsed: 00:00:00
+----------------------------------------------------------
+
+31/72 Testing: GarmanKohlhagenKnownValues.MatchesTheTextbookBlackScholesValues
+31/72 Test: GarmanKohlhagenKnownValues.MatchesTheTextbookBlackScholesValues
+Command: "/Users/elgun/Desktop/fx-derivative-models/build/release/tests/fxval_unit_tests" "--gtest_filter=GarmanKohlhagenKnownValues.MatchesTheTextbookBlackScholesValues" "--gtest_also_run_disabled_tests"
+Directory: /Users/elgun/Desktop/fx-derivative-models/build/release/tests
+"GarmanKohlhagenKnownValues.MatchesTheTextbookBlackScholesValues" start time: Oct 13 22:42 +04
+Output:
+----------------------------------------------------------
+Running main() from /Users/elgun/Desktop/fx-derivative-models/build/release/_deps/googletest-src/googletest/src/gtest_main.cc
+Note: Google Test filter = GarmanKohlhagenKnownValues.MatchesTheTextbookBlackScholesValues
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from GarmanKohlhagenKnownValues
+[ RUN      ] GarmanKohlhagenKnownValues.MatchesTheTextbookBlackScholesValues
+[       OK ] GarmanKohlhagenKnownValues.MatchesTheTextbookBlackScholesValues (0 ms)
+[----------] 1 test from GarmanKohlhagenKnownValues (0 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (0 ms total)
+[  PASSED  ] 1 test.
+<end of output>
+Test time =   0.00 sec
+----------------------------------------------------------
+Test Passed.
+"GarmanKohlhagenKnownValues.MatchesTheTextbookBlackScholesValues" end time: Oct 13 22:42 +04
+"GarmanKohlhagenKnownValues.MatchesTheTextbookBlackScholesValues" time elapsed: 00:00:00
+----------------------------------------------------------
+
+32/72 Testing: GarmanKohlhagenKnownValues.AtTheMoneyForwardWithZeroRatesHasTheClosedFormValue
+32/72 Test: GarmanKohlhagenKnownValues.AtTheMoneyForwardWithZeroRatesHasTheClosedFormValue
+Command: "/Users/elgun/Desktop/fx-derivative-models/build/release/tests/fxval_unit_tests" "--gtest_filter=GarmanKohlhagenKnownValues.AtTheMoneyForwardWithZeroRatesHasTheClosedFormValue" "--gtest_also_run_disabled_tests"
+Directory: /Users/elgun/Desktop/fx-derivative-models/build/release/tests
+"GarmanKohlhagenKnownValues.AtTheMoneyForwardWithZeroRatesHasTheClosedFormValue" start time: Oct 13 22:42 +04
+Output:
+----------------------------------------------------------
+Running main() from /Users/elgun/Desktop/fx-derivative-models/build/release/_deps/googletest-src/googletest/src/gtest_main.cc
+Note: Google Test filter = GarmanKohlhagenKnownValues.AtTheMoneyForwardWithZeroRatesHasTheClosedFormValue
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from GarmanKohlhagenKnownValues
+[ RUN      ] GarmanKohlhagenKnownValues.AtTheMoneyForwardWithZeroRatesHasTheClosedFormValue
+[       OK ] GarmanKohlhagenKnownValues.AtTheMoneyForwardWithZeroRatesHasTheClosedFormValue (0 ms)
+[----------] 1 test from GarmanKohlhagenKnownValues (0 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (0 ms total)
+[  PASSED  ] 1 test.
+<end of output>
+Test time =   0.00 sec
+----------------------------------------------------------
+Test Passed.
+"GarmanKohlhagenKnownValues.AtTheMoneyForwardWithZeroRatesHasTheClosedFormValue" end time: Oct 13 22:42 +04
+"GarmanKohlhagenKnownValues.AtTheMoneyForwardWithZeroRatesHasTheClosedFormValue" time elapsed: 00:00:00
+----------------------------------------------------------
+
+33/72 Testing: GarmanKohlhagenKnownValues.CurrencyInversionSymmetry
+33/72 Test: GarmanKohlhagenKnownValues.CurrencyInversionSymmetry
+Command: "/Users/elgun/Desktop/fx-derivative-models/build/release/tests/fxval_unit_tests" "--gtest_filter=GarmanKohlhagenKnownValues.CurrencyInversionSymmetry" "--gtest_also_run_disabled_tests"
+Directory: /Users/elgun/Desktop/fx-derivative-models/build/release/tests
+"GarmanKohlhagenKnownValues.CurrencyInversionSymmetry" start time: Oct 13 22:42 +04
+Output:
+----------------------------------------------------------
+Running main() from /Users/elgun/Desktop/fx-derivative-models/build/release/_deps/googletest-src/googletest/src/gtest_main.cc
+Note: Google Test filter = GarmanKohlhagenKnownValues.CurrencyInversionSymmetry
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from GarmanKohlhagenKnownValues
+[ RUN      ] GarmanKohlhagenKnownValues.CurrencyInversionSymmetry
+[       OK ] GarmanKohlhagenKnownValues.CurrencyInversionSymmetry (0 ms)
+[----------] 1 test from GarmanKohlhagenKnownValues (0 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (0 ms total)
+[  PASSED  ] 1 test.
+<end of output>
+Test time =   0.00 sec
+----------------------------------------------------------
+Test Passed.
+"GarmanKohlhagenKnownValues.CurrencyInversionSymmetry" end time: Oct 13 22:42 +04
+"GarmanKohlhagenKnownValues.CurrencyInversionSymmetry" time elapsed: 00:00:00
+----------------------------------------------------------
+
+34/72 Testing: GarmanKohlhagenDegenerate.ZeroVolatilityPutIsDiscountedIntrinsicOfTheForward
+34/72 Test: GarmanKohlhagenDegenerate.ZeroVolatilityPutIsDiscountedIntrinsicOfTheForward
+Command: "/Users/elgun/Desktop/fx-derivative-models/build/release/tests/fxval_unit_tests" "--gtest_filter=GarmanKohlhagenDegenerate.ZeroVolatilityPutIsDiscountedIntrinsicOfTheForward" "--gtest_also_run_disabled_tests"
+Directory: /Users/elgun/Desktop/fx-derivative-models/build/release/tests
+"GarmanKohlhagenDegenerate.ZeroVolatilityPutIsDiscountedIntrinsicOfTheForward" start time: Oct 13 22:42 +04
+Output:
+----------------------------------------------------------
+Running main() from /Users/elgun/Desktop/fx-derivative-models/build/release/_deps/googletest-src/googletest/src/gtest_main.cc
+Note: Google Test filter = GarmanKohlhagenDegenerate.ZeroVolatilityPutIsDiscountedIntrinsicOfTheForward
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from GarmanKohlhagenDegenerate
+[ RUN      ] GarmanKohlhagenDegenerate.ZeroVolatilityPutIsDiscountedIntrinsicOfTheForward
+[       OK ] GarmanKohlhagenDegenerate.ZeroVolatilityPutIsDiscountedIntrinsicOfTheForward (0 ms)
+[----------] 1 test from GarmanKohlhagenDegenerate (0 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (0 ms total)
+[  PASSED  ] 1 test.
+<end of output>
+Test time =   0.00 sec
+----------------------------------------------------------
+Test Passed.
+"GarmanKohlhagenDegenerate.ZeroVolatilityPutIsDiscountedIntrinsicOfTheForward" end time: Oct 13 22:42 +04
+"GarmanKohlhagenDegenerate.ZeroVolatilityPutIsDiscountedIntrinsicOfTheForward" time elapsed: 00:00:00
+----------------------------------------------------------
+
+35/72 Testing: GarmanKohlhagenDegenerate.SmallVolatilityApproachesTheZeroVolatilityLimit
+35/72 Test: GarmanKohlhagenDegenerate.SmallVolatilityApproachesTheZeroVolatilityLimit
+Command: "/Users/elgun/Desktop/fx-derivative-models/build/release/tests/fxval_unit_tests" "--gtest_filter=GarmanKohlhagenDegenerate.SmallVolatilityApproachesTheZeroVolatilityLimit" "--gtest_also_run_disabled_tests"
+Directory: /Users/elgun/Desktop/fx-derivative-models/build/release/tests
+"GarmanKohlhagenDegenerate.SmallVolatilityApproachesTheZeroVolatilityLimit" start time: Oct 13 22:42 +04
+Output:
+----------------------------------------------------------
+Running main() from /Users/elgun/Desktop/fx-derivative-models/build/release/_deps/googletest-src/googletest/src/gtest_main.cc
+Note: Google Test filter = GarmanKohlhagenDegenerate.SmallVolatilityApproachesTheZeroVolatilityLimit
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from GarmanKohlhagenDegenerate
+[ RUN      ] GarmanKohlhagenDegenerate.SmallVolatilityApproachesTheZeroVolatilityLimit
+[       OK ] GarmanKohlhagenDegenerate.SmallVolatilityApproachesTheZeroVolatilityLimit (0 ms)
+[----------] 1 test from GarmanKohlhagenDegenerate (0 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (0 ms total)
+[  PASSED  ] 1 test.
+<end of output>
+Test time =   0.01 sec
+----------------------------------------------------------
+Test Passed.
+"GarmanKohlhagenDegenerate.SmallVolatilityApproachesTheZeroVolatilityLimit" end time: Oct 13 22:42 +04
+"GarmanKohlhagenDegenerate.SmallVolatilityApproachesTheZeroVolatilityLimit" time elapsed: 00:00:00
+----------------------------------------------------------
+
+36/72 Testing: GarmanKohlhagenDegenerate.PricesAreNeverNegativeDeepOutOfTheMoney
+36/72 Test: GarmanKohlhagenDegenerate.PricesAreNeverNegativeDeepOutOfTheMoney
+Command: "/Users/elgun/Desktop/fx-derivative-models/build/release/tests/fxval_unit_tests" "--gtest_filter=GarmanKohlhagenDegenerate.PricesAreNeverNegativeDeepOutOfTheMoney" "--gtest_also_run_disabled_tests"
+Directory: /Users/elgun/Desktop/fx-derivative-models/build/release/tests
+"GarmanKohlhagenDegenerate.PricesAreNeverNegativeDeepOutOfTheMoney" start time: Oct 13 22:42 +04
+Output:
+----------------------------------------------------------
+Running main() from /Users/elgun/Desktop/fx-derivative-models/build/release/_deps/googletest-src/googletest/src/gtest_main.cc
+Note: Google Test filter = GarmanKohlhagenDegenerate.PricesAreNeverNegativeDeepOutOfTheMoney
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from GarmanKohlhagenDegenerate
+[ RUN      ] GarmanKohlhagenDegenerate.PricesAreNeverNegativeDeepOutOfTheMoney
+[       OK ] GarmanKohlhagenDegenerate.PricesAreNeverNegativeDeepOutOfTheMoney (0 ms)
+[----------] 1 test from GarmanKohlhagenDegenerate (0 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (0 ms total)
+[  PASSED  ] 1 test.
+<end of output>
+Test time =   0.01 sec
+----------------------------------------------------------
+Test Passed.
+"GarmanKohlhagenDegenerate.PricesAreNeverNegativeDeepOutOfTheMoney" end time: Oct 13 22:42 +04
+"GarmanKohlhagenDegenerate.PricesAreNeverNegativeDeepOutOfTheMoney" time elapsed: 00:00:00
+----------------------------------------------------------
+
+37/72 Testing: GarmanKohlhagenErrors.GreeksAreRejectedWhenVolatilityOrExpiryIsZero
+37/72 Test: GarmanKohlhagenErrors.GreeksAreRejectedWhenVolatilityOrExpiryIsZero
+Command: "/Users/elgun/Desktop/fx-derivative-models/build/release/tests/fxval_unit_tests" "--gtest_filter=GarmanKohlhagenErrors.GreeksAreRejectedWhenVolatilityOrExpiryIsZero" "--gtest_also_run_disabled_tests"
+Directory: /Users/elgun/Desktop/fx-derivative-models/build/release/tests
+"GarmanKohlhagenErrors.GreeksAreRejectedWhenVolatilityOrExpiryIsZero" start time: Oct 13 22:42 +04
+Output:
+----------------------------------------------------------
+Running main() from /Users/elgun/Desktop/fx-derivative-models/build/release/_deps/googletest-src/googletest/src/gtest_main.cc
+Note: Google Test filter = GarmanKohlhagenErrors.GreeksAreRejectedWhenVolatilityOrExpiryIsZero
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from GarmanKohlhagenErrors
+[ RUN      ] GarmanKohlhagenErrors.GreeksAreRejectedWhenVolatilityOrExpiryIsZero
+[       OK ] GarmanKohlhagenErrors.GreeksAreRejectedWhenVolatilityOrExpiryIsZero (0 ms)
+[----------] 1 test from GarmanKohlhagenErrors (0 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (0 ms total)
+[  PASSED  ] 1 test.
+<end of output>
+Test time =   0.00 sec
+----------------------------------------------------------
+Test Passed.
+"GarmanKohlhagenErrors.GreeksAreRejectedWhenVolatilityOrExpiryIsZero" end time: Oct 13 22:42 +04
+"GarmanKohlhagenErrors.GreeksAreRejectedWhenVolatilityOrExpiryIsZero" time elapsed: 00:00:00
+----------------------------------------------------------
+
+38/72 Testing: GarmanKohlhagenErrors.OverflowIsReportedNotReturnedAsInfinity
+38/72 Test: GarmanKohlhagenErrors.OverflowIsReportedNotReturnedAsInfinity
+Command: "/Users/elgun/Desktop/fx-derivative-models/build/release/tests/fxval_unit_tests" "--gtest_filter=GarmanKohlhagenErrors.OverflowIsReportedNotReturnedAsInfinity" "--gtest_also_run_disabled_tests"
+Directory: /Users/elgun/Desktop/fx-derivative-models/build/release/tests
+"GarmanKohlhagenErrors.OverflowIsReportedNotReturnedAsInfinity" start time: Oct 13 22:42 +04
+Output:
+----------------------------------------------------------
+Running main() from /Users/elgun/Desktop/fx-derivative-models/build/release/_deps/googletest-src/googletest/src/gtest_main.cc
+Note: Google Test filter = GarmanKohlhagenErrors.OverflowIsReportedNotReturnedAsInfinity
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from GarmanKohlhagenErrors
+[ RUN      ] GarmanKohlhagenErrors.OverflowIsReportedNotReturnedAsInfinity
+[       OK ] GarmanKohlhagenErrors.OverflowIsReportedNotReturnedAsInfinity (0 ms)
+[----------] 1 test from GarmanKohlhagenErrors (0 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (0 ms total)
+[  PASSED  ] 1 test.
+<end of output>
+Test time =   0.01 sec
+----------------------------------------------------------
+Test Passed.
+"GarmanKohlhagenErrors.OverflowIsReportedNotReturnedAsInfinity" end time: Oct 13 22:42 +04
+"GarmanKohlhagenErrors.OverflowIsReportedNotReturnedAsInfinity" time elapsed: 00:00:00
+----------------------------------------------------------
+
+39/72 Testing: GarmanKohlhagenErrors.ExtremeButValidInputsStayFinite
+39/72 Test: GarmanKohlhagenErrors.ExtremeButValidInputsStayFinite
+Command: "/Users/elgun/Desktop/fx-derivative-models/build/release/tests/fxval_unit_tests" "--gtest_filter=GarmanKohlhagenErrors.ExtremeButValidInputsStayFinite" "--gtest_also_run_disabled_tests"
+Directory: /Users/elgun/Desktop/fx-derivative-models/build/release/tests
+"GarmanKohlhagenErrors.ExtremeButValidInputsStayFinite" start time: Oct 13 22:42 +04
+Output:
+----------------------------------------------------------
+Running main() from /Users/elgun/Desktop/fx-derivative-models/build/release/_deps/googletest-src/googletest/src/gtest_main.cc
+Note: Google Test filter = GarmanKohlhagenErrors.ExtremeButValidInputsStayFinite
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from GarmanKohlhagenErrors
+[ RUN      ] GarmanKohlhagenErrors.ExtremeButValidInputsStayFinite
+[       OK ] GarmanKohlhagenErrors.ExtremeButValidInputsStayFinite (0 ms)
+[----------] 1 test from GarmanKohlhagenErrors (0 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (0 ms total)
+[  PASSED  ] 1 test.
+<end of output>
+Test time =   0.00 sec
+----------------------------------------------------------
+Test Passed.
+"GarmanKohlhagenErrors.ExtremeButValidInputsStayFinite" end time: Oct 13 22:42 +04
+"GarmanKohlhagenErrors.ExtremeButValidInputsStayFinite" time elapsed: 00:00:00
+----------------------------------------------------------
+
+40/72 Testing: HestonParamsTest.AcceptsValidParametersAndKeepsTheValues
+40/72 Test: HestonParamsTest.AcceptsValidParametersAndKeepsTheValues
+Command: "/Users/elgun/Desktop/fx-derivative-models/build/release/tests/fxval_unit_tests" "--gtest_filter=HestonParamsTest.AcceptsValidParametersAndKeepsTheValues" "--gtest_also_run_disabled_tests"
+Directory: /Users/elgun/Desktop/fx-derivative-models/build/release/tests
+"HestonParamsTest.AcceptsValidParametersAndKeepsTheValues" start time: Oct 13 22:42 +04
+Output:
+----------------------------------------------------------
+Running main() from /Users/elgun/Desktop/fx-derivative-models/build/release/_deps/googletest-src/googletest/src/gtest_main.cc
+Note: Google Test filter = HestonParamsTest.AcceptsValidParametersAndKeepsTheValues
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from HestonParamsTest
+[ RUN      ] HestonParamsTest.AcceptsValidParametersAndKeepsTheValues
+[       OK ] HestonParamsTest.AcceptsValidParametersAndKeepsTheValues (0 ms)
+[----------] 1 test from HestonParamsTest (0 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (0 ms total)
+[  PASSED  ] 1 test.
+<end of output>
+Test time =   0.01 sec
+----------------------------------------------------------
+Test Passed.
+"HestonParamsTest.AcceptsValidParametersAndKeepsTheValues" end time: Oct 13 22:42 +04
+"HestonParamsTest.AcceptsValidParametersAndKeepsTheValues" time elapsed: 00:00:00
+----------------------------------------------------------
+
+41/72 Testing: HestonParamsTest.AcceptsTheBoundaryValues
+41/72 Test: HestonParamsTest.AcceptsTheBoundaryValues
+Command: "/Users/elgun/Desktop/fx-derivative-models/build/release/tests/fxval_unit_tests" "--gtest_filter=HestonParamsTest.AcceptsTheBoundaryValues" "--gtest_also_run_disabled_tests"
+Directory: /Users/elgun/Desktop/fx-derivative-models/build/release/tests
+"HestonParamsTest.AcceptsTheBoundaryValues" start time: Oct 13 22:42 +04
+Output:
+----------------------------------------------------------
+Running main() from /Users/elgun/Desktop/fx-derivative-models/build/release/_deps/googletest-src/googletest/src/gtest_main.cc
+Note: Google Test filter = HestonParamsTest.AcceptsTheBoundaryValues
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from HestonParamsTest
+[ RUN      ] HestonParamsTest.AcceptsTheBoundaryValues
+[       OK ] HestonParamsTest.AcceptsTheBoundaryValues (0 ms)
+[----------] 1 test from HestonParamsTest (0 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (0 ms total)
+[  PASSED  ] 1 test.
+<end of output>
+Test time =   0.00 sec
+----------------------------------------------------------
+Test Passed.
+"HestonParamsTest.AcceptsTheBoundaryValues" end time: Oct 13 22:42 +04
+"HestonParamsTest.AcceptsTheBoundaryValues" time elapsed: 00:00:00
+----------------------------------------------------------
+
+42/72 Testing: HestonParamsTest.RejectsEveryOutOfRangeParameterAndNamesIt
+42/72 Test: HestonParamsTest.RejectsEveryOutOfRangeParameterAndNamesIt
+Command: "/Users/elgun/Desktop/fx-derivative-models/build/release/tests/fxval_unit_tests" "--gtest_filter=HestonParamsTest.RejectsEveryOutOfRangeParameterAndNamesIt" "--gtest_also_run_disabled_tests"
+Directory: /Users/elgun/Desktop/fx-derivative-models/build/release/tests
+"HestonParamsTest.RejectsEveryOutOfRangeParameterAndNamesIt" start time: Oct 13 22:42 +04
+Output:
+----------------------------------------------------------
+Running main() from /Users/elgun/Desktop/fx-derivative-models/build/release/_deps/googletest-src/googletest/src/gtest_main.cc
+Note: Google Test filter = HestonParamsTest.RejectsEveryOutOfRangeParameterAndNamesIt
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from HestonParamsTest
+[ RUN      ] HestonParamsTest.RejectsEveryOutOfRangeParameterAndNamesIt
+[       OK ] HestonParamsTest.RejectsEveryOutOfRangeParameterAndNamesIt (0 ms)
+[----------] 1 test from HestonParamsTest (0 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (0 ms total)
+[  PASSED  ] 1 test.
+<end of output>
+Test time =   0.00 sec
+----------------------------------------------------------
+Test Passed.
+"HestonParamsTest.RejectsEveryOutOfRangeParameterAndNamesIt" end time: Oct 13 22:42 +04
+"HestonParamsTest.RejectsEveryOutOfRangeParameterAndNamesIt" time elapsed: 00:00:00
+----------------------------------------------------------
+
+43/72 Testing: HestonParamsTest.FellerCondition
+43/72 Test: HestonParamsTest.FellerCondition
+Command: "/Users/elgun/Desktop/fx-derivative-models/build/release/tests/fxval_unit_tests" "--gtest_filter=HestonParamsTest.FellerCondition" "--gtest_also_run_disabled_tests"
+Directory: /Users/elgun/Desktop/fx-derivative-models/build/release/tests
+"HestonParamsTest.FellerCondition" start time: Oct 13 22:42 +04
+Output:
+----------------------------------------------------------
+Running main() from /Users/elgun/Desktop/fx-derivative-models/build/release/_deps/googletest-src/googletest/src/gtest_main.cc
+Note: Google Test filter = HestonParamsTest.FellerCondition
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from HestonParamsTest
+[ RUN      ] HestonParamsTest.FellerCondition
+[       OK ] HestonParamsTest.FellerCondition (0 ms)
+[----------] 1 test from HestonParamsTest (0 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (0 ms total)
+[  PASSED  ] 1 test.
+<end of output>
+Test time =   0.00 sec
+----------------------------------------------------------
+Test Passed.
+"HestonParamsTest.FellerCondition" end time: Oct 13 22:42 +04
+"HestonParamsTest.FellerCondition" time elapsed: 00:00:00
+----------------------------------------------------------
+
+44/72 Testing: HestonVariance.ExpectedIntegratedVarianceLimits
+44/72 Test: HestonVariance.ExpectedIntegratedVarianceLimits
+Command: "/Users/elgun/Desktop/fx-derivative-models/build/release/tests/fxval_unit_tests" "--gtest_filter=HestonVariance.ExpectedIntegratedVarianceLimits" "--gtest_also_run_disabled_tests"
+Directory: /Users/elgun/Desktop/fx-derivative-models/build/release/tests
+"HestonVariance.ExpectedIntegratedVarianceLimits" start time: Oct 13 22:42 +04
+Output:
+----------------------------------------------------------
+Running main() from /Users/elgun/Desktop/fx-derivative-models/build/release/_deps/googletest-src/googletest/src/gtest_main.cc
+Note: Google Test filter = HestonVariance.ExpectedIntegratedVarianceLimits
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from HestonVariance
+[ RUN      ] HestonVariance.ExpectedIntegratedVarianceLimits
+[       OK ] HestonVariance.ExpectedIntegratedVarianceLimits (0 ms)
+[----------] 1 test from HestonVariance (0 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (0 ms total)
+[  PASSED  ] 1 test.
+<end of output>
+Test time =   0.00 sec
+----------------------------------------------------------
+Test Passed.
+"HestonVariance.ExpectedIntegratedVarianceLimits" end time: Oct 13 22:42 +04
+"HestonVariance.ExpectedIntegratedVarianceLimits" time elapsed: 00:00:00
+----------------------------------------------------------
+
+45/72 Testing: HestonCharacteristicFunction.EqualsOneAtZeroAndAtMinusI
+45/72 Test: HestonCharacteristicFunction.EqualsOneAtZeroAndAtMinusI
+Command: "/Users/elgun/Desktop/fx-derivative-models/build/release/tests/fxval_unit_tests" "--gtest_filter=HestonCharacteristicFunction.EqualsOneAtZeroAndAtMinusI" "--gtest_also_run_disabled_tests"
+Directory: /Users/elgun/Desktop/fx-derivative-models/build/release/tests
+"HestonCharacteristicFunction.EqualsOneAtZeroAndAtMinusI" start time: Oct 13 22:42 +04
+Output:
+----------------------------------------------------------
+Running main() from /Users/elgun/Desktop/fx-derivative-models/build/release/_deps/googletest-src/googletest/src/gtest_main.cc
+Note: Google Test filter = HestonCharacteristicFunction.EqualsOneAtZeroAndAtMinusI
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from HestonCharacteristicFunction
+[ RUN      ] HestonCharacteristicFunction.EqualsOneAtZeroAndAtMinusI
+[       OK ] HestonCharacteristicFunction.EqualsOneAtZeroAndAtMinusI (0 ms)
+[----------] 1 test from HestonCharacteristicFunction (0 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (0 ms total)
+[  PASSED  ] 1 test.
+<end of output>
+Test time =   0.00 sec
+----------------------------------------------------------
+Test Passed.
+"HestonCharacteristicFunction.EqualsOneAtZeroAndAtMinusI" end time: Oct 13 22:42 +04
+"HestonCharacteristicFunction.EqualsOneAtZeroAndAtMinusI" time elapsed: 00:00:00
+----------------------------------------------------------
+
+46/72 Testing: HestonCharacteristicFunction.IsABoundedHermitianFunctionOnTheRealLine
+46/72 Test: HestonCharacteristicFunction.IsABoundedHermitianFunctionOnTheRealLine
+Command: "/Users/elgun/Desktop/fx-derivative-models/build/release/tests/fxval_unit_tests" "--gtest_filter=HestonCharacteristicFunction.IsABoundedHermitianFunctionOnTheRealLine" "--gtest_also_run_disabled_tests"
+Directory: /Users/elgun/Desktop/fx-derivative-models/build/release/tests
+"HestonCharacteristicFunction.IsABoundedHermitianFunctionOnTheRealLine" start time: Oct 13 22:42 +04
+Output:
+----------------------------------------------------------
+Running main() from /Users/elgun/Desktop/fx-derivative-models/build/release/_deps/googletest-src/googletest/src/gtest_main.cc
+Note: Google Test filter = HestonCharacteristicFunction.IsABoundedHermitianFunctionOnTheRealLine
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from HestonCharacteristicFunction
+[ RUN      ] HestonCharacteristicFunction.IsABoundedHermitianFunctionOnTheRealLine
+[       OK ] HestonCharacteristicFunction.IsABoundedHermitianFunctionOnTheRealLine (0 ms)
+[----------] 1 test from HestonCharacteristicFunction (0 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (0 ms total)
+[  PASSED  ] 1 test.
+<end of output>
+Test time =   0.00 sec
+----------------------------------------------------------
+Test Passed.
+"HestonCharacteristicFunction.IsABoundedHermitianFunctionOnTheRealLine" end time: Oct 13 22:42 +04
+"HestonCharacteristicFunction.IsABoundedHermitianFunctionOnTheRealLine" time elapsed: 00:00:00
+----------------------------------------------------------
+
+47/72 Testing: HestonCharacteristicFunction.FirstMomentIsMinusHalfTheExpectedIntegratedVariance
+47/72 Test: HestonCharacteristicFunction.FirstMomentIsMinusHalfTheExpectedIntegratedVariance
+Command: "/Users/elgun/Desktop/fx-derivative-models/build/release/tests/fxval_unit_tests" "--gtest_filter=HestonCharacteristicFunction.FirstMomentIsMinusHalfTheExpectedIntegratedVariance" "--gtest_also_run_disabled_tests"
+Directory: /Users/elgun/Desktop/fx-derivative-models/build/release/tests
+"HestonCharacteristicFunction.FirstMomentIsMinusHalfTheExpectedIntegratedVariance" start time: Oct 13 22:42 +04
+Output:
+----------------------------------------------------------
+Running main() from /Users/elgun/Desktop/fx-derivative-models/build/release/_deps/googletest-src/googletest/src/gtest_main.cc
+Note: Google Test filter = HestonCharacteristicFunction.FirstMomentIsMinusHalfTheExpectedIntegratedVariance
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from HestonCharacteristicFunction
+[ RUN      ] HestonCharacteristicFunction.FirstMomentIsMinusHalfTheExpectedIntegratedVariance
+[       OK ] HestonCharacteristicFunction.FirstMomentIsMinusHalfTheExpectedIntegratedVariance (0 ms)
+[----------] 1 test from HestonCharacteristicFunction (0 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (0 ms total)
+[  PASSED  ] 1 test.
+<end of output>
+Test time =   0.00 sec
+----------------------------------------------------------
+Test Passed.
+"HestonCharacteristicFunction.FirstMomentIsMinusHalfTheExpectedIntegratedVariance" end time: Oct 13 22:42 +04
+"HestonCharacteristicFunction.FirstMomentIsMinusHalfTheExpectedIntegratedVariance" time elapsed: 00:00:00
+----------------------------------------------------------
+
+48/72 Testing: HestonPrice.ZeroVolOfVolIsExactlyBlackScholesWithTheExpectedTotalVariance
+48/72 Test: HestonPrice.ZeroVolOfVolIsExactlyBlackScholesWithTheExpectedTotalVariance
+Command: "/Users/elgun/Desktop/fx-derivative-models/build/release/tests/fxval_unit_tests" "--gtest_filter=HestonPrice.ZeroVolOfVolIsExactlyBlackScholesWithTheExpectedTotalVariance" "--gtest_also_run_disabled_tests"
+Directory: /Users/elgun/Desktop/fx-derivative-models/build/release/tests
+"HestonPrice.ZeroVolOfVolIsExactlyBlackScholesWithTheExpectedTotalVariance" start time: Oct 13 22:42 +04
+Output:
+----------------------------------------------------------
+Running main() from /Users/elgun/Desktop/fx-derivative-models/build/release/_deps/googletest-src/googletest/src/gtest_main.cc
+Note: Google Test filter = HestonPrice.ZeroVolOfVolIsExactlyBlackScholesWithTheExpectedTotalVariance
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from HestonPrice
+[ RUN      ] HestonPrice.ZeroVolOfVolIsExactlyBlackScholesWithTheExpectedTotalVariance
+[       OK ] HestonPrice.ZeroVolOfVolIsExactlyBlackScholesWithTheExpectedTotalVariance (0 ms)
+[----------] 1 test from HestonPrice (0 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (0 ms total)
+[  PASSED  ] 1 test.
+<end of output>
+Test time =   0.00 sec
+----------------------------------------------------------
+Test Passed.
+"HestonPrice.ZeroVolOfVolIsExactlyBlackScholesWithTheExpectedTotalVariance" end time: Oct 13 22:42 +04
+"HestonPrice.ZeroVolOfVolIsExactlyBlackScholesWithTheExpectedTotalVariance" time elapsed: 00:00:00
+----------------------------------------------------------
+
+49/72 Testing: HestonPrice.PutCallParity
+49/72 Test: HestonPrice.PutCallParity
+Command: "/Users/elgun/Desktop/fx-derivative-models/build/release/tests/fxval_unit_tests" "--gtest_filter=HestonPrice.PutCallParity" "--gtest_also_run_disabled_tests"
+Directory: /Users/elgun/Desktop/fx-derivative-models/build/release/tests
+"HestonPrice.PutCallParity" start time: Oct 13 22:42 +04
+Output:
+----------------------------------------------------------
+Running main() from /Users/elgun/Desktop/fx-derivative-models/build/release/_deps/googletest-src/googletest/src/gtest_main.cc
+Note: Google Test filter = HestonPrice.PutCallParity
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from HestonPrice
+[ RUN      ] HestonPrice.PutCallParity
+[       OK ] HestonPrice.PutCallParity (0 ms)
+[----------] 1 test from HestonPrice (0 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (0 ms total)
+[  PASSED  ] 1 test.
+<end of output>
+Test time =   0.00 sec
+----------------------------------------------------------
+Test Passed.
+"HestonPrice.PutCallParity" end time: Oct 13 22:42 +04
+"HestonPrice.PutCallParity" time elapsed: 00:00:00
+----------------------------------------------------------
+
+50/72 Testing: HestonPrice.ZeroExpiryIsIntrinsicValue
+50/72 Test: HestonPrice.ZeroExpiryIsIntrinsicValue
+Command: "/Users/elgun/Desktop/fx-derivative-models/build/release/tests/fxval_unit_tests" "--gtest_filter=HestonPrice.ZeroExpiryIsIntrinsicValue" "--gtest_also_run_disabled_tests"
+Directory: /Users/elgun/Desktop/fx-derivative-models/build/release/tests
+"HestonPrice.ZeroExpiryIsIntrinsicValue" start time: Oct 13 22:42 +04
+Output:
+----------------------------------------------------------
+Running main() from /Users/elgun/Desktop/fx-derivative-models/build/release/_deps/googletest-src/googletest/src/gtest_main.cc
+Note: Google Test filter = HestonPrice.ZeroExpiryIsIntrinsicValue
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from HestonPrice
+[ RUN      ] HestonPrice.ZeroExpiryIsIntrinsicValue
+[       OK ] HestonPrice.ZeroExpiryIsIntrinsicValue (0 ms)
+[----------] 1 test from HestonPrice (0 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (0 ms total)
+[  PASSED  ] 1 test.
+<end of output>
+Test time =   0.00 sec
+----------------------------------------------------------
+Test Passed.
+"HestonPrice.ZeroExpiryIsIntrinsicValue" end time: Oct 13 22:42 +04
+"HestonPrice.ZeroExpiryIsIntrinsicValue" time elapsed: 00:00:00
+----------------------------------------------------------
+
+51/72 Testing: HestonPrice.PricesStayInsideTheNoArbitrageBounds
+51/72 Test: HestonPrice.PricesStayInsideTheNoArbitrageBounds
+Command: "/Users/elgun/Desktop/fx-derivative-models/build/release/tests/fxval_unit_tests" "--gtest_filter=HestonPrice.PricesStayInsideTheNoArbitrageBounds" "--gtest_also_run_disabled_tests"
+Directory: /Users/elgun/Desktop/fx-derivative-models/build/release/tests
+"HestonPrice.PricesStayInsideTheNoArbitrageBounds" start time: Oct 13 22:42 +04
+Output:
+----------------------------------------------------------
+Running main() from /Users/elgun/Desktop/fx-derivative-models/build/release/_deps/googletest-src/googletest/src/gtest_main.cc
+Note: Google Test filter = HestonPrice.PricesStayInsideTheNoArbitrageBounds
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from HestonPrice
+[ RUN      ] HestonPrice.PricesStayInsideTheNoArbitrageBounds
+[       OK ] HestonPrice.PricesStayInsideTheNoArbitrageBounds (0 ms)
+[----------] 1 test from HestonPrice (0 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (0 ms total)
+[  PASSED  ] 1 test.
+<end of output>
+Test time =   0.00 sec
+----------------------------------------------------------
+Test Passed.
+"HestonPrice.PricesStayInsideTheNoArbitrageBounds" end time: Oct 13 22:42 +04
+"HestonPrice.PricesStayInsideTheNoArbitrageBounds" time elapsed: 00:00:00
+----------------------------------------------------------
+
+52/72 Testing: HestonPrice.CallIsDecreasingAndConvexInTheStrike
+52/72 Test: HestonPrice.CallIsDecreasingAndConvexInTheStrike
+Command: "/Users/elgun/Desktop/fx-derivative-models/build/release/tests/fxval_unit_tests" "--gtest_filter=HestonPrice.CallIsDecreasingAndConvexInTheStrike" "--gtest_also_run_disabled_tests"
+Directory: /Users/elgun/Desktop/fx-derivative-models/build/release/tests
+"HestonPrice.CallIsDecreasingAndConvexInTheStrike" start time: Oct 13 22:42 +04
+Output:
+----------------------------------------------------------
+Running main() from /Users/elgun/Desktop/fx-derivative-models/build/release/_deps/googletest-src/googletest/src/gtest_main.cc
+Note: Google Test filter = HestonPrice.CallIsDecreasingAndConvexInTheStrike
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from HestonPrice
+[ RUN      ] HestonPrice.CallIsDecreasingAndConvexInTheStrike
+[       OK ] HestonPrice.CallIsDecreasingAndConvexInTheStrike (0 ms)
+[----------] 1 test from HestonPrice (0 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (0 ms total)
+[  PASSED  ] 1 test.
+<end of output>
+Test time =   0.00 sec
+----------------------------------------------------------
+Test Passed.
+"HestonPrice.CallIsDecreasingAndConvexInTheStrike" end time: Oct 13 22:42 +04
+"HestonPrice.CallIsDecreasingAndConvexInTheStrike" time elapsed: 00:00:00
+----------------------------------------------------------
+
+53/72 Testing: HestonPrice.TheSmileHasTheSignOfRho
+53/72 Test: HestonPrice.TheSmileHasTheSignOfRho
+Command: "/Users/elgun/Desktop/fx-derivative-models/build/release/tests/fxval_unit_tests" "--gtest_filter=HestonPrice.TheSmileHasTheSignOfRho" "--gtest_also_run_disabled_tests"
+Directory: /Users/elgun/Desktop/fx-derivative-models/build/release/tests
+"HestonPrice.TheSmileHasTheSignOfRho" start time: Oct 13 22:42 +04
+Output:
+----------------------------------------------------------
+Running main() from /Users/elgun/Desktop/fx-derivative-models/build/release/_deps/googletest-src/googletest/src/gtest_main.cc
+Note: Google Test filter = HestonPrice.TheSmileHasTheSignOfRho
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from HestonPrice
+[ RUN      ] HestonPrice.TheSmileHasTheSignOfRho
+[       OK ] HestonPrice.TheSmileHasTheSignOfRho (0 ms)
+[----------] 1 test from HestonPrice (0 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (0 ms total)
+[  PASSED  ] 1 test.
+<end of output>
+Test time =   0.00 sec
+----------------------------------------------------------
+Test Passed.
+"HestonPrice.TheSmileHasTheSignOfRho" end time: Oct 13 22:42 +04
+"HestonPrice.TheSmileHasTheSignOfRho" time elapsed: 00:00:00
+----------------------------------------------------------
+
+54/72 Testing: HestonPrice.ReportsAnOverflowingForward
+54/72 Test: HestonPrice.ReportsAnOverflowingForward
+Command: "/Users/elgun/Desktop/fx-derivative-models/build/release/tests/fxval_unit_tests" "--gtest_filter=HestonPrice.ReportsAnOverflowingForward" "--gtest_also_run_disabled_tests"
+Directory: /Users/elgun/Desktop/fx-derivative-models/build/release/tests
+"HestonPrice.ReportsAnOverflowingForward" start time: Oct 13 22:42 +04
+Output:
+----------------------------------------------------------
+Running main() from /Users/elgun/Desktop/fx-derivative-models/build/release/_deps/googletest-src/googletest/src/gtest_main.cc
+Note: Google Test filter = HestonPrice.ReportsAnOverflowingForward
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from HestonPrice
+[ RUN      ] HestonPrice.ReportsAnOverflowingForward
+[       OK ] HestonPrice.ReportsAnOverflowingForward (0 ms)
+[----------] 1 test from HestonPrice (0 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (0 ms total)
+[  PASSED  ] 1 test.
+<end of output>
+Test time =   0.00 sec
+----------------------------------------------------------
+Test Passed.
+"HestonPrice.ReportsAnOverflowingForward" end time: Oct 13 22:42 +04
+"HestonPrice.ReportsAnOverflowingForward" time elapsed: 00:00:00
+----------------------------------------------------------
+
+55/72 Testing: HestonPrice.ExtremeButValidInputsGiveFinitePrices
+55/72 Test: HestonPrice.ExtremeButValidInputsGiveFinitePrices
+Command: "/Users/elgun/Desktop/fx-derivative-models/build/release/tests/fxval_unit_tests" "--gtest_filter=HestonPrice.ExtremeButValidInputsGiveFinitePrices" "--gtest_also_run_disabled_tests"
+Directory: /Users/elgun/Desktop/fx-derivative-models/build/release/tests
+"HestonPrice.ExtremeButValidInputsGiveFinitePrices" start time: Oct 13 22:42 +04
+Output:
+----------------------------------------------------------
+Running main() from /Users/elgun/Desktop/fx-derivative-models/build/release/_deps/googletest-src/googletest/src/gtest_main.cc
+Note: Google Test filter = HestonPrice.ExtremeButValidInputsGiveFinitePrices
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from HestonPrice
+[ RUN      ] HestonPrice.ExtremeButValidInputsGiveFinitePrices
+[       OK ] HestonPrice.ExtremeButValidInputsGiveFinitePrices (2 ms)
+[----------] 1 test from HestonPrice (2 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (2 ms total)
+[  PASSED  ] 1 test.
+<end of output>
+Test time =   0.01 sec
+----------------------------------------------------------
+Test Passed.
+"HestonPrice.ExtremeButValidInputsGiveFinitePrices" end time: Oct 13 22:42 +04
+"HestonPrice.ExtremeButValidInputsGiveFinitePrices" time elapsed: 00:00:00
+----------------------------------------------------------
+
+56/72 Testing: HestonPrice.IsMonotoneInSpotAcrossTheMoney
+56/72 Test: HestonPrice.IsMonotoneInSpotAcrossTheMoney
+Command: "/Users/elgun/Desktop/fx-derivative-models/build/release/tests/fxval_unit_tests" "--gtest_filter=HestonPrice.IsMonotoneInSpotAcrossTheMoney" "--gtest_also_run_disabled_tests"
+Directory: /Users/elgun/Desktop/fx-derivative-models/build/release/tests
+"HestonPrice.IsMonotoneInSpotAcrossTheMoney" start time: Oct 13 22:42 +04
+Output:
+----------------------------------------------------------
+Running main() from /Users/elgun/Desktop/fx-derivative-models/build/release/_deps/googletest-src/googletest/src/gtest_main.cc
+Note: Google Test filter = HestonPrice.IsMonotoneInSpotAcrossTheMoney
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from HestonPrice
+[ RUN      ] HestonPrice.IsMonotoneInSpotAcrossTheMoney
+[       OK ] HestonPrice.IsMonotoneInSpotAcrossTheMoney (0 ms)
+[----------] 1 test from HestonPrice (0 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (0 ms total)
+[  PASSED  ] 1 test.
+<end of output>
+Test time =   0.00 sec
+----------------------------------------------------------
+Test Passed.
+"HestonPrice.IsMonotoneInSpotAcrossTheMoney" end time: Oct 13 22:42 +04
+"HestonPrice.IsMonotoneInSpotAcrossTheMoney" time elapsed: 00:00:00
+----------------------------------------------------------
+
+57/72 Testing: Quadrature.NodesAndWeightsIntegratePolynomialsExactly
+57/72 Test: Quadrature.NodesAndWeightsIntegratePolynomialsExactly
+Command: "/Users/elgun/Desktop/fx-derivative-models/build/release/tests/fxval_unit_tests" "--gtest_filter=Quadrature.NodesAndWeightsIntegratePolynomialsExactly" "--gtest_also_run_disabled_tests"
+Directory: /Users/elgun/Desktop/fx-derivative-models/build/release/tests
+"Quadrature.NodesAndWeightsIntegratePolynomialsExactly" start time: Oct 13 22:42 +04
+Output:
+----------------------------------------------------------
+Running main() from /Users/elgun/Desktop/fx-derivative-models/build/release/_deps/googletest-src/googletest/src/gtest_main.cc
+Note: Google Test filter = Quadrature.NodesAndWeightsIntegratePolynomialsExactly
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from Quadrature
+[ RUN      ] Quadrature.NodesAndWeightsIntegratePolynomialsExactly
+[       OK ] Quadrature.NodesAndWeightsIntegratePolynomialsExactly (0 ms)
+[----------] 1 test from Quadrature (0 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (0 ms total)
+[  PASSED  ] 1 test.
+<end of output>
+Test time =   0.00 sec
+----------------------------------------------------------
+Test Passed.
+"Quadrature.NodesAndWeightsIntegratePolynomialsExactly" end time: Oct 13 22:42 +04
+"Quadrature.NodesAndWeightsIntegratePolynomialsExactly" time elapsed: 00:00:00
+----------------------------------------------------------
+
+58/72 Testing: Quadrature.SmoothIntegralsWithKnownValues
+58/72 Test: Quadrature.SmoothIntegralsWithKnownValues
+Command: "/Users/elgun/Desktop/fx-derivative-models/build/release/tests/fxval_unit_tests" "--gtest_filter=Quadrature.SmoothIntegralsWithKnownValues" "--gtest_also_run_disabled_tests"
+Directory: /Users/elgun/Desktop/fx-derivative-models/build/release/tests
+"Quadrature.SmoothIntegralsWithKnownValues" start time: Oct 13 22:42 +04
+Output:
+----------------------------------------------------------
+Running main() from /Users/elgun/Desktop/fx-derivative-models/build/release/_deps/googletest-src/googletest/src/gtest_main.cc
+Note: Google Test filter = Quadrature.SmoothIntegralsWithKnownValues
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from Quadrature
+[ RUN      ] Quadrature.SmoothIntegralsWithKnownValues
+[       OK ] Quadrature.SmoothIntegralsWithKnownValues (0 ms)
+[----------] 1 test from Quadrature (0 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (0 ms total)
+[  PASSED  ] 1 test.
+<end of output>
+Test time =   0.00 sec
+----------------------------------------------------------
+Test Passed.
+"Quadrature.SmoothIntegralsWithKnownValues" end time: Oct 13 22:42 +04
+"Quadrature.SmoothIntegralsWithKnownValues" time elapsed: 00:00:00
+----------------------------------------------------------
+
+59/72 Testing: Quadrature.RefinesWhereTheIntegrandIsDifficult
+59/72 Test: Quadrature.RefinesWhereTheIntegrandIsDifficult
+Command: "/Users/elgun/Desktop/fx-derivative-models/build/release/tests/fxval_unit_tests" "--gtest_filter=Quadrature.RefinesWhereTheIntegrandIsDifficult" "--gtest_also_run_disabled_tests"
+Directory: /Users/elgun/Desktop/fx-derivative-models/build/release/tests
+"Quadrature.RefinesWhereTheIntegrandIsDifficult" start time: Oct 13 22:42 +04
+Output:
+----------------------------------------------------------
+Running main() from /Users/elgun/Desktop/fx-derivative-models/build/release/_deps/googletest-src/googletest/src/gtest_main.cc
+Note: Google Test filter = Quadrature.RefinesWhereTheIntegrandIsDifficult
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from Quadrature
+[ RUN      ] Quadrature.RefinesWhereTheIntegrandIsDifficult
+[       OK ] Quadrature.RefinesWhereTheIntegrandIsDifficult (0 ms)
+[----------] 1 test from Quadrature (0 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (0 ms total)
+[  PASSED  ] 1 test.
+<end of output>
+Test time =   0.00 sec
+----------------------------------------------------------
+Test Passed.
+"Quadrature.RefinesWhereTheIntegrandIsDifficult" end time: Oct 13 22:42 +04
+"Quadrature.RefinesWhereTheIntegrandIsDifficult" time elapsed: 00:00:00
+----------------------------------------------------------
+
+60/72 Testing: Quadrature.IntegralOverAReversedIntervalHasTheOppositeSign
+60/72 Test: Quadrature.IntegralOverAReversedIntervalHasTheOppositeSign
+Command: "/Users/elgun/Desktop/fx-derivative-models/build/release/tests/fxval_unit_tests" "--gtest_filter=Quadrature.IntegralOverAReversedIntervalHasTheOppositeSign" "--gtest_also_run_disabled_tests"
+Directory: /Users/elgun/Desktop/fx-derivative-models/build/release/tests
+"Quadrature.IntegralOverAReversedIntervalHasTheOppositeSign" start time: Oct 13 22:42 +04
+Output:
+----------------------------------------------------------
+Running main() from /Users/elgun/Desktop/fx-derivative-models/build/release/_deps/googletest-src/googletest/src/gtest_main.cc
+Note: Google Test filter = Quadrature.IntegralOverAReversedIntervalHasTheOppositeSign
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from Quadrature
+[ RUN      ] Quadrature.IntegralOverAReversedIntervalHasTheOppositeSign
+[       OK ] Quadrature.IntegralOverAReversedIntervalHasTheOppositeSign (0 ms)
+[----------] 1 test from Quadrature (0 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (0 ms total)
+[  PASSED  ] 1 test.
+<end of output>
+Test time =   0.00 sec
+----------------------------------------------------------
+Test Passed.
+"Quadrature.IntegralOverAReversedIntervalHasTheOppositeSign" end time: Oct 13 22:42 +04
+"Quadrature.IntegralOverAReversedIntervalHasTheOppositeSign" time elapsed: 00:00:00
+----------------------------------------------------------
+
+61/72 Testing: Quadrature.ReportsNonConvergenceInsteadOfAnUnreliableValue
+61/72 Test: Quadrature.ReportsNonConvergenceInsteadOfAnUnreliableValue
+Command: "/Users/elgun/Desktop/fx-derivative-models/build/release/tests/fxval_unit_tests" "--gtest_filter=Quadrature.ReportsNonConvergenceInsteadOfAnUnreliableValue" "--gtest_also_run_disabled_tests"
+Directory: /Users/elgun/Desktop/fx-derivative-models/build/release/tests
+"Quadrature.ReportsNonConvergenceInsteadOfAnUnreliableValue" start time: Oct 13 22:42 +04
+Output:
+----------------------------------------------------------
+Running main() from /Users/elgun/Desktop/fx-derivative-models/build/release/_deps/googletest-src/googletest/src/gtest_main.cc
+Note: Google Test filter = Quadrature.ReportsNonConvergenceInsteadOfAnUnreliableValue
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from Quadrature
+[ RUN      ] Quadrature.ReportsNonConvergenceInsteadOfAnUnreliableValue
+[       OK ] Quadrature.ReportsNonConvergenceInsteadOfAnUnreliableValue (0 ms)
+[----------] 1 test from Quadrature (0 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (0 ms total)
+[  PASSED  ] 1 test.
+<end of output>
+Test time =   0.00 sec
+----------------------------------------------------------
+Test Passed.
+"Quadrature.ReportsNonConvergenceInsteadOfAnUnreliableValue" end time: Oct 13 22:42 +04
+"Quadrature.ReportsNonConvergenceInsteadOfAnUnreliableValue" time elapsed: 00:00:00
+----------------------------------------------------------
+
+62/72 Testing: Quadrature.ATolerancePastTheRoundingLevelIsRelaxedNotImpossible
+62/72 Test: Quadrature.ATolerancePastTheRoundingLevelIsRelaxedNotImpossible
+Command: "/Users/elgun/Desktop/fx-derivative-models/build/release/tests/fxval_unit_tests" "--gtest_filter=Quadrature.ATolerancePastTheRoundingLevelIsRelaxedNotImpossible" "--gtest_also_run_disabled_tests"
+Directory: /Users/elgun/Desktop/fx-derivative-models/build/release/tests
+"Quadrature.ATolerancePastTheRoundingLevelIsRelaxedNotImpossible" start time: Oct 13 22:42 +04
+Output:
+----------------------------------------------------------
+Running main() from /Users/elgun/Desktop/fx-derivative-models/build/release/_deps/googletest-src/googletest/src/gtest_main.cc
+Note: Google Test filter = Quadrature.ATolerancePastTheRoundingLevelIsRelaxedNotImpossible
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from Quadrature
+[ RUN      ] Quadrature.ATolerancePastTheRoundingLevelIsRelaxedNotImpossible
+[       OK ] Quadrature.ATolerancePastTheRoundingLevelIsRelaxedNotImpossible (0 ms)
+[----------] 1 test from Quadrature (0 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (0 ms total)
+[  PASSED  ] 1 test.
+<end of output>
+Test time =   0.00 sec
+----------------------------------------------------------
+Test Passed.
+"Quadrature.ATolerancePastTheRoundingLevelIsRelaxedNotImpossible" end time: Oct 13 22:42 +04
+"Quadrature.ATolerancePastTheRoundingLevelIsRelaxedNotImpossible" time elapsed: 00:00:00
+----------------------------------------------------------
+
+63/72 Testing: TestCatalogue.ListsEveryPlannedValidationTestExactlyOnce
+63/72 Test: TestCatalogue.ListsEveryPlannedValidationTestExactlyOnce
+Command: "/Users/elgun/Desktop/fx-derivative-models/build/release/tests/fxval_validation_tests" "--gtest_filter=TestCatalogue.ListsEveryPlannedValidationTestExactlyOnce" "--gtest_also_run_disabled_tests"
+Directory: /Users/elgun/Desktop/fx-derivative-models/build/release/tests
+"TestCatalogue.ListsEveryPlannedValidationTestExactlyOnce" start time: Oct 13 22:42 +04
+Output:
+----------------------------------------------------------
+Running main() from /Users/elgun/Desktop/fx-derivative-models/build/release/_deps/googletest-src/googletest/src/gtest_main.cc
+Note: Google Test filter = TestCatalogue.ListsEveryPlannedValidationTestExactlyOnce
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from TestCatalogue
+[ RUN      ] TestCatalogue.ListsEveryPlannedValidationTestExactlyOnce
+[       OK ] TestCatalogue.ListsEveryPlannedValidationTestExactlyOnce (0 ms)
+[----------] 1 test from TestCatalogue (0 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (0 ms total)
+[  PASSED  ] 1 test.
+<end of output>
+Test time =   0.02 sec
+----------------------------------------------------------
+Test Passed.
+"TestCatalogue.ListsEveryPlannedValidationTestExactlyOnce" end time: Oct 13 22:42 +04
+"TestCatalogue.ListsEveryPlannedValidationTestExactlyOnce" time elapsed: 00:00:00
+----------------------------------------------------------
+
+64/72 Testing: V01_PutCallParity.HoldsOnAGridOfMarkets
+64/72 Test: V01_PutCallParity.HoldsOnAGridOfMarkets
+Command: "/Users/elgun/Desktop/fx-derivative-models/build/release/tests/fxval_validation_tests" "--gtest_filter=V01_PutCallParity.HoldsOnAGridOfMarkets" "--gtest_also_run_disabled_tests"
+Directory: /Users/elgun/Desktop/fx-derivative-models/build/release/tests
+"V01_PutCallParity.HoldsOnAGridOfMarkets" start time: Oct 13 22:42 +04
+Output:
+----------------------------------------------------------
+Running main() from /Users/elgun/Desktop/fx-derivative-models/build/release/_deps/googletest-src/googletest/src/gtest_main.cc
+Note: Google Test filter = V01_PutCallParity.HoldsOnAGridOfMarkets
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from V01_PutCallParity
+[ RUN      ] V01_PutCallParity.HoldsOnAGridOfMarkets
+[       OK ] V01_PutCallParity.HoldsOnAGridOfMarkets (0 ms)
+[----------] 1 test from V01_PutCallParity (0 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (0 ms total)
+[  PASSED  ] 1 test.
+<end of output>
+Test time =   0.00 sec
+----------------------------------------------------------
+Test Passed.
+"V01_PutCallParity.HoldsOnAGridOfMarkets" end time: Oct 13 22:42 +04
+"V01_PutCallParity.HoldsOnAGridOfMarkets" time elapsed: 00:00:00
+----------------------------------------------------------
+
+65/72 Testing: V02_GreeksVsFiniteDifferences.AllGreeksAgreeWithDifferencesOfThePrice
+65/72 Test: V02_GreeksVsFiniteDifferences.AllGreeksAgreeWithDifferencesOfThePrice
+Command: "/Users/elgun/Desktop/fx-derivative-models/build/release/tests/fxval_validation_tests" "--gtest_filter=V02_GreeksVsFiniteDifferences.AllGreeksAgreeWithDifferencesOfThePrice" "--gtest_also_run_disabled_tests"
+Directory: /Users/elgun/Desktop/fx-derivative-models/build/release/tests
+"V02_GreeksVsFiniteDifferences.AllGreeksAgreeWithDifferencesOfThePrice" start time: Oct 13 22:42 +04
+Output:
+----------------------------------------------------------
+Running main() from /Users/elgun/Desktop/fx-derivative-models/build/release/_deps/googletest-src/googletest/src/gtest_main.cc
+Note: Google Test filter = V02_GreeksVsFiniteDifferences.AllGreeksAgreeWithDifferencesOfThePrice
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from V02_GreeksVsFiniteDifferences
+[ RUN      ] V02_GreeksVsFiniteDifferences.AllGreeksAgreeWithDifferencesOfThePrice
+[       OK ] V02_GreeksVsFiniteDifferences.AllGreeksAgreeWithDifferencesOfThePrice (0 ms)
+[----------] 1 test from V02_GreeksVsFiniteDifferences (0 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (0 ms total)
+[  PASSED  ] 1 test.
+<end of output>
+Test time =   0.00 sec
+----------------------------------------------------------
+Test Passed.
+"V02_GreeksVsFiniteDifferences.AllGreeksAgreeWithDifferencesOfThePrice" end time: Oct 13 22:42 +04
+"V02_GreeksVsFiniteDifferences.AllGreeksAgreeWithDifferencesOfThePrice" time elapsed: 00:00:00
+----------------------------------------------------------
+
+66/72 Testing: REF_IndependentPythonImplementation.PricesAndGreeksMatch
+66/72 Test: REF_IndependentPythonImplementation.PricesAndGreeksMatch
+Command: "/Users/elgun/Desktop/fx-derivative-models/build/release/tests/fxval_validation_tests" "--gtest_filter=REF_IndependentPythonImplementation.PricesAndGreeksMatch" "--gtest_also_run_disabled_tests"
+Directory: /Users/elgun/Desktop/fx-derivative-models/build/release/tests
+"REF_IndependentPythonImplementation.PricesAndGreeksMatch" start time: Oct 13 22:42 +04
+Output:
+----------------------------------------------------------
+Running main() from /Users/elgun/Desktop/fx-derivative-models/build/release/_deps/googletest-src/googletest/src/gtest_main.cc
+Note: Google Test filter = REF_IndependentPythonImplementation.PricesAndGreeksMatch
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from REF_IndependentPythonImplementation
+[ RUN      ] REF_IndependentPythonImplementation.PricesAndGreeksMatch
+[       OK ] REF_IndependentPythonImplementation.PricesAndGreeksMatch (1 ms)
+[----------] 1 test from REF_IndependentPythonImplementation (1 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (1 ms total)
+[  PASSED  ] 1 test.
+<end of output>
+Test time =   0.00 sec
+----------------------------------------------------------
+Test Passed.
+"REF_IndependentPythonImplementation.PricesAndGreeksMatch" end time: Oct 13 22:42 +04
+"REF_IndependentPythonImplementation.PricesAndGreeksMatch" time elapsed: 00:00:00
+----------------------------------------------------------
+
+67/72 Testing: V03_HestonVsGarmanKohlhagen.ExactAtZeroVolOfVariance
+67/72 Test: V03_HestonVsGarmanKohlhagen.ExactAtZeroVolOfVariance
+Command: "/Users/elgun/Desktop/fx-derivative-models/build/release/tests/fxval_validation_tests" "--gtest_filter=V03_HestonVsGarmanKohlhagen.ExactAtZeroVolOfVariance" "--gtest_also_run_disabled_tests"
+Directory: /Users/elgun/Desktop/fx-derivative-models/build/release/tests
+"V03_HestonVsGarmanKohlhagen.ExactAtZeroVolOfVariance" start time: Oct 13 22:42 +04
+Output:
+----------------------------------------------------------
+Running main() from /Users/elgun/Desktop/fx-derivative-models/build/release/_deps/googletest-src/googletest/src/gtest_main.cc
+Note: Google Test filter = V03_HestonVsGarmanKohlhagen.ExactAtZeroVolOfVariance
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from V03_HestonVsGarmanKohlhagen
+[ RUN      ] V03_HestonVsGarmanKohlhagen.ExactAtZeroVolOfVariance
+[       OK ] V03_HestonVsGarmanKohlhagen.ExactAtZeroVolOfVariance (1 ms)
+[----------] 1 test from V03_HestonVsGarmanKohlhagen (1 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (1 ms total)
+[  PASSED  ] 1 test.
+<end of output>
+Test time =   0.00 sec
+----------------------------------------------------------
+Test Passed.
+"V03_HestonVsGarmanKohlhagen.ExactAtZeroVolOfVariance" end time: Oct 13 22:42 +04
+"V03_HestonVsGarmanKohlhagen.ExactAtZeroVolOfVariance" time elapsed: 00:00:00
+----------------------------------------------------------
+
+68/72 Testing: V03_HestonVsGarmanKohlhagen.ConvergesToGarmanKohlhagenAtTheTheoreticalOrder
+68/72 Test: V03_HestonVsGarmanKohlhagen.ConvergesToGarmanKohlhagenAtTheTheoreticalOrder
+Command: "/Users/elgun/Desktop/fx-derivative-models/build/release/tests/fxval_validation_tests" "--gtest_filter=V03_HestonVsGarmanKohlhagen.ConvergesToGarmanKohlhagenAtTheTheoreticalOrder" "--gtest_also_run_disabled_tests"
+Directory: /Users/elgun/Desktop/fx-derivative-models/build/release/tests
+"V03_HestonVsGarmanKohlhagen.ConvergesToGarmanKohlhagenAtTheTheoreticalOrder" start time: Oct 13 22:42 +04
+Output:
+----------------------------------------------------------
+Running main() from /Users/elgun/Desktop/fx-derivative-models/build/release/_deps/googletest-src/googletest/src/gtest_main.cc
+Note: Google Test filter = V03_HestonVsGarmanKohlhagen.ConvergesToGarmanKohlhagenAtTheTheoreticalOrder
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from V03_HestonVsGarmanKohlhagen
+[ RUN      ] V03_HestonVsGarmanKohlhagen.ConvergesToGarmanKohlhagenAtTheTheoreticalOrder
+[       OK ] V03_HestonVsGarmanKohlhagen.ConvergesToGarmanKohlhagenAtTheTheoreticalOrder (2 ms)
+[----------] 1 test from V03_HestonVsGarmanKohlhagen (2 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (2 ms total)
+[  PASSED  ] 1 test.
+<end of output>
+Test time =   0.01 sec
+----------------------------------------------------------
+Test Passed.
+"V03_HestonVsGarmanKohlhagen.ConvergesToGarmanKohlhagenAtTheTheoreticalOrder" end time: Oct 13 22:42 +04
+"V03_HestonVsGarmanKohlhagen.ConvergesToGarmanKohlhagenAtTheTheoreticalOrder" time elapsed: 00:00:00
+----------------------------------------------------------
+
+69/72 Testing: V04_HestonRobustness.CharacteristicFunctionHasNoBranchJumpsInMaturity
+69/72 Test: V04_HestonRobustness.CharacteristicFunctionHasNoBranchJumpsInMaturity
+Command: "/Users/elgun/Desktop/fx-derivative-models/build/release/tests/fxval_validation_tests" "--gtest_filter=V04_HestonRobustness.CharacteristicFunctionHasNoBranchJumpsInMaturity" "--gtest_also_run_disabled_tests"
+Directory: /Users/elgun/Desktop/fx-derivative-models/build/release/tests
+"V04_HestonRobustness.CharacteristicFunctionHasNoBranchJumpsInMaturity" start time: Oct 13 22:42 +04
+Output:
+----------------------------------------------------------
+Running main() from /Users/elgun/Desktop/fx-derivative-models/build/release/_deps/googletest-src/googletest/src/gtest_main.cc
+Note: Google Test filter = V04_HestonRobustness.CharacteristicFunctionHasNoBranchJumpsInMaturity
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from V04_HestonRobustness
+[ RUN      ] V04_HestonRobustness.CharacteristicFunctionHasNoBranchJumpsInMaturity
+[       OK ] V04_HestonRobustness.CharacteristicFunctionHasNoBranchJumpsInMaturity (77 ms)
+[----------] 1 test from V04_HestonRobustness (77 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (77 ms total)
+[  PASSED  ] 1 test.
+<end of output>
+Test time =   0.08 sec
+----------------------------------------------------------
+Test Passed.
+"V04_HestonRobustness.CharacteristicFunctionHasNoBranchJumpsInMaturity" end time: Oct 13 22:42 +04
+"V04_HestonRobustness.CharacteristicFunctionHasNoBranchJumpsInMaturity" time elapsed: 00:00:00
+----------------------------------------------------------
+
+70/72 Testing: V04_HestonRobustness.TheOriginalFormulationDoesJumpSoTheCheckCanFail
+70/72 Test: V04_HestonRobustness.TheOriginalFormulationDoesJumpSoTheCheckCanFail
+Command: "/Users/elgun/Desktop/fx-derivative-models/build/release/tests/fxval_validation_tests" "--gtest_filter=V04_HestonRobustness.TheOriginalFormulationDoesJumpSoTheCheckCanFail" "--gtest_also_run_disabled_tests"
+Directory: /Users/elgun/Desktop/fx-derivative-models/build/release/tests
+"V04_HestonRobustness.TheOriginalFormulationDoesJumpSoTheCheckCanFail" start time: Oct 13 22:42 +04
+Output:
+----------------------------------------------------------
+Running main() from /Users/elgun/Desktop/fx-derivative-models/build/release/_deps/googletest-src/googletest/src/gtest_main.cc
+Note: Google Test filter = V04_HestonRobustness.TheOriginalFormulationDoesJumpSoTheCheckCanFail
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from V04_HestonRobustness
+[ RUN      ] V04_HestonRobustness.TheOriginalFormulationDoesJumpSoTheCheckCanFail
+[       OK ] V04_HestonRobustness.TheOriginalFormulationDoesJumpSoTheCheckCanFail (1 ms)
+[----------] 1 test from V04_HestonRobustness (1 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (1 ms total)
+[  PASSED  ] 1 test.
+<end of output>
+Test time =   0.00 sec
+----------------------------------------------------------
+Test Passed.
+"V04_HestonRobustness.TheOriginalFormulationDoesJumpSoTheCheckCanFail" end time: Oct 13 22:42 +04
+"V04_HestonRobustness.TheOriginalFormulationDoesJumpSoTheCheckCanFail" time elapsed: 00:00:00
+----------------------------------------------------------
+
+71/72 Testing: V04_HestonRobustness.PricesAreFiniteBoundedMonotoneAndConvexOnAnExtremeGrid
+71/72 Test: V04_HestonRobustness.PricesAreFiniteBoundedMonotoneAndConvexOnAnExtremeGrid
+Command: "/Users/elgun/Desktop/fx-derivative-models/build/release/tests/fxval_validation_tests" "--gtest_filter=V04_HestonRobustness.PricesAreFiniteBoundedMonotoneAndConvexOnAnExtremeGrid" "--gtest_also_run_disabled_tests"
+Directory: /Users/elgun/Desktop/fx-derivative-models/build/release/tests
+"V04_HestonRobustness.PricesAreFiniteBoundedMonotoneAndConvexOnAnExtremeGrid" start time: Oct 13 22:42 +04
+Output:
+----------------------------------------------------------
+Running main() from /Users/elgun/Desktop/fx-derivative-models/build/release/_deps/googletest-src/googletest/src/gtest_main.cc
+Note: Google Test filter = V04_HestonRobustness.PricesAreFiniteBoundedMonotoneAndConvexOnAnExtremeGrid
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from V04_HestonRobustness
+[ RUN      ] V04_HestonRobustness.PricesAreFiniteBoundedMonotoneAndConvexOnAnExtremeGrid
+[       OK ] V04_HestonRobustness.PricesAreFiniteBoundedMonotoneAndConvexOnAnExtremeGrid (1475 ms)
+[----------] 1 test from V04_HestonRobustness (1475 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (1475 ms total)
+[  PASSED  ] 1 test.
+<end of output>
+Test time =   1.48 sec
+----------------------------------------------------------
+Test Passed.
+"V04_HestonRobustness.PricesAreFiniteBoundedMonotoneAndConvexOnAnExtremeGrid" end time: Oct 13 22:42 +04
+"V04_HestonRobustness.PricesAreFiniteBoundedMonotoneAndConvexOnAnExtremeGrid" time elapsed: 00:00:01
+----------------------------------------------------------
+
+72/72 Testing: HESTON_REF_IndependentPythonImplementation.CallAndPutMatch
+72/72 Test: HESTON_REF_IndependentPythonImplementation.CallAndPutMatch
+Command: "/Users/elgun/Desktop/fx-derivative-models/build/release/tests/fxval_validation_tests" "--gtest_filter=HESTON_REF_IndependentPythonImplementation.CallAndPutMatch" "--gtest_also_run_disabled_tests"
+Directory: /Users/elgun/Desktop/fx-derivative-models/build/release/tests
+"HESTON_REF_IndependentPythonImplementation.CallAndPutMatch" start time: Oct 13 22:42 +04
+Output:
+----------------------------------------------------------
+Running main() from /Users/elgun/Desktop/fx-derivative-models/build/release/_deps/googletest-src/googletest/src/gtest_main.cc
+Note: Google Test filter = HESTON_REF_IndependentPythonImplementation.CallAndPutMatch
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from HESTON_REF_IndependentPythonImplementation
+[ RUN      ] HESTON_REF_IndependentPythonImplementation.CallAndPutMatch
+[       OK ] HESTON_REF_IndependentPythonImplementation.CallAndPutMatch (152 ms)
+[----------] 1 test from HESTON_REF_IndependentPythonImplementation (152 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (152 ms total)
+[  PASSED  ] 1 test.
+<end of output>
+Test time =   0.15 sec
+----------------------------------------------------------
+Test Passed.
+"HESTON_REF_IndependentPythonImplementation.CallAndPutMatch" end time: Oct 13 22:42 +04
+"HESTON_REF_IndependentPythonImplementation.CallAndPutMatch" time elapsed: 00:00:00
+----------------------------------------------------------
+
+End testing: Oct 13 22:42 +04
