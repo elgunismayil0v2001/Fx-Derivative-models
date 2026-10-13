@@ -13,8 +13,8 @@ duplicated, or outside V-01 to V-21.
 |---|---|---|---|---|---|
 | V-01 | Put-call parity (Garman-Kohlhagen) | Error below 1e-12 | 2 | passing | `tests/validation/test_v01_put_call_parity.cpp`. 8000 markets (5 spots x 5 strikes at 0.6-1.8 of spot x 4 domestic x 4 foreign rates from -1% to 8% x vol 1%-100% x expiry 1 day-30 years). Worst relative error 4.0e-16. |
 | V-02 | GK Greeks vs finite differences | Relative error below 1e-6 (central difference) | 2 | passing | `tests/validation/test_v02_greeks_fd.cpp`. 120 points, 5-point fourth-order stencils. Worst: delta 1.8e-7, gamma 6.9e-8, vega 2.3e-8, volga 1.1e-7, vanna 2.3e-7, theta 6.6e-8, rho 2e-10. Volga is differenced from the analytic vega because a second difference of the price is limited by rounding noise (eps/h^2). |
-| V-03 | Heston semi-analytic vs GK as vol-of-vol goes to 0 | Prices agree within 1e-6 | 3 | planned | |
-| V-04 | Heston semi-analytic robustness over long maturities and extreme parameters | No branch-cut or discontinuity errors over a parameter grid | 3 | planned | |
+| V-03 | Heston semi-analytic vs GK as vol-of-vol goes to 0 | Prices agree within 1e-6 | 3 | passing | `tests/validation/test_v03_heston_vs_gk.cpp`. Exact at xi = 0 (worst 4.2e-16 on 60 cases). For xi > 0 the gap shrinks at the theoretical order: tenfold per tenfold in xi for rho != 0, hundredfold for rho = 0 (checked as ratios). Worst gap at xi = 1e-7: 2.8e-9. |
+| V-04 | Heston semi-analytic robustness over long maturities and extreme parameters | No branch-cut or discontinuity errors over a parameter grid | 3 | passing | `tests/validation/test_v04_heston_robustness.cpp`. (A) characteristic function walked along maturity to 30 years on 72 parameter/point combinations: worst relative step 0.023 against a jump threshold of 0.25; the original 1993 formulation, run as a control, shows 0.59, so the check can fail. (B) 576 parameter sets (432 violate Feller; vol of vol up to 5, rho +-0.95, kappa 0.05 to 10, expiry 1 week to 30 years) x 5 strikes: every price finite, inside the no-arbitrage bounds, decreasing and convex in strike, and the characteristic function respects its martingale bounds. |
 | V-05 | Heston Monte Carlo (each scheme) vs semi-analytic | Within 3 standard errors; bias vs step size reported | 4 | planned | |
 | V-06 | Scheme behaviour when the Feller condition fails | Bias documented for Euler full truncation and QE | 5 | planned | |
 | V-07 | Monte Carlo reproducibility | Identical result for 1 and N threads with the same seed | 4 | planned | |
@@ -40,9 +40,22 @@ duplicated, or outside V-01 to V-21.
   (8 boundary cases plus 300 random markets, call and put, seed 20261010). Tolerance 1e-11; worst
   difference 6.6e-14. CI regenerates the table and fails if it differs from the committed file.
 
+* **HESTON-REF** (`tests/validation/test_heston_reference.cpp`): C++ call and put against an
+  independent Python implementation (Heston 1993 probabilities P1 and P2, SciPy QUADPACK), 589
+  rows in `tests/validation/data/heston_reference.csv` (389 moderate plus 200 stress rows with
+  `rho xi > kappa`; rows where SciPy cannot certify its own integral are dropped). Tolerance
+  `2e-11 * max(1, spot)` absolute; worst difference 1.6e-12. The table is compared numerically,
+  not byte by byte, because quadrature results can differ in the last digits between SciPy versions.
+* **Mutation check, done by hand in week 3** (not automated): flipping the sign of `rho` in the
+  characteristic function is caught by HESTON-REF and the smile unit test but **not** by V-03 or
+  V-04 (those do not depend on the sign of `rho`); corrupting one Gauss-Kronrod weight is caught by
+  11 tests; flipping a sign in `D` is caught by HESTON-REF, V-03, V-04 and a unit test. This is why
+  the independent table is part of the suite.
+
 ## Tests that are not part of the V-series
 
 Unit tests (`tests/unit/`) cover the library's own behaviour: the error type, typed units, day
-count, known GK values, degenerate inputs and error paths. They protect the code from regressions
+count, known GK values, degenerate inputs, Heston parameter validation, characteristic-function
+identities, the smile sign, the quadrature routine and error paths. They protect the code from regressions
 and are not validation evidence about the models, so they are not listed here. See
 `docs/adr/0003-testing-strategy.md`.

@@ -1,6 +1,6 @@
 # Repository guide
 
-What every folder and file is for. Status: week 2.
+What every folder and file is for. Status: week 3.
 
 ## The two kinds of test, in one paragraph
 
@@ -33,6 +33,8 @@ validation tests are what a model-validation team would ask for. Reasoning:
 | `core/limits.hpp` | none | Domain bounds and the named test tolerances (`tol::put_call_parity`, ...). |
 | `core/daycount.hpp` | `daycount.cpp` | ACT/365 fixed year fraction between two dates. |
 | `pricing/garman_kohlhagen.hpp` | `garman_kohlhagen.cpp` | `garman_kohlhagen_price` and `garman_kohlhagen_greeks`: the benchmark model. |
+| `models/heston.hpp` | `heston.cpp` | `HestonParams`, `HestonVanilla`, `log_forward_characteristic_function`, `heston_price`: semi-analytic Heston (docs section 4, ADR 0004). |
+| `numerics/quadrature.hpp` | none (header-only template) | `adaptive_gauss_kronrod`: adaptive Gauss-Kronrod (7, 15) integration with an explicit `converged` flag. |
 | `version.hpp.in` | none | Template turned into the version header by CMake. |
 
 ## `tests/`
@@ -40,14 +42,21 @@ validation tests are what a model-validation team would ask for. Reasoning:
 | Path | Purpose |
 |---|---|
 | `CMakeLists.txt` | Builds two executables, `fxval_unit_tests` and `fxval_validation_tests`, and registers every test with CTest. |
+| `support/heston_test_support.hpp` | `make_params()`, `make_heston_market()`, `heston_value()`, `gk_call()`, and a bisection implied-volatility helper for the smile test. |
 | `support/gk_test_support.hpp` | `must()` (unwrap a `Result` or fail with its message), `make_market()`, `gk_value()`, `gk_all()`. |
 | `unit/test_error.cpp`, `test_units.cpp`, `test_version.cpp`, `test_daycount.cpp` | Error type, typed units, version, day count. |
 | `unit/test_garman_kohlhagen.cpp` | Intrinsic value at expiry, zero volatility, parity at one point, delta relations. |
 | `unit/test_garman_kohlhagen_errors.cpp` | Textbook values, currency-inversion symmetry, degenerate inputs, every error path. |
 | `validation/test_v01_put_call_parity.cpp` | V-01 on a grid of 8000 markets; records the worst error. |
 | `validation/test_v02_greeks_fd.cpp` | V-02: all Greeks against finite differences of the price on 120 points; records the worst error per Greek and where. |
+| `unit/test_quadrature.cpp` | The integrator on integrals with known answers: polynomials, sine, Gaussian, sqrt singularity, narrow peak, reversed interval, non-convergence, rounding-level stop rule. |
+| `unit/test_heston.cpp` | Parameter validation, characteristic-function identities (`phi(0) = phi(-i) = 1`, boundedness, first moment), `xi = 0` equals Garman-Kohlhagen, parity, bounds, convexity, smile sign, error paths. |
+| `validation/test_v03_heston_vs_gk.cpp` | V-03: Heston to Garman-Kohlhagen as vol of vol goes to 0, checked at the theoretical order of convergence. |
+| `validation/test_v04_heston_robustness.cpp` | V-04: no branch-cut jumps in maturity (with the 1993 formulation as a control that must fail), and 576 extreme parameter sets priced and checked for bounds, monotonicity and convexity. |
+| `validation/test_heston_reference.cpp` | C++ Heston against the independent Python table (589 rows). |
 | `validation/test_gk_reference.cpp` | C++ against the independent Python table (616 rows). |
 | `validation/test_catalogue_consistency.cpp` | Fails if `docs/test_catalogue.md` lists a V-ID twice, never, or outside V-01..V-21. |
+| `validation/data/heston_reference.csv` | The Heston reference table, written by `python/gen_heston_reference.py`. |
 | `validation/data/gk_reference.csv` | The independent reference table, written by `python/gen_gk_reference.py`. |
 | `regression/` | Empty until week 6. |
 
@@ -56,8 +65,9 @@ validation tests are what a model-validation team would ask for. Reasoning:
 | File | Purpose |
 |---|---|
 | `data_download.py` | Downloads NBP, ECB and FRED history; writes CSV plus provenance file. |
+| `gen_heston_reference.py` | Writes the Heston table with the textbook P1/P2 probabilities and SciPy QUADPACK (a different integral, parametrisation and integrator from the C++ code). |
 | `gen_gk_reference.py` | Writes the reference table with SciPy, in a different algebraic form from the C++ code, fixed seed. |
-| `tests/test_data_download.py`, `tests/test_gen_gk_reference.py` | Offline tests of the parsers and of the generator. |
+| `tests/test_data_download.py`, `tests/test_gen_gk_reference.py`, `tests/test_gen_heston_reference.py` | Offline tests of the parsers and of the generator. |
 
 ## Other
 

@@ -1,14 +1,15 @@
 # Model documentation
 
-Status: **draft, week 2.** Sections marked *planned* are placeholders that name the week in
-which they are written. Garman-Kohlhagen is implemented and checked by V-01 and V-02.
+Status: **draft, week 3.** Sections marked *planned* are placeholders that name the week in
+which they are written. Garman-Kohlhagen is implemented and checked by V-01 and V-02. The Heston
+semi-analytic pricer is implemented and checked by V-03, V-04 and an independent Python table.
 
 | Section | Status |
 |---|---|
 | 1. Purpose and scope | draft |
 | 2. Notation and conventions | draft |
 | 3. Garman-Kohlhagen (benchmark) | implemented; V-01 and V-02 passing |
-| 4. Heston | specification only, formulas written in week 3 |
+| 4. Heston | semi-analytic pricer implemented; V-03, V-04, reference table passing (week 3); calibration week 8 |
 | 5. Monte Carlo schemes | planned, weeks 4-5 |
 | 6. FX smile from delta quotes | planned, week 7 |
 | 7. Vanna-Volga | planned, week 9 |
@@ -120,24 +121,97 @@ tests: the discounted expected payoff under `Q_d` solves this PDE.
 
 ## 4. Heston
 
-*Specification only. The characteristic function, the integration scheme and the calibration
-objective are written in week 3 from the cited sources, then tested.*
+### 4.1 Dynamics and parameters
 
-Dynamics under `Q_d`:
+Under `Q_d`:
 
     dS_t = (r_d - r_f) S_t dt + sqrt(v_t) S_t dW^1_t
     dv_t = kappa (theta - v_t) dt + xi sqrt(v_t) dW^2_t,    d<W^1, W^2>_t = rho dt
 
-| Parameter | Meaning | Main effect on the smile |
-|---|---|---|
-| `v_0` | initial variance | level of the short-dated smile |
-| `kappa` | speed of mean reversion of variance | how fast the term structure moves from `v_0` to `theta` |
-| `theta` | long-run variance | level of the long-dated smile |
-| `xi` | volatility of variance | curvature of the smile |
-| `rho` | spot-variance correlation | skew (asymmetry) |
+| Parameter | Meaning | Main effect on the smile | Domain in `HestonParams` |
+|---|---|---|---|
+| `v_0` | initial variance (not volatility) | level of the short-dated smile | `[0, 25]` |
+| `kappa` | speed of mean reversion of variance | how fast the term structure moves from `v_0` to `theta` | `(0, 100]` |
+| `theta` | long-run variance | level of the long-dated smile | `(0, 25]` |
+| `xi` | volatility of variance | curvature of the smile | `[0, 10]` |
+| `rho` | spot-variance correlation | skew (asymmetry) | `[-1, 1]` |
 
-Feller condition: `2 kappa theta >= xi^2` keeps the variance process strictly positive. When it
-fails, simulation schemes can misbehave. Test V-06 measures how.
+Feller condition: `2 kappa theta >= xi^2` keeps the variance process strictly positive. The
+semi-analytic price does **not** need it (the characteristic function is valid either way, and
+V-04 includes Feller violations); simulation schemes do (V-06 measures how).
+
+`xi = 0` is allowed: the variance is then deterministic, `v(t) = theta + (v_0 - theta) e^{-kappa t}`,
+and the model is Garman-Kohlhagen with total variance `W = E[integral of v] =
+theta tau + (v_0 - theta)(1 - e^{-kappa tau}) / kappa` (`expected_integrated_variance`).
+
+### 4.2 Characteristic function
+
+Let `X = ln(S_tau / F)`, which does not depend on the interest rates. Then
+`dX = -(v/2) dt + sqrt(v) dW^1` and `phi(u; tau) = E[e^{iuX}] = exp(C(tau) + D(tau) v_0)`, where
+with `h = i u + u^2` the functions solve the Riccati equations (Feynman-Kac)
+
+    D' = (xi^2 / 2) D^2 + (rho xi i u - kappa) D - h / 2,     C' = kappa theta D,     D(0) = C(0) = 0.
+
+The closed-form solution, in the "formulation 2" of Albrecher, Mayer, Schoutens and Tistaert
+(*the little Heston trap*), with `a = kappa - rho xi i u` and `d = sqrt(a^2 + xi^2 h)` (principal
+root), `g = (a - d) / (a + d)`:
+
+    D = -h / (a + d) * (1 - e^{-d tau}) / (1 - g e^{-d tau})
+    C = (kappa theta / xi^2) [ (a - d) tau - 2 ln( (1 - g e^{-d tau}) / (1 - g) ) ]
+
+Why this form and not the one in Heston's paper: the original paper uses `e^{+d tau}` and
+`g = (a + d) / (a - d)`. For long maturities the complex logarithm in `C` then jumps by `2 pi i`
+and the price is wrong with no warning. Test V-04 shows the jump in the original form
+(`kappa = 0.3, theta = v_0 = 0.04, xi = 0.5, rho = -0.9`: a relative step of 0.59 near `tau = 16`) and none in this one.
+
+Implementation details that matter (`src/heston.cpp`):
+
+* **No division by `xi^2`.** Since `a^2 - d^2 = -xi^2 h`, the quantities `(a - d) / xi^2 = -h / (a + d)`
+  and `g / xi^2 = -h / (a + d)^2` are computed directly. The textbook form loses about
+  `eps / xi^2` of relative accuracy, which is fatal for small `xi`; this one is exact at `xi = 0`.
+* `ln(1 + z) / z` uses a series for `|z| < 1e-3`.
+* **`a + d` without cancellation.** If `Re(a) < 0` (`rho xi > kappa`) then `d` is close to `-a`;
+  `a + d` is computed as `xi^2 h / (d - a)`. Found by test V-04: before this, `phi(-i)` returned NaN.
+* `u = 0` and `u = -i` are removable singularities (`h = 0`); the function returns exactly 1
+  there (total probability; martingale property `E[S_T] = F`).
+
+### 4.3 European price (Lewis 2001)
+
+With `x = ln(F / K)`:
+
+    E[(F e^X - K)^+] = F - (sqrt(F K) / pi) * Integral_0^inf Re[ e^{i u x} phi(u - i/2) ] / (u^2 + 1/4) du
+
+and `E[(K - F e^X)^+] = K - (the same integral term)`. The price is the discounted
+expectation, `e^{-r_d tau} * (...)`. One integral instead of the two probabilities of Heston's
+paper; the integrand is smooth and decays quickly. Convergence on the line `Im(u) = -1/2` needs
+only the moment of order 1/2 of `S_T`, which is always finite.
+
+Out-of-the-money option: `df * (min(F, K) - I)`, so the cancellation is against a small number.
+In-the-money option: out-of-the-money value plus `df |F - K|` (parity).
+
+### 4.4 Numerical method and accuracy
+
+* `[0, inf)` is mapped to `[0, 1)` with `u = t / (1 - t)`, then integrated with adaptive
+  Gauss-Kronrod (7, 15) in the style of QUADPACK `qag` (`fxval/numerics/quadrature.hpp`, tested on
+  its own): start from 8 panels, bisect the panel with
+  the largest error estimate, at most 4000 panels.
+* Target: absolute price error about `1e-14 F`, relaxed to the rounding level of the sum
+  (`10 eps` times the integral of `|f|`) when the target is below what floating point can give.
+  Failure to converge returns `ErrorCode::not_converged`; a non-finite value returns
+  `numerical_failure`. A price violating the no-arbitrage bounds also returns `numerical_failure`.
+* Measured: against an independent Python implementation, worst absolute difference 1.6e-12 on
+  589 call and put prices (`tests/validation/data/heston_reference.csv`). At `xi = 0` the
+  difference from Garman-Kohlhagen is 4e-16.
+* Cost: about 0.1 to 0.3 ms per price in a Release build.
+
+### 4.5 Limitations
+
+* Deep out-of-the-money prices have absolute accuracy about `1e-13 F`, not relative accuracy.
+* Parameters are constant in time; the model is fitted per expiry (calibration, week 8).
+* Interest rates are deterministic (as in the rest of v1.0).
+* The `not_converged` path is not exercised by a test: no input is known that triggers it.
+* Not covered yet: Heston Greeks (week 8, by finite differences of the price), implied volatility
+  output, and exotic payoffs (weeks 4-5 by Monte Carlo).
 
 ## 5. to 10. Planned sections
 

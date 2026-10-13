@@ -49,7 +49,7 @@ configure_file(include/fxval/version.hpp.in
                "${PROJECT_BINARY_DIR}/generated/include/fxval/version.hpp" @ONLY)
 
 add_library(fxval STATIC src/contracts.cpp src/error.cpp src/units.cpp src/daycount.cpp
-                        src/garman_kohlhagen.cpp)
+                        src/garman_kohlhagen.cpp src/heston.cpp)
 add_library(fxval::fxval ALIAS fxval)
 
 target_include_directories(

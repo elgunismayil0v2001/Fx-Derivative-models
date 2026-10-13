@@ -4,9 +4,10 @@ A C++20 library that prices FX options and measures FX portfolio market and coun
 together with an **independent validation** of those models: exact benchmarks, numerical tests,
 model comparison, and a written validation report.
 
-> **Status: week 2 of a 14-week plan.** The engineering foundation is in place and the
-> Garman-Kohlhagen benchmark (price and Greeks) is implemented and checked by V-01 and V-02.
-> Heston, Monte Carlo, smile, risk and CVA are not started.
+> **Status: week 3 of a 14-week plan.** The engineering foundation is in place, the
+> Garman-Kohlhagen benchmark is checked by V-01 and V-02, and the Heston semi-analytic pricer is
+> checked by V-03, V-04 and an independent Python table. Monte Carlo, smile, calibration, risk and
+> CVA are not started.
 
 ## What exists today
 
@@ -15,10 +16,11 @@ model comparison, and a written validation report.
 | Build (CMake presets, install and export, `find_package(fxval)`) | working |
 | Error policy (`Result<T>`, contract checks) and typed units (`Spot`, `Volatility`, `Rate`, `Years`, `Strike`, `Notional`) | working, tested |
 | Garman-Kohlhagen price and Greeks, ACT/365 fixed | working; V-01 and V-02 passing |
-| Unit tests, V-01, V-02, independent Python reference (616 rows), catalogue consistency test | 43 tests in `ctest` |
+| Heston semi-analytic European pricer (stable characteristic function, Lewis integral) | working; V-03, V-04 and reference table (589 rows) passing |
+| Unit tests, V-01 to V-04, independent Python references, catalogue consistency test | 72 tests in `ctest` |
 | CI (format, four compilers, sanitizers, clang-tidy, coverage, install check, Python, Docker) | `.github/workflows/ci.yml` |
 | Data download scripts (NBP, ECB, FRED) with provenance files | parsers tested offline |
-| Heston, Monte Carlo, smile, risk, CVA | not started (see `docs/test_catalogue.md`) |
+| Monte Carlo, smile, calibration, risk, CVA | not started (see `docs/test_catalogue.md`) |
 
 ## Build and test
 

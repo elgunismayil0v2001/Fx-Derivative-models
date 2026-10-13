@@ -1,6 +1,6 @@
 # Architecture
 
-Status: week 2. The `core` and `pricing` layers exist. The rest is the planned structure so that
+Status: week 3. The `core`, `pricing` and (Heston part of) `models` layers exist. The rest is the planned structure so that
 each module added later has an obvious place and an obvious set of allowed dependencies.
 
 ## Layers and dependency rule
@@ -9,8 +9,11 @@ Each layer may depend only on layers above it in this list. Nothing depends on `
 
 ```
 core          errors, typed units, day count, limits, contracts    (implemented)
+numerics      adaptive quadrature (implemented, week 3);           (week 3, 8)
+              optimiser (planned)
 pricing       Garman-Kohlhagen (Greeks); Black-76 and barriers later (week 2, 9)
-models        GBM, Heston, semi-analytic Heston                    (week 3)
+models        semi-analytic Heston (implemented, week 3);          (week 3, 4)
+              path-simulation dynamics: GBM, Heston (planned)
 mc            engine, schemes, random streams, thread pool         (weeks 4-5)
 smile         delta quotes, interpolation, arbitrage checks        (week 7)
 calibration   Heston calibrator, optimiser                         (week 8)
