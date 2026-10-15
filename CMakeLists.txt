@@ -48,8 +48,11 @@ endif()
 configure_file(include/fxval/version.hpp.in
                "${PROJECT_BINARY_DIR}/generated/include/fxval/version.hpp" @ONLY)
 
+find_package(Threads REQUIRED)
+
 add_library(fxval STATIC src/contracts.cpp src/error.cpp src/units.cpp src/daycount.cpp
-                        src/garman_kohlhagen.cpp src/heston.cpp)
+                        src/garman_kohlhagen.cpp src/heston.cpp src/mc_engine.cpp
+                        src/mc_models.cpp src/mc_vanilla.cpp)
 add_library(fxval::fxval ALIAS fxval)
 
 target_include_directories(
@@ -58,6 +61,7 @@ target_include_directories(
          "$<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/generated/include>"
          "$<INSTALL_INTERFACE:include>")
 target_compile_features(fxval PUBLIC cxx_std_20)
+target_link_libraries(fxval PUBLIC Threads::Threads)  # the Monte Carlo engine uses std::jthread
 # Contract checks (FXVAL_EXPECTS) are active in Debug builds, including for consumers.
 target_compile_definitions(fxval PUBLIC "$<$<CONFIG:Debug>:FXVAL_ENABLE_CONTRACTS>")
 fxval_set_warnings(fxval)

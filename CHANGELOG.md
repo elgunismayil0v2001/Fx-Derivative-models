@@ -6,6 +6,29 @@ All notable changes are recorded here. The format follows
 
 ## [Unreleased]
 
+### Added (week 4: Monte Carlo engine)
+
+- `fxval::mc`: Philox4x32-10 counter-based generator, `NormalStream` (Box-Muller, stream number =
+  path number), `RunningStats` (Welford with exact merge), the `PathModel` concept and
+  `run_monte_carlo` (threads, fixed blocks, merge in block order), exact `GbmModel`,
+  `HestonEulerFullTruncation`, and `gbm_mc_price` / `heston_euler_mc_price` with standard errors.
+- V-05 (Monte Carlo vs analytic prices, bias vs step size with a power check) and V-07 (bitwise
+  identical results for any thread count, with a control that must fail).
+- Independent Python reference for the random numbers and Heston paths
+  (`python/gen_mc_reference.py`, 120-row table) and a C++ test against it.
+- ADR 0005 (Monte Carlo engine), model documentation section 5. ADRs 0001 (error policy) and
+  0003 (testing strategy), which other documents link to, are now in `docs/adr/`.
+
+### Changed
+
+- The library now links `Threads::Threads` (`std::jthread`), and `fxvalConfig.cmake` finds it.
+- `.clang-tidy`: `clang-analyzer-core.uninitialized.Assign` is disabled. It reports a false
+  positive on libstdc++ `std::variant` whenever an `Error` is copied from one `Result<T>` into
+  another (reproduced on a 6-line file without project code).
+- Restored `SpacesBeforeTrailingComments: 2` in `.clang-format` and the Python reference steps in
+  CI, both lost in a merge; `build/release/` is no longer tracked (it contained absolute paths of
+  one machine and broke builds elsewhere).
+
 ### Added
 
 - Independent Python reference for Garman-Kohlhagen (`python/gen_gk_reference.py`, 616-row table)
