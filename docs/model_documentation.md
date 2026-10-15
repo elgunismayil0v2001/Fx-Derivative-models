@@ -211,13 +211,96 @@ In-the-money option: out-of-the-money value plus `df |F - K|` (parity).
 * Interest rates are deterministic (as in the rest of v1.0).
 * The `not_converged` path is not exercised by a test: no input is known that triggers it.
 * Not covered yet: Heston Greeks (week 8, by finite differences of the price), implied volatility
-  output, and exotic payoffs (weeks 4-5 by Monte Carlo).
+  output, and exotic payoffs (week 9 by Monte Carlo).
 
-## 5. to 10. Planned sections
+## 5. Monte Carlo
 
-* **5. Monte Carlo schemes** (weeks 4-5): Euler with full truncation, Andersen QE, control
-  variate using the GK price, antithetic variates, seeded per-block random streams so results do
-  not depend on the number of threads (V-07).
+Status: the engine, exact GBM and the Heston Euler scheme with full truncation (week 4). The QE
+scheme, variance reduction and the Feller study follow in week 5.
+
+### 5.1 Estimator and standard error
+
+For a payoff `g` of the terminal spot, the price is estimated by
+
+```
+price_hat = e^{-r_d T} * (1/N) * sum_i g(S_T^(i)),
+SE        = e^{-r_d T} * s / sqrt(N),     s^2 = sample variance of g(S_T^(i)).
+```
+
+The standard error measures sampling noise only. It says nothing about the bias of a time
+discretisation, which is why test V-05 compares with the semi-analytic price and reports the
+bias separately.
+
+### 5.2 Random numbers
+
+* **Philox4x32-10**, a counter-based generator (Salmon et al., 2011): the output is a function of
+  (key, counter), with no state to share. Key = 64-bit seed. Counter = (block number, path
+  number). **Path number = stream number**, so path `p` gets the same numbers whichever thread
+  runs it. Checked against the published known-answer vectors.
+* One 128-bit block gives two uniforms in `(0, 1)` (top 53 bits of each 64-bit half,
+  `u = (k + 1/2) 2^-53`), and Box-Muller turns them into two independent standard normals. The
+  largest possible `|z|` is about 8.6; real normals exceed that with probability below `1e-17`.
+* A Heston step uses exactly one block (`Z_v`, `Z_perp`).
+
+### 5.3 Models
+
+* **GBM** (the Garman-Kohlhagen dynamics) is simulated exactly:
+  `S_T = S_0 exp((r_d - r_f - sigma^2/2) T + sigma sqrt(T) Z)`. The step count is ignored. It
+  exists to validate the engine and the discounting against the closed form.
+* **Heston, Euler with full truncation** (Lord, Koekkoek and van Dijk, 2010). With `dt = T / n`,
+  `v+ = max(v, 0)` and `Z_S = rho Z_v + sqrt(1 - rho^2) Z_perp`:
+
+  ```
+  ln S_{k+1} = ln S_k + (r_d - r_f - v+/2) dt + sqrt(v+ dt) Z_S
+  v_{k+1}    = v_k + kappa (theta - v+) dt + xi sqrt(v+ dt) Z_v
+  ```
+
+  `S` is advanced in logs, so it stays positive; the raw `v` may become negative and is carried
+  (not reset), which is what "full" truncation means. Every step multiplies `S` by
+  `exp(-v+ dt/2 + sqrt(v+ dt) Z_S)`, whose conditional mean is 1, so `E[S_T] = F` exactly for any
+  number of steps (a unit test checks this). The bias is in the distribution, not the mean.
+
+### 5.4 Parallel execution and reproducibility
+
+Paths are grouped in fixed blocks (default 4096). Threads take blocks from an atomic counter;
+each block is summarised on its own (Welford mean and sum of squares); the block summaries are
+merged in **block order** (Chan, Golub, LeVeque). Which thread ran which block cannot change a
+bit of the result, so the same seed gives bitwise identical output for 1 or N threads (V-07).
+Changing the *block size* changes the order of the arithmetic and therefore the last digits (not
+the distribution); this is documented behaviour and is checked to `1e-12` relative.
+
+### 5.5 Evidence (week 4)
+
+* **V-05** (`test_v05_heston_mc_vs_analytic.cpp`), seed 20261014, fixed before looking at results:
+  GBM engine vs Garman-Kohlhagen, 16 comparisons (8 markets, call and put, 200,000 paths): worst
+  |z| = 2.20, all within 3 SE. Heston Euler, Feller satisfied (`v0 = theta = 0.04`, `kappa = 2`,
+  `xi = 0.3`, `rho = -0.5`, `T = 1`), 64 steps, 200,000 paths, strikes 0.95, 1.10, 1.25 at spot
+  1.10: worst |z| = 1.69. Bias vs steps for a set that violates Feller badly (`kappa = 0.5`,
+  `xi = 1`, `rho = -0.9`, `T = 2`, at the money, 100,000 paths): bias 3.4e-2, 1.9e-2, 9.2e-3,
+  4.2e-3, 1.7e-3 for 8, 16, 32, 64, 128 steps (86, 61, 36, 18, 7.8 standard errors).
+* **V-07** (`test_v07_mc_reproducibility.cpp`): bitwise identical mean, standard error and
+  variance for 1, 2, 3, 4, 7, 8, 16 threads and hardware concurrency, for GBM and Heston; 25 repeated
+  runs with 8 threads identical; a naive "equal share per thread" reduction, run as a control,
+  differs from its 1-thread result for 4 of 4 thread counts, so the bitwise check can fail.
+* **MC-PATH-REF** (`test_mc_path_reference.cpp`): 120 (seed, stream) cases, including 64-bit seeds
+  and streams, `xi = 0`, `rho = +-1`, one step, against an independent Python implementation of
+  Philox, Box-Muller and the path. Worst differences on the development machine: 0 (bitwise);
+  the tolerance (1e-13 for normals, 1e-9 for paths) allows for other libm versions.
+
+### 5.6 Limitations
+
+* The Euler scheme is badly biased when Feller fails: in the stress case above the bias is still
+  7.8 standard errors at 128 steps. It is a baseline, not the recommended scheme; QE (week 5) is.
+* No variance reduction yet (week 5). Standard errors scale as `1/sqrt(N)` only.
+* The engine passes the terminal spot to the payoff. Path-dependent payoffs (barriers, week 9)
+  need a richer interface, and the `PathModel` concept will be extended then.
+* The throughput quoted for planning (about 3.5e7 time steps per second on two threads in the
+  development sandbox) is one unrepeated measurement, not a benchmark. Scaling benchmarks: week 5.
+
+## 6. to 10. Planned sections
+
+* **Week 5 additions to section 5:** Andersen QE scheme, control variate using the GK price,
+  antithetic variates, the Feller study (V-06, V-08).
 * **6. FX smile from delta quotes** (week 7): ATM, 25-delta risk reversal and butterfly. The
   delta convention (spot or forward delta, premium included or not, ATM definition) must be
   chosen once, written here, and tested (V-09).
@@ -249,6 +332,12 @@ Verify the bibliographic details of each entry before citing it in the validatio
   Financial Studies 6(2).
 * H. Albrecher, P. Mayer, W. Schoutens and J. Tistaert (2007), *The little Heston trap*, Wilmott
   Magazine.
+* R. Lord, R. Koekkoek and D. van Dijk (2010), *A comparison of biased simulation schemes for
+  stochastic volatility models*, Quantitative Finance 10(2).
+* J. Salmon, M. Moraes, R. Dror and D. Shaw (2011), *Parallel random numbers: as easy as 1, 2, 3*,
+  Proceedings of SC11.
+* T. Chan, G. Golub and R. LeVeque (1983), *Algorithms for computing the sample variance*, The
+  American Statistician 37(3).
 * L. Andersen (2008), *Simple and efficient simulation of the Heston stochastic volatility
   model*, Journal of Computational Finance 11(3).
 * M. Reiner and M. Rubinstein (1991), *Breaking down the barriers*, Risk 4(8).

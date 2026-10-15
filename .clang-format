@@ -18,5 +18,6 @@ QualifierAlignment: Left
 SortIncludes: CaseSensitive
 SpaceAfterTemplateKeyword: true
 AlwaysBreakTemplateDeclarations: Yes
+SpacesBeforeTrailingComments: 2
 PenaltyBreakAssignment: 2
 PenaltyReturnTypeOnItsOwnLine: 200

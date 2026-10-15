@@ -1,6 +1,6 @@
 # Architecture
 
-Status: week 3. The `core`, `pricing` and (Heston part of) `models` layers exist. The rest is the planned structure so that
+Status: week 4. The `core`, `pricing`, `numerics`, `models` (Heston) and `mc` layers exist. The rest is the planned structure so that
 each module added later has an obvious place and an obvious set of allowed dependencies.
 
 ## Layers and dependency rule
@@ -12,9 +12,9 @@ core          errors, typed units, day count, limits, contracts    (implemented)
 numerics      adaptive quadrature (implemented, week 3);           (week 3, 8)
               optimiser (planned)
 pricing       Garman-Kohlhagen (Greeks); Black-76 and barriers later (week 2, 9)
-models        semi-analytic Heston (implemented, week 3);          (week 3, 4)
-              path-simulation dynamics: GBM, Heston (planned)
-mc            engine, schemes, random streams, thread pool         (weeks 4-5)
+models        semi-analytic Heston (implemented, week 3)           (week 3)
+mc            engine, random streams, GBM, Heston Euler FT        (implemented, week 4)
+              QE scheme, variance reduction (planned)              (week 5)
 smile         delta quotes, interpolation, arbitrage checks        (week 7)
 calibration   Heston calibrator, optimiser                         (week 8)
 exotics       Vanna-Volga, barrier and touch options               (week 9)
@@ -37,6 +37,8 @@ is split into more than one target. Until then it is a review rule.
   functions are safe to call from several threads at once (documented per class).
 * **Determinism:** no global state, no `rand()`, explicit seeds, no fast-math. Results must not
   depend on the number of threads (test V-07).
+* **Extension:** a new simulation scheme is a new class that satisfies the `PathModel` concept
+  (`mc/engine.hpp`); the engine is not edited (open for extension, closed for modification).
 * **Dispatch:** static dispatch (templates and concepts) inside Monte Carlo inner loops, runtime
   polymorphism only at instrument boundaries.
 

@@ -1,6 +1,6 @@
 # Repository guide
 
-What every folder and file is for. Status: week 3.
+What every folder and file is for. Status: week 4.
 
 ## The two kinds of test, in one paragraph
 
@@ -14,7 +14,7 @@ validation tests are what a model-validation team would ask for. Reasoning:
 
 | Path | Purpose |
 |---|---|
-| `CMakeLists.txt` | Defines the library `fxval` (sources listed explicitly), include paths, warnings, install and export rules. Adds `tests/`. |
+| `CMakeLists.txt` | Defines the library `fxval` (sources listed explicitly; links `Threads::Threads`), include paths, warnings, install and export rules. Adds `tests/`. |
 | `CMakePresets.json` | Named build configurations: `debug`, `release`, `asan-ubsan`, `tsan`, `coverage`, `release-vcpkg`. |
 | `vcpkg.json` | Dependency manifest for the vcpkg preset. |
 | `Dockerfile` | Builds and tests the library in a clean container. |
@@ -35,6 +35,13 @@ validation tests are what a model-validation team would ask for. Reasoning:
 | `pricing/garman_kohlhagen.hpp` | `garman_kohlhagen.cpp` | `garman_kohlhagen_price` and `garman_kohlhagen_greeks`: the benchmark model. |
 | `models/heston.hpp` | `heston.cpp` | `HestonParams`, `HestonVanilla`, `log_forward_characteristic_function`, `heston_price`: semi-analytic Heston (docs section 4, ADR 0004). |
 | `numerics/quadrature.hpp` | none (header-only template) | `adaptive_gauss_kronrod`: adaptive Gauss-Kronrod (7, 15) integration with an explicit `converged` flag. |
+| `mc/philox.hpp` | none (header-only) | `Philox4x32`: counter-based random number generator, checked against the published known answers. |
+| `mc/normal_stream.hpp` | none (header-only) | `NormalStream(seed, stream)`: standard normals by Box-Muller from Philox blocks; stream number = path number. |
+| `mc/running_stats.hpp` | none (header-only) | `RunningStats`: Welford mean and variance with an exact merge. |
+| `mc/engine.hpp` | `mc_engine.cpp` | `McConfig`, `McEstimate`, the `PathModel` concept and `run_monte_carlo`: threads, fixed blocks, merge in block order (V-07). `mc_engine.cpp` holds configuration validation. |
+| `mc/gbm.hpp` | `mc_models.cpp` | `GbmModel`: exact GBM simulation (engine check). |
+| `mc/heston_euler.hpp` | `mc_models.cpp` | `HestonEulerFullTruncation`: Euler scheme with full truncation; `simulate_terminal_state` for cross-checks. |
+| `mc/vanilla.hpp` | `mc_vanilla.cpp` | `gbm_mc_price`, `heston_euler_mc_price`: discounted vanilla price with standard error. |
 | `version.hpp.in` | none | Template turned into the version header by CMake. |
 
 ## `tests/`
@@ -55,6 +62,14 @@ validation tests are what a model-validation team would ask for. Reasoning:
 | `validation/test_v04_heston_robustness.cpp` | V-04: no branch-cut jumps in maturity (with the 1993 formulation as a control that must fail), and 576 extreme parameter sets priced and checked for bounds, monotonicity and convexity. |
 | `validation/test_heston_reference.cpp` | C++ Heston against the independent Python table (589 rows). |
 | `validation/test_gk_reference.cpp` | C++ against the independent Python table (616 rows). |
+| `support/mc_test_support.hpp` | `scaled_paths()` (fewer paths in Debug and sanitizer builds), `make_config()`, `bits_of()` (compare doubles bit for bit). |
+| `unit/test_philox.cpp` | Philox known-answer vectors (also at compile time), avalanche, uniform mapping, stream determinism, moments, tail frequencies, Kolmogorov-Smirnov, independence between streams. |
+| `unit/test_running_stats.cpp` | Welford against two-pass, huge-mean stability (with the textbook formula failing as a contrast), merge equals one pass. |
+| `unit/test_mc_engine.cpp` | Engine: constants, steps passed through, path = stream, partial blocks, every configuration error, non-finite result; models: zero expiry, martingale property, constant-variance law, truncation reached. |
+| `validation/test_v05_heston_mc_vs_analytic.cpp` | V-05: GBM engine vs Garman-Kohlhagen; Heston Euler vs the semi-analytic price; bias vs step size with a power check. |
+| `validation/test_v07_mc_reproducibility.cpp` | V-07: bitwise equality over thread counts and repeats, with a naive-partition control that must differ. |
+| `validation/test_mc_path_reference.cpp` | Normals and Heston paths against the independent Python table (120 rows). |
+| `validation/data/mc_path_reference.csv` | The path reference table, written by `python/gen_mc_reference.py`. |
 | `validation/test_catalogue_consistency.cpp` | Fails if `docs/test_catalogue.md` lists a V-ID twice, never, or outside V-01..V-21. |
 | `validation/data/heston_reference.csv` | The Heston reference table, written by `python/gen_heston_reference.py`. |
 | `validation/data/gk_reference.csv` | The independent reference table, written by `python/gen_gk_reference.py`. |
@@ -66,8 +81,9 @@ validation tests are what a model-validation team would ask for. Reasoning:
 |---|---|
 | `data_download.py` | Downloads NBP, ECB and FRED history; writes CSV plus provenance file. |
 | `gen_heston_reference.py` | Writes the Heston table with the textbook P1/P2 probabilities and SciPy QUADPACK (a different integral, parametrisation and integrator from the C++ code). |
+| `gen_mc_reference.py` | Writes the Monte Carlo path table: Philox, Box-Muller and the Heston Euler path re-implemented in plain Python (no shared code with C++). |
 | `gen_gk_reference.py` | Writes the reference table with SciPy, in a different algebraic form from the C++ code, fixed seed. |
-| `tests/test_data_download.py`, `tests/test_gen_gk_reference.py`, `tests/test_gen_heston_reference.py` | Offline tests of the parsers and of the generator. |
+| `tests/test_data_download.py`, `tests/test_gen_gk_reference.py`, `tests/test_gen_heston_reference.py`, `tests/test_gen_mc_reference.py` | Offline tests of the parsers and of the generators (the Monte Carlo one needs no third-party package). |
 
 ## Other
 

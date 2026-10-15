@@ -34,10 +34,12 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - name: Pytest (offline)
+      - name: Pytest (offline) and reference tables
         run: |
-          pip install pytest
+          pip install pytest numpy scipy
           pytest -q
+          python python/gen_gk_reference.py "$RUNNER_TEMP/gk.csv"
+          cmp "$RUNNER_TEMP/gk.csv" tests/validation/data/gk_reference.csv
 
   test:
     runs-on: ubuntu-24.04
