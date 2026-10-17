@@ -58,7 +58,10 @@ def test_inputs_are_deterministic():
 
 
 def test_committed_table_is_reproducible(tmp_path):
-    # Inputs must match exactly. Prices come from quadrature, so they are compared numerically.
+    # Neither inputs nor prices are compared as text. Prices come from quadrature, and inputs from
+    # numpy's random generator plus exp/sqrt: the last digit can differ between platforms (fused
+    # multiply-add on Apple silicon, different libm). Both are compared to 1e-12 relative, which
+    # still catches any real change of the generator, the seed or the formulas.
     fresh = tmp_path / "heston_reference.csv"
     gen.write_table(fresh)
     with fresh.open() as a, TABLE.open() as b:
@@ -66,7 +69,9 @@ def test_committed_table_is_reproducible(tmp_path):
     assert new_rows[0] == old_rows[0] == gen.COLUMNS
     assert len(new_rows) == len(old_rows)
     for new, old in zip(new_rows[1:], old_rows[1:], strict=True):
-        assert new[:10] == old[:10]
+        assert [float(x) for x in new[:10]] == pytest.approx(
+            [float(x) for x in old[:10]], rel=1e-12, abs=0.0
+        )
         assert [float(x) for x in new[10:]] == pytest.approx(
             [float(x) for x in old[10:]], abs=1e-10
         )

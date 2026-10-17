@@ -1,0 +1,130 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/elgunismayil0v2001/Fx-Derivative-models/configs/schema/price_config.schema.json",
+  "title": "fxval-price configuration, format_version 1",
+  "description": "For editors and CI. The C++ parser (apps/lib/price_config.cpp) is the authority: it also rejects repeated keys, duplicate option ids and a few cross-field cases that this schema cannot express. Rates and volatilities are DECIMALS (0.03 is 3%).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["format_version", "market", "model", "options"],
+  "properties": {
+    "format_version": { "const": 1 },
+    "market": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["spot", "domestic_rate", "foreign_rate"],
+      "properties": {
+        "spot": { "type": "number", "exclusiveMinimum": 0 },
+        "domestic_rate": { "type": "number", "minimum": -1, "maximum": 1 },
+        "foreign_rate": { "type": "number", "minimum": -1, "maximum": 1 }
+      }
+    },
+    "model": {
+      "oneOf": [
+        { "$ref": "#/$defs/garman_kohlhagen" },
+        { "$ref": "#/$defs/heston_semi_analytic" },
+        { "$ref": "#/$defs/gbm_monte_carlo" },
+        { "$ref": "#/$defs/heston_monte_carlo" }
+      ]
+    },
+    "options": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 100000,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "type", "strike", "expiry_years"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,63}$" },
+          "type": { "enum": ["call", "put"] },
+          "strike": { "type": "number", "exclusiveMinimum": 0 },
+          "expiry_years": { "type": "number", "exclusiveMinimum": 0, "maximum": 100 },
+          "notional": { "type": "number", "exclusiveMinimum": 0 }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "volatility": { "type": "number", "minimum": 0, "maximum": 5 },
+    "heston_parameters": {
+      "v0": { "type": "number", "minimum": 0, "maximum": 25 },
+      "kappa": { "type": "number", "exclusiveMinimum": 0, "maximum": 100 },
+      "theta": { "type": "number", "exclusiveMinimum": 0, "maximum": 25 },
+      "xi": { "type": "number", "minimum": 0, "maximum": 10 },
+      "rho": { "type": "number", "minimum": -1, "maximum": 1 }
+    },
+    "garman_kohlhagen": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "volatility"],
+      "properties": {
+        "type": { "const": "garman_kohlhagen" },
+        "volatility": { "$ref": "#/$defs/volatility" }
+      }
+    },
+    "heston_semi_analytic": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "v0", "kappa", "theta", "xi", "rho"],
+      "properties": {
+        "type": { "const": "heston_semi_analytic" },
+        "v0": { "$ref": "#/$defs/heston_parameters/v0" },
+        "kappa": { "$ref": "#/$defs/heston_parameters/kappa" },
+        "theta": { "$ref": "#/$defs/heston_parameters/theta" },
+        "xi": { "$ref": "#/$defs/heston_parameters/xi" },
+        "rho": { "$ref": "#/$defs/heston_parameters/rho" }
+      }
+    },
+    "gbm_monte_carlo": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "volatility", "monte_carlo"],
+      "properties": {
+        "type": { "const": "gbm_monte_carlo" },
+        "volatility": { "$ref": "#/$defs/volatility" },
+        "monte_carlo": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["seed", "paths"],
+          "properties": {
+            "seed": { "type": "integer", "minimum": 0, "maximum": 18446744073709551615 },
+            "paths": { "type": "integer", "minimum": 1, "maximum": 2000000000 },
+            "threads": { "type": "integer", "minimum": 0, "maximum": 256 },
+            "block_size": { "type": "integer", "minimum": 1 }
+          }
+        }
+      }
+    },
+    "heston_monte_carlo": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "v0", "kappa", "theta", "xi", "rho", "scheme", "monte_carlo"],
+      "properties": {
+        "type": { "const": "heston_monte_carlo" },
+        "v0": { "$ref": "#/$defs/heston_parameters/v0" },
+        "kappa": { "$ref": "#/$defs/heston_parameters/kappa" },
+        "theta": { "$ref": "#/$defs/heston_parameters/theta" },
+        "xi": { "$ref": "#/$defs/heston_parameters/xi" },
+        "rho": { "$ref": "#/$defs/heston_parameters/rho" },
+        "scheme": { "enum": ["euler", "qe"] },
+        "monte_carlo": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["seed", "paths", "steps"],
+          "properties": {
+            "seed": { "type": "integer", "minimum": 0, "maximum": 18446744073709551615 },
+            "paths": { "type": "integer", "minimum": 1, "maximum": 2000000000 },
+            "steps": { "type": "integer", "minimum": 1, "maximum": 1000000 },
+            "threads": { "type": "integer", "minimum": 0, "maximum": 256 },
+            "block_size": { "type": "integer", "minimum": 1 },
+            "antithetic": { "type": "boolean" },
+            "control_variate": { "type": "boolean" },
+            "pilot_paths": { "type": "integer", "minimum": 100 }
+          }
+        }
+      },
+      "if": { "properties": { "scheme": { "const": "qe" } }, "required": ["scheme"] },
+      "then": { "properties": { "xi": { "exclusiveMinimum": 0 } } }
+    }
+  }
+}

@@ -37,9 +37,9 @@ for preset in asan-ubsan tsan; do
 done
 
 step "clang-tidy (library sources)"
-clang-tidy -p build/debug --quiet src/*.cpp
+clang-tidy -p build/debug --quiet src/*.cpp apps/lib/*.cpp apps/price/main.cpp
 
-step "python: ruff, reference table, pytest (needs: pip install numpy scipy pytest ruff)"
+step "python: ruff, reference table, pytest (needs: pip install numpy scipy jsonschema pytest ruff)"
 ruff check python
 ruff format --check python
 regen="$(mktemp)"

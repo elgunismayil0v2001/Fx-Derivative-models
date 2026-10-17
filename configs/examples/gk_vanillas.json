@@ -1,0 +1,12 @@
+{
+  "format_version": 1,
+  "market": { "spot": 1.10, "domestic_rate": 0.03, "foreign_rate": 0.01 },
+  "model": { "type": "garman_kohlhagen", "volatility": 0.08 },
+  "options": [
+    { "id": "EURUSD-1Y-ATM-C", "type": "call", "strike": 1.10, "expiry_years": 1.0, "notional": 1000000 },
+    { "id": "EURUSD-1Y-ATM-P", "type": "put", "strike": 1.10, "expiry_years": 1.0, "notional": 1000000 },
+    { "id": "EURUSD-3M-OTM-C", "type": "call", "strike": 1.15, "expiry_years": 0.25, "notional": 500000 },
+    { "id": "EURUSD-3M-OTM-P", "type": "put", "strike": 1.05, "expiry_years": 0.25, "notional": 500000 },
+    { "id": "EURUSD-2W-ATM-C", "type": "call", "strike": 1.10, "expiry_years": 0.0383561643835616 }
+  ]
+}

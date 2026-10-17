@@ -30,7 +30,8 @@ fxval_add_test_executable(fxval_unit_tests unit/test_error.cpp unit/test_units.c
                           unit/test_garman_kohlhagen.cpp unit/test_garman_kohlhagen_errors.cpp unit/test_heston.cpp
                           unit/test_quadrature.cpp unit/test_philox.cpp
                           unit/test_running_stats.cpp unit/test_mc_engine.cpp
-                          unit/test_heston_qe.cpp unit/test_variance_reduction.cpp)
+                          unit/test_heston_qe.cpp unit/test_variance_reduction.cpp
+                          unit/test_sha256.cpp)
 
 fxval_add_test_executable(fxval_validation_tests validation/test_catalogue_consistency.cpp
                           validation/test_v01_put_call_parity.cpp validation/test_v02_greeks_fd.cpp
@@ -52,3 +53,34 @@ target_compile_definitions(
           "FXVAL_MC_QE_PATH_REFERENCE_PATH=\"${PROJECT_SOURCE_DIR}/tests/validation/data/mc_qe_path_reference.csv\"")
 target_include_directories(fxval_unit_tests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 target_include_directories(fxval_validation_tests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+
+# ---------------------------------------------------------------------------
+# Command-line layer (apps/): unit tests, regression tests, allocation test, end-to-end test
+# ---------------------------------------------------------------------------
+if(FXVAL_BUILD_APPS)
+  add_executable(
+    fxval_app_tests app/test_price_config.cpp app/test_price_runner.cpp app/test_report.cpp
+                    app/test_cli.cpp app/test_run_metadata.cpp regression/test_price_regression.cpp)
+  target_link_libraries(fxval_app_tests PRIVATE fxval_app GTest::gtest_main nlohmann_json::nlohmann_json)
+  target_include_directories(fxval_app_tests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+  target_compile_definitions(
+    fxval_app_tests
+    PRIVATE "FXVAL_CONFIG_EXAMPLES_DIR=\"${PROJECT_SOURCE_DIR}/configs/examples\""
+            "FXVAL_REGRESSION_DIR=\"${CMAKE_CURRENT_SOURCE_DIR}/regression/expected\"")
+  fxval_set_warnings(fxval_app_tests)
+  gtest_discover_tests(fxval_app_tests DISCOVERY_TIMEOUT 60)
+
+  # Replaces operator new for the whole process, so it is a program of its own.
+  add_executable(fxval_alloc_tests app/test_allocation_free.cpp)
+  target_link_libraries(fxval_alloc_tests PRIVATE fxval::fxval GTest::gtest_main)
+  target_include_directories(fxval_alloc_tests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+  fxval_set_warnings(fxval_alloc_tests)
+  gtest_discover_tests(fxval_alloc_tests DISCOVERY_TIMEOUT 60)
+
+  add_test(
+    NAME cli_end_to_end
+    COMMAND ${CMAKE_COMMAND} -DPRICE=$<TARGET_FILE:fxval-price>
+            -DCONFIGS=${PROJECT_SOURCE_DIR}/configs/examples
+            -DWORK=${CMAKE_CURRENT_BINARY_DIR}/cli_end_to_end -P
+            ${CMAKE_CURRENT_SOURCE_DIR}/integration/run_cli.cmake)
+endif()

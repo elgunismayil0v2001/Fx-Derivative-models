@@ -6,7 +6,9 @@ v1.0 scope is frozen. New ideas go in the "Later" list below, not into the v1.0 
 
 Garman-Kohlhagen with Greeks, Heston semi-analytic pricer, Monte Carlo engine with Euler full
 truncation and QE schemes, control variate and antithetics, thread-count-invariant results, and a
-first validation write-up on Heston and the Monte Carlo schemes. Tests V-01 to V-08.
+first validation write-up on Heston and the Monte Carlo schemes (`docs/validation_report.md`), and
+the `fxval-price` command-line program with validated configuration and run metadata.
+Tests V-01 to V-08.
 
 ## v1.0
 

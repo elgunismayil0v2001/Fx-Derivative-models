@@ -1,9 +1,10 @@
 {
   "$schema": "https://raw.githubusercontent.com/microsoft/vcpkg-tool/main/docs/vcpkg.schema.json",
   "name": "fxval",
-  "version": "0.1.0",
+  "version": "0.5.0",
   "description": "FX derivative pricing and risk models with an independent validation suite",
   "dependencies": [
-    "gtest"
+    "gtest",
+    "nlohmann-json"
   ]
 }

@@ -36,7 +36,7 @@ jobs:
           python-version: "3.12"
       - name: Pytest (offline) and reference tables
         run: |
-          pip install pytest numpy scipy
+          pip install pytest numpy scipy jsonschema
           pytest -q
           python python/gen_gk_reference.py "$RUNNER_TEMP/gk.csv"
           cmp "$RUNNER_TEMP/gk.csv" tests/validation/data/gk_reference.csv
@@ -97,7 +97,7 @@ jobs:
       - name: Configure debug (compile_commands.json)
         run: cmake --preset debug
       - name: clang-tidy on library sources
-        run: clang-tidy -p build/debug --quiet src/*.cpp
+        run: clang-tidy -p build/debug --quiet src/*.cpp apps/lib/*.cpp apps/price/main.cpp
 
   coverage:
     runs-on: ubuntu-24.04
@@ -128,6 +128,7 @@ jobs:
           cmake -S examples/consumer -B build/consumer -DCMAKE_PREFIX_PATH="$HOME/fxval-install"
           cmake --build build/consumer
           ./build/consumer/consumer
+          "$HOME/fxval-install/bin/fxval-price" --config configs/examples/gk_vanillas.json --quiet > /dev/null
 
   docker:
     runs-on: ubuntu-24.04

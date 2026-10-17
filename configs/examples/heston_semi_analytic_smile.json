@@ -1,0 +1,18 @@
+{
+  "format_version": 1,
+  "market": { "spot": 1.10, "domestic_rate": 0.03, "foreign_rate": 0.01 },
+  "model": {
+    "type": "heston_semi_analytic",
+    "v0": 0.04, "kappa": 2.0, "theta": 0.04, "xi": 0.3, "rho": -0.5
+  },
+  "options": [
+    { "id": "K0.95-1Y", "type": "call", "strike": 0.95, "expiry_years": 1.0 },
+    { "id": "K1.00-1Y", "type": "call", "strike": 1.00, "expiry_years": 1.0 },
+    { "id": "K1.05-1Y", "type": "call", "strike": 1.05, "expiry_years": 1.0 },
+    { "id": "K1.10-1Y", "type": "call", "strike": 1.10, "expiry_years": 1.0 },
+    { "id": "K1.15-1Y", "type": "call", "strike": 1.15, "expiry_years": 1.0 },
+    { "id": "K1.20-1Y", "type": "call", "strike": 1.20, "expiry_years": 1.0 },
+    { "id": "K1.25-1Y", "type": "call", "strike": 1.25, "expiry_years": 1.0 },
+    { "id": "K1.10-6M-P", "type": "put", "strike": 1.10, "expiry_years": 0.5 }
+  ]
+}
