@@ -29,7 +29,8 @@ fxval_add_test_executable(fxval_unit_tests unit/test_error.cpp unit/test_units.c
                           unit/test_version.cpp unit/test_daycount.cpp
                           unit/test_garman_kohlhagen.cpp unit/test_garman_kohlhagen_errors.cpp unit/test_heston.cpp
                           unit/test_quadrature.cpp unit/test_philox.cpp
-                          unit/test_running_stats.cpp unit/test_mc_engine.cpp)
+                          unit/test_running_stats.cpp unit/test_mc_engine.cpp
+                          unit/test_heston_qe.cpp unit/test_variance_reduction.cpp)
 
 fxval_add_test_executable(fxval_validation_tests validation/test_catalogue_consistency.cpp
                           validation/test_v01_put_call_parity.cpp validation/test_v02_greeks_fd.cpp
@@ -38,12 +39,16 @@ fxval_add_test_executable(fxval_validation_tests validation/test_catalogue_consi
                           validation/test_heston_reference.cpp
                           validation/test_v05_heston_mc_vs_analytic.cpp
                           validation/test_v07_mc_reproducibility.cpp
-                          validation/test_mc_path_reference.cpp)
+                          validation/test_mc_path_reference.cpp
+                          validation/test_mc_qe_path_reference.cpp
+                          validation/test_v06_feller_study.cpp
+                          validation/test_v08_variance_reduction.cpp)
 target_compile_definitions(
   fxval_validation_tests
   PRIVATE "FXVAL_TEST_CATALOGUE_PATH=\"${PROJECT_SOURCE_DIR}/docs/test_catalogue.md\""
           "FXVAL_GK_REFERENCE_PATH=\"${PROJECT_SOURCE_DIR}/tests/validation/data/gk_reference.csv\""
           "FXVAL_HESTON_REFERENCE_PATH=\"${PROJECT_SOURCE_DIR}/tests/validation/data/heston_reference.csv\""
-          "FXVAL_MC_PATH_REFERENCE_PATH=\"${PROJECT_SOURCE_DIR}/tests/validation/data/mc_path_reference.csv\"")
+          "FXVAL_MC_PATH_REFERENCE_PATH=\"${PROJECT_SOURCE_DIR}/tests/validation/data/mc_path_reference.csv\""
+          "FXVAL_MC_QE_PATH_REFERENCE_PATH=\"${PROJECT_SOURCE_DIR}/tests/validation/data/mc_qe_path_reference.csv\"")
 target_include_directories(fxval_unit_tests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 target_include_directories(fxval_validation_tests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})

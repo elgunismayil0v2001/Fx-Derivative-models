@@ -6,6 +6,26 @@ All notable changes are recorded here. The format follows
 
 ## [Unreleased]
 
+### Added (week 5: QE scheme, variance reduction, Feller study)
+
+- `mc::HestonQuadraticExponential`: Andersen's QE scheme with central discretisation and martingale
+  correction, `heston_qe_mc_price`; `NormalStream` can be antithetic (sign flip).
+- `mc/variance_reduction.hpp`: `run_antithetic`, `run_variance_reduced` (antithetic and/or control
+  variate), `estimate_control_coefficient` (pilot run on separate streams); `McReduction` options for
+  the vanilla wrappers, new overloads of `heston_euler_mc_price`.
+- V-06 (Euler vs QE when Feller fails, Feller-ratio sweep), V-08 (variance ratios, unbiasedness, honest
+  standard errors, a control with a wrong mean that must be rejected), QE path reference
+  (`python/gen_qe_reference.py`, 160 rows) and its C++ test, unit tests for QE and variance reduction.
+- `bench/bench_mc_scaling.cpp` (option `FXVAL_BUILD_BENCH`, off by default): thread scaling,
+  scheme cost, work-normalised variance. Not part of `ctest`.
+- ADR 0006.
+
+### Changed (week 5)
+
+- `mc/engine.hpp`: the body of `run_monte_carlo` moved into the new `run_samples` (path index in,
+  sample out); `run_monte_carlo` calls it. No behaviour change: all week 4 tests pass unchanged,
+  including the bitwise checks of V-07.
+
 ### Added (week 4: Monte Carlo engine)
 
 - `fxval::mc`: Philox4x32-10 counter-based generator, `NormalStream` (Box-Muller, stream number =

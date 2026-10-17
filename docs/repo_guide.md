@@ -36,12 +36,14 @@ validation tests are what a model-validation team would ask for. Reasoning:
 | `models/heston.hpp` | `heston.cpp` | `HestonParams`, `HestonVanilla`, `log_forward_characteristic_function`, `heston_price`: semi-analytic Heston (docs section 4, ADR 0004). |
 | `numerics/quadrature.hpp` | none (header-only template) | `adaptive_gauss_kronrod`: adaptive Gauss-Kronrod (7, 15) integration with an explicit `converged` flag. |
 | `mc/philox.hpp` | none (header-only) | `Philox4x32`: counter-based random number generator, checked against the published known answers. |
-| `mc/normal_stream.hpp` | none (header-only) | `NormalStream(seed, stream)`: standard normals by Box-Muller from Philox blocks; stream number = path number. |
+| `mc/normal_stream.hpp` | none (header-only) | `NormalStream(seed, stream, antithetic = false)`: standard normals by Box-Muller from Philox blocks; stream number = path number. |
 | `mc/running_stats.hpp` | none (header-only) | `RunningStats`: Welford mean and variance with an exact merge. |
-| `mc/engine.hpp` | `mc_engine.cpp` | `McConfig`, `McEstimate`, the `PathModel` concept and `run_monte_carlo`: threads, fixed blocks, merge in block order (V-07). `mc_engine.cpp` holds configuration validation. |
+| `mc/engine.hpp` | `mc_engine.cpp` | `McConfig`, `McEstimate`, the `PathModel` concept, `run_samples` (any sample function of the path index) and `run_monte_carlo`: threads, fixed blocks, merge in block order (V-07). `mc_engine.cpp` holds configuration validation. |
 | `mc/gbm.hpp` | `mc_models.cpp` | `GbmModel`: exact GBM simulation (engine check). |
 | `mc/heston_euler.hpp` | `mc_models.cpp` | `HestonEulerFullTruncation`: Euler scheme with full truncation; `simulate_terminal_state` for cross-checks. |
-| `mc/vanilla.hpp` | `mc_vanilla.cpp` | `gbm_mc_price`, `heston_euler_mc_price`: discounted vanilla price with standard error. |
+| `mc/heston_qe.hpp` | `mc_models.cpp` | `HestonQuadraticExponential`: Andersen QE scheme with martingale correction (week 5); `next_variance` exposes the variance step for tests. |
+| `mc/variance_reduction.hpp` | none (header-only) | `run_antithetic`, `run_variance_reduced`, `estimate_control_coefficient`, `NoControl`: antithetic and control variates on top of `run_samples`. |
+| `mc/vanilla.hpp` | `mc_vanilla.cpp` | `gbm_mc_price`, `heston_euler_mc_price`, `heston_qe_mc_price` (and `McReduction` options): discounted vanilla price with standard error. |
 | `version.hpp.in` | none | Template turned into the version header by CMake. |
 
 ## `tests/`
@@ -68,6 +70,12 @@ validation tests are what a model-validation team would ask for. Reasoning:
 | `unit/test_mc_engine.cpp` | Engine: constants, steps passed through, path = stream, partial blocks, every configuration error, non-finite result; models: zero expiry, martingale property, constant-variance law, truncation reached. |
 | `validation/test_v05_heston_mc_vs_analytic.cpp` | V-05: GBM engine vs Garman-Kohlhagen; Heston Euler vs the semi-analytic price; bias vs step size with a power check. |
 | `validation/test_v07_mc_reproducibility.cpp` | V-07: bitwise equality over thread counts and repeats, with a naive-partition control that must differ. |
+| `unit/test_heston_qe.cpp` | QE: argument checks, exact conditional mean and variance of the variance step in both branches, point mass at zero, positivity, martingale at few steps, determinism, one block per step. |
+| `unit/test_variance_reduction.cpp` | Antithetic stream is the exact negation; exact identities (odd function cancels, perfect control, known coefficient); pilot streams; errors; bitwise equality over thread counts; wrapper errors. |
+| `validation/test_v06_feller_study.cpp` | V-06: Euler vs QE bias over four Feller-violating sets, steps, strikes; martingale; switching level; Feller-ratio sweep. |
+| `validation/test_v08_variance_reduction.cpp` | V-08: unbiasedness, wrong-mean control rejected, standard error vs spread over 80 seeds, variance ratios, GK control under GBM. |
+| `validation/test_mc_qe_path_reference.cpp` | QE terminal states against the independent Python table (160 rows). |
+| `validation/data/mc_qe_path_reference.csv` | The QE reference table, written by `python/gen_qe_reference.py`. |
 | `validation/test_mc_path_reference.cpp` | Normals and Heston paths against the independent Python table (120 rows). |
 | `validation/data/mc_path_reference.csv` | The path reference table, written by `python/gen_mc_reference.py`. |
 | `validation/test_catalogue_consistency.cpp` | Fails if `docs/test_catalogue.md` lists a V-ID twice, never, or outside V-01..V-21. |
@@ -81,9 +89,10 @@ validation tests are what a model-validation team would ask for. Reasoning:
 |---|---|
 | `data_download.py` | Downloads NBP, ECB and FRED history; writes CSV plus provenance file. |
 | `gen_heston_reference.py` | Writes the Heston table with the textbook P1/P2 probabilities and SciPy QUADPACK (a different integral, parametrisation and integrator from the C++ code). |
+| `gen_qe_reference.py` | Writes the QE path table: the scheme re-implemented in plain Python (same paper, separately written code; random numbers from `gen_mc_reference.py`). |
 | `gen_mc_reference.py` | Writes the Monte Carlo path table: Philox, Box-Muller and the Heston Euler path re-implemented in plain Python (no shared code with C++). |
 | `gen_gk_reference.py` | Writes the reference table with SciPy, in a different algebraic form from the C++ code, fixed seed. |
-| `tests/test_data_download.py`, `tests/test_gen_gk_reference.py`, `tests/test_gen_heston_reference.py`, `tests/test_gen_mc_reference.py` | Offline tests of the parsers and of the generators (the Monte Carlo one needs no third-party package). |
+| `tests/test_data_download.py`, `tests/test_gen_gk_reference.py`, `tests/test_gen_heston_reference.py`, `tests/test_gen_mc_reference.py`, `tests/test_gen_qe_reference.py` | Offline tests of the parsers and of the generators (the Monte Carlo one needs no third-party package). |
 
 ## Other
 
@@ -94,4 +103,5 @@ validation tests are what a model-validation team would ask for. Reasoning:
 | `scripts/check.sh` | Runs format, builds, tests, sanitizers, clang-tidy and Python checks locally. |
 | `.github/workflows/ci.yml` | The same checks in GitHub Actions, plus the compiler matrix, coverage and Docker. |
 | `docs/` | Model documentation, test catalogue, architecture, ADRs, this guide. |
-| `bench/`, `configs/`, `data/`, `notebooks/` | Placeholders, empty until used. |
+| `bench/bench_mc_scaling.cpp` | Monte Carlo benchmark: thread scaling, cost of Euler vs QE, SE^2 x time of the variance-reduced estimators. Build with `-DFXVAL_BUILD_BENCH=ON`; not part of `ctest` (timings are not tests). |
+| `configs/`, `data/`, `notebooks/` | Placeholders, empty until used. |
