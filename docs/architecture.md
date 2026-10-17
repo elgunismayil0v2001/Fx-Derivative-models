@@ -1,6 +1,6 @@
 # Architecture
 
-Status: week 5. The `core`, `pricing`, `numerics`, `models` (Heston) and `mc` layers exist. The rest is the planned structure so that
+Status: week 6. The `core`, `pricing`, `numerics`, `models` (Heston) and `mc` layers exist, and the first program in `apps`. The rest is the planned structure so that
 each module added later has an obvious place and an obvious set of allowed dependencies.
 
 ## Layers and dependency rule
@@ -22,7 +22,8 @@ instruments   FX forward, FX option, portfolio                     (weeks 9-11)
 timeseries    EWMA, GARCH, GJR-GARCH                               (week 10)
 risk          VaR, ES, backtests                                   (week 10)
 credit        exposure, netting, CVA                               (week 11)
-apps          command-line programs                                (week 6 onward)
+apps          fxval-price (implemented, week 6); more programs     (week 6 onward)
+              not part of the public API; the only code that uses a JSON parser
 ```
 
 The dependency rule will be enforced by directory-level `target_link_libraries` once the library
@@ -47,11 +48,16 @@ is split into more than one target. Until then it is a review rule.
 * `tests/unit/`: behaviour of the library's own code.
 * `tests/validation/`: the V-series (see `docs/test_catalogue.md`), which is evidence about the
   models and appears in the validation report.
-* `tests/regression/`: frozen outputs for the example portfolios (from week 6).
+* `tests/app/`: the command-line layer (configuration, runner, reports, CLI, metadata), and the
+  allocation test (`fxval_alloc_tests`, a program of its own because it replaces `operator new`).
+* `tests/regression/`: frozen results of the example configurations; checked against independent
+  Python code by `python/tests/test_price_examples.py`.
+* `tests/integration/run_cli.cmake`: end-to-end test of the real executable (exit codes, files,
+  config hash against CMake's own SHA-256).
 * `python/tests/`: data download parsers, run offline.
 
 ## Provenance
 
-Every output file written by an application will carry the git commit, a hash of the input
-configuration, the random seed and the library version (planned for week 6). The data download
+Every report written by `fxval-price` carries the git commit, the SHA-256 of the input
+configuration, the random seed, the compiler and the library version (ADR 0007). The data download
 script already writes a `.meta.json` next to each CSV with source URL, retrieval time and a hash.

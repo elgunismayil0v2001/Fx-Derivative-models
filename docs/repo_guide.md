@@ -1,6 +1,6 @@
 # Repository guide
 
-What every folder and file is for. Status: week 4.
+What every folder and file is for. Status: week 6.
 
 ## The two kinds of test, in one paragraph
 
@@ -17,7 +17,9 @@ validation tests are what a model-validation team would ask for. Reasoning:
 | `CMakeLists.txt` | Defines the library `fxval` (sources listed explicitly; links `Threads::Threads`), include paths, warnings, install and export rules. Adds `tests/`. |
 | `CMakePresets.json` | Named build configurations: `debug`, `release`, `asan-ubsan`, `tsan`, `coverage`, `release-vcpkg`. |
 | `vcpkg.json` | Dependency manifest for the vcpkg preset. |
-| `Dockerfile` | Builds and tests the library in a clean container. |
+| `Dockerfile` | Builds and tests the library in a clean container; the runtime image has `fxval-price` as its entry point. |
+| `apps/` | Command-line programs. `apps/lib/` is the static library `fxval_app` (configuration parser, runner, report writers, run metadata, logger, CLI); `apps/price/main.cpp` is ten lines. Not part of the public API. |
+| `configs/examples/`, `configs/schema/` | Three example configurations (also the inputs of the regression tests) and the JSON Schema for editors and CI. |
 | `pyproject.toml` | Python tool configuration (pytest, ruff) and optional dependencies for the reference generator. |
 | `.clang-format`, `.clang-tidy`, `.pre-commit-config.yaml` | Code style, static analysis, checks before each commit. |
 | `.gitignore` | Keeps `build/`, caches and `.DS_Store` out of git. |
@@ -81,7 +83,15 @@ validation tests are what a model-validation team would ask for. Reasoning:
 | `validation/test_catalogue_consistency.cpp` | Fails if `docs/test_catalogue.md` lists a V-ID twice, never, or outside V-01..V-21. |
 | `validation/data/heston_reference.csv` | The Heston reference table, written by `python/gen_heston_reference.py`. |
 | `validation/data/gk_reference.csv` | The independent reference table, written by `python/gen_gk_reference.py`. |
-| `regression/` | Empty until week 6. |
+| `regression/` | `test_price_regression.cpp` and `expected/*.results.json`: the example configurations priced and compared with frozen results (relative 1e-9). `FXVAL_UPDATE_GOLDEN=1` rewrites them. |
+| `app/test_price_config.cpp` | Every rule of the configuration format (one case each, message must name the field), repeated keys, nesting, 100,001 options, and 24,000 randomly damaged documents. |
+| `app/test_price_runner.cpp` | Runner agrees bit for bit with the library; put-call parity, order and thread-count invariance, notional scaling, failure isolation, missing Greeks. |
+| `app/test_report.cpp` | JSON structure and field order, lossless numbers, error rows, CSV quoting. |
+| `app/test_cli.cpp` | Argument handling, every exit code, stdin, file output, size limit, determinism, log versus report streams. |
+| `app/test_run_metadata.cpp` | Timestamp formatter against Python datetime (60 instants), metadata record. |
+| `app/test_allocation_free.cpp` | Counts heap allocations: zero per simulated path; engine allocations independent of path count; a model that allocates is detected. |
+| `unit/test_sha256.cpp` | SHA-256 against NIST vectors, padding boundaries, one million bytes. |
+| `integration/run_cli.cmake` | Runs the real `fxval-price`: exit codes, both formats, config hash against CMake's `file(SHA256)`, `SOURCE_DATE_EPOCH`. |
 
 ## `python/`
 
@@ -91,6 +101,7 @@ validation tests are what a model-validation team would ask for. Reasoning:
 | `gen_heston_reference.py` | Writes the Heston table with the textbook P1/P2 probabilities and SciPy QUADPACK (a different integral, parametrisation and integrator from the C++ code). |
 | `gen_qe_reference.py` | Writes the QE path table: the scheme re-implemented in plain Python (same paper, separately written code; random numbers from `gen_mc_reference.py`). |
 | `gen_mc_reference.py` | Writes the Monte Carlo path table: Philox, Box-Muller and the Heston Euler path re-implemented in plain Python (no shared code with C++). |
+| `tests/test_price_examples.py` | Checks the example configurations against the JSON Schema (and that the schema rejects 14 damaged copies), and the frozen results against SciPy (Garman-Kohlhagen), the textbook Heston integrals and, for Monte Carlo, the independent price within 4 standard errors. |
 | `gen_gk_reference.py` | Writes the reference table with SciPy, in a different algebraic form from the C++ code, fixed seed. |
 | `tests/test_data_download.py`, `tests/test_gen_gk_reference.py`, `tests/test_gen_heston_reference.py`, `tests/test_gen_mc_reference.py`, `tests/test_gen_qe_reference.py` | Offline tests of the parsers and of the generators (the Monte Carlo one needs no third-party package). |
 
@@ -104,4 +115,4 @@ validation tests are what a model-validation team would ask for. Reasoning:
 | `.github/workflows/ci.yml` | The same checks in GitHub Actions, plus the compiler matrix, coverage and Docker. |
 | `docs/` | Model documentation, test catalogue, architecture, ADRs, this guide. |
 | `bench/bench_mc_scaling.cpp` | Monte Carlo benchmark: thread scaling, cost of Euler vs QE, SE^2 x time of the variance-reduced estimators. Build with `-DFXVAL_BUILD_BENCH=ON`; not part of `ctest` (timings are not tests). |
-| `configs/`, `data/`, `notebooks/` | Placeholders, empty until used. |
+| `data/`, `notebooks/` | Placeholders, empty until used. |

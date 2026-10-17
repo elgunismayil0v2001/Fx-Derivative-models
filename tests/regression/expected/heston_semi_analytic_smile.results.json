@@ -1,0 +1,82 @@
+[
+  {
+    "expiry_years": 1.0,
+    "id": "K0.95-1Y",
+    "notional": 1.0,
+    "present_value": 0.1929248544036379,
+    "price": 0.1929248544036379,
+    "status": "ok",
+    "strike": 0.95,
+    "type": "call"
+  },
+  {
+    "expiry_years": 1.0,
+    "id": "K1.00-1Y",
+    "notional": 1.0,
+    "present_value": 0.1563110027021348,
+    "price": 0.1563110027021348,
+    "status": "ok",
+    "strike": 1.0,
+    "type": "call"
+  },
+  {
+    "expiry_years": 1.0,
+    "id": "K1.05-1Y",
+    "notional": 1.0,
+    "present_value": 0.1234420716274327,
+    "price": 0.1234420716274327,
+    "status": "ok",
+    "strike": 1.05,
+    "type": "call"
+  },
+  {
+    "expiry_years": 1.0,
+    "id": "K1.10-1Y",
+    "notional": 1.0,
+    "present_value": 0.09478998318246243,
+    "price": 0.09478998318246243,
+    "status": "ok",
+    "strike": 1.1,
+    "type": "call"
+  },
+  {
+    "expiry_years": 1.0,
+    "id": "K1.15-1Y",
+    "notional": 1.0,
+    "present_value": 0.07064128737143344,
+    "price": 0.07064128737143344,
+    "status": "ok",
+    "strike": 1.15,
+    "type": "call"
+  },
+  {
+    "expiry_years": 1.0,
+    "id": "K1.20-1Y",
+    "notional": 1.0,
+    "present_value": 0.0510357825117135,
+    "price": 0.0510357825117135,
+    "status": "ok",
+    "strike": 1.2,
+    "type": "call"
+  },
+  {
+    "expiry_years": 1.0,
+    "id": "K1.25-1Y",
+    "notional": 1.0,
+    "present_value": 0.03574438046302491,
+    "price": 0.03574438046302491,
+    "status": "ok",
+    "strike": 1.25,
+    "type": "call"
+  },
+  {
+    "expiry_years": 0.5,
+    "id": "K1.10-6M-P",
+    "notional": 1.0,
+    "present_value": 0.054673265412662334,
+    "price": 0.054673265412662334,
+    "status": "ok",
+    "strike": 1.1,
+    "type": "put"
+  }
+]

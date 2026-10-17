@@ -1,7 +1,8 @@
 # Reproducible build and test environment.
 #   docker build -t fxval .
 # The build stage compiles the library and RUNS THE TESTS. If a test fails, the image does not
-# build. The runtime stage carries only the installed library (apps arrive in week 6).
+# build. The runtime stage carries the installed library and the fxval-price program:
+#   docker run --rm -v "$PWD/configs:/configs" fxval --config /configs/examples/gk_vanillas.json
 #
 # TODO when publishing: pin the base image by digest (ubuntu:24.04@sha256:...).
 
@@ -23,3 +24,6 @@ RUN cmake --preset release \
 FROM ubuntu:24.04 AS runtime
 COPY --from=build /opt/fxval /opt/fxval
 ENV CMAKE_PREFIX_PATH=/opt/fxval
+ENV PATH=/opt/fxval/bin:$PATH
+ENTRYPOINT ["fxval-price"]
+CMD ["--help"]

@@ -1,0 +1,35 @@
+[
+  {
+    "expiry_years": 1.0,
+    "id": "K1.00-1Y",
+    "notional": 1.0,
+    "present_value": 0.15644090543161776,
+    "price": 0.15644090543161776,
+    "standard_error": 0.00015342183806442086,
+    "status": "ok",
+    "strike": 1.0,
+    "type": "call"
+  },
+  {
+    "expiry_years": 1.0,
+    "id": "K1.10-1Y",
+    "notional": 1.0,
+    "present_value": 0.0948957207418593,
+    "price": 0.0948957207418593,
+    "standard_error": 0.00018430295429751334,
+    "status": "ok",
+    "strike": 1.1,
+    "type": "call"
+  },
+  {
+    "expiry_years": 1.0,
+    "id": "K1.20-1Y",
+    "notional": 1.0,
+    "present_value": 0.05111895395753161,
+    "price": 0.05111895395753161,
+    "standard_error": 0.00017316607111477432,
+    "status": "ok",
+    "strike": 1.2,
+    "type": "call"
+  }
+]

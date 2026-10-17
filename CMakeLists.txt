@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.25)
 
 project(
   fxval
-  VERSION 0.1.0
+  VERSION 0.5.0
   DESCRIPTION "FX derivative pricing and risk models with an independent validation suite"
   LANGUAGES CXX)
 
@@ -24,6 +24,7 @@ endif()
 
 option(FXVAL_BUILD_TESTS "Build the unit and validation tests" ON)
 option(FXVAL_BUILD_BENCH "Build the benchmark programs in bench/" OFF)
+option(FXVAL_BUILD_APPS "Build the command-line programs in apps/ (needs nlohmann_json)" ON)
 option(FXVAL_WARNINGS_AS_ERRORS "Treat compiler warnings as errors" ON)
 option(FXVAL_FETCH_DEPS "Download missing third-party dependencies with FetchContent" ON)
 option(FXVAL_COVERAGE "Instrument the build for line coverage (GCC or Clang)" OFF)
@@ -53,7 +54,7 @@ find_package(Threads REQUIRED)
 
 add_library(fxval STATIC src/contracts.cpp src/error.cpp src/units.cpp src/daycount.cpp
                         src/garman_kohlhagen.cpp src/heston.cpp src/mc_engine.cpp
-                        src/mc_models.cpp src/mc_vanilla.cpp)
+                        src/mc_models.cpp src/mc_vanilla.cpp src/sha256.cpp)
 add_library(fxval::fxval ALIAS fxval)
 
 target_include_directories(
@@ -66,6 +67,15 @@ target_link_libraries(fxval PUBLIC Threads::Threads)  # the Monte Carlo engine u
 # Contract checks (FXVAL_EXPECTS) are active in Debug builds, including for consumers.
 target_compile_definitions(fxval PUBLIC "$<$<CONFIG:Debug>:FXVAL_ENABLE_CONTRACTS>")
 fxval_set_warnings(fxval)
+
+include(GNUInstallDirs)
+
+# ---------------------------------------------------------------------------
+# Command-line programs (apps/): not part of the library's public API
+# ---------------------------------------------------------------------------
+if(FXVAL_BUILD_APPS)
+  add_subdirectory(apps)
+endif()
 
 # ---------------------------------------------------------------------------
 # Tests
@@ -82,7 +92,6 @@ endif()
 # ---------------------------------------------------------------------------
 # Install and package config: find_package(fxval) then link fxval::fxval
 # ---------------------------------------------------------------------------
-include(GNUInstallDirs)
 include(CMakePackageConfigHelpers)
 
 install(

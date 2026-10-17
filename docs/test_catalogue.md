@@ -100,6 +100,30 @@ duplicated, or outside V-01 to V-21.
   a statistical comparison with moderate path counts cannot see a sign error in one drift term, nor the
   missing martingale correction. The `1 - U` mutation was the one the suite missed at first; the extra
   unit test is the fix, and it was itself checked by re-running that mutation (now caught).
+* **Mutation check, done by hand in week 6** (not automated). Sixteen changes were made one at a time to
+  the configuration parser, runner, report writer, CLI, metadata and SHA-256 code; the Release build was
+  rebuilt and the command-line-layer tests, the SHA-256 tests and the end-to-end test were run each time
+  (script kept outside the repository). One change did not compile the first time (an unused parameter) and
+  was rewritten; each was reverted afterwards. Every change is caught. The list of tests is abbreviated.
+
+  | Change | Caught by |
+  |---|---|
+  | duplicate option ids allowed | one rejection case |
+  | unknown keys ignored | one rejection case one rejection case one rejection case one rejection case one rejection case one rejection case ... |
+  | repeated JSON keys allowed | PriceConfigSyntaxTest.RepeatedKeysAreRejectedNotSilentlyResolved |
+  | domestic and foreign rate swapped | PriceConfigAcceptTest.GarmanKohlhagenValuesAreConverted; RegressionTest.GarmanKohlhagenVanillas; RegressionTest.HestonMonteCarloQe; RegressionTest.HestonSemiAnalyticSmile; one rejection case one rejection case |
+  | seed optional (defaults to 0) | one rejection case |
+  | present value ignores notional | PriceRunnerTest.PresentValueIsPriceTimesNotional; RegressionTest.GarmanKohlhagenVanillas |
+  | failed options count as success | CliTest.FailedOptionStillProducesTheReportAndExitsThree |
+  | hash of the wrong bytes | RunMetadataTest.MetadataRecordsTheInputHashVersionAndTime; cli_end_to_end |
+  | month off by one in timestamps | CliTest.EpochOverrideAppearsInBothFormats; RunMetadataTest.TimestampMatchesPythonDatetime |
+  | size limit off by one | CliTest.ConfigurationLargerThanTheLimitIsRejected |
+  | CSV does not quote commas | CsvFieldTest.QuotesOnlyWhenNeeded |
+  | SHA-256 sigma constant wrong | Sha256Test.OneMillionA; Sha256Test.PaddingBoundaries; Sha256Test.PublishedVectors; cli_end_to_end |
+  | report written non-atomically (rename skipped, tmp kept) | CliTest.ReportCanBeWrittenToAFileAtomically |
+  | QE allowed with xi = 0 | one rejection case |
+  | CLI log written to stdout | CliTest.ConfigurationCanComeFromStandardInput; CliTest.ConfigurationLargerThanTheLimitIsRejected; CliTest.FailedOptionStillProducesTheReportAndExitsThree; CliTest.InlineEqualsFormIsAccepted; CliTest.InvalidConfigurationExitsTwoNamesTheFieldAndPricesNothing; CliTest.MissingConfigurationFileExitsFour ... |
+  | antithetic flag dropped from config | PriceConfigAcceptTest.HestonSemiAnalyticAndMonteCarloValuesAreConverted; RegressionTest.HestonMonteCarloQe; ReportJsonTest.MonteCarloReportEchoesSeedAndSettings; one rejection case |
 * **Mutation check, done by hand in week 3** (not automated): flipping the sign of `rho` in the
   characteristic function is caught by HESTON-REF and the smile unit test but **not** by V-03 or
   V-04 (those do not depend on the sign of `rho`); corrupting one Gauss-Kronrod weight is caught by

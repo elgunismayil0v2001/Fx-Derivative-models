@@ -6,6 +6,31 @@ All notable changes are recorded here. The format follows
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-10-17
+
+### Added (week 6: command-line program, run metadata, first validation report)
+
+- `fxval-price` (`apps/`): prices European options with Garman-Kohlhagen, Heston semi-analytic, GBM or
+  Heston Monte Carlo from a JSON configuration; JSON and CSV reports; exit codes 0 to 5; standard
+  input and output; atomic report files. Reference: `docs/cli.md`, decision: ADR 0007.
+- Strict, versioned configuration (`format_version` 1): unknown, repeated and missing keys, wrong
+  types and out-of-domain values are errors that name the field path; the Monte Carlo seed is required.
+  JSON Schema in `configs/schema/`; three example configurations in `configs/examples/`.
+- Run metadata on every report: library version, git commit (recorded at build time, `-dirty` when
+  tracked files changed), compiler, build type, SHA-256 of the input bytes, UTC timestamp
+  (`SOURCE_DATE_EPOCH` honoured). `fxval/core/sha256.hpp`.
+- Tests: 130 command-line-layer tests, regression tests with frozen results (checked against
+  independent Python code), an allocation-counting test (zero allocations per simulated path), an
+  end-to-end test of the real executable, SHA-256 vectors, 21 Python tests.
+- `docs/validation_report.md`: first validation report (Garman-Kohlhagen, Heston, Monte Carlo
+  schemes, variance reduction), with a findings register and a limitations list.
+- Option `FXVAL_BUILD_APPS` (default ON); `vcpkg.json` lists `nlohmann-json`; version 0.5.0.
+
+### Changed (week 6)
+
+- The library `fxval` is unchanged except for the new `sha256` source; it still has no third-party
+  dependency. The Docker runtime image now has `fxval-price` as its entry point.
+
 ### Added (week 5: QE scheme, variance reduction, Feller study)
 
 - `mc::HestonQuadraticExponential`: Andersen's QE scheme with central discretisation and martingale

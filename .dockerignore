@@ -1,0 +1,7 @@
+# Keep local build trees and caches out of the image build context.
+build/
+.venv/
+__pycache__/
+.pytest_cache/
+.ruff_cache/
+.DS_Store

@@ -1,0 +1,22 @@
+{
+  "format_version": 1,
+  "market": { "spot": 1.10, "domestic_rate": 0.03, "foreign_rate": 0.01 },
+  "model": {
+    "type": "heston_monte_carlo",
+    "v0": 0.04, "kappa": 2.0, "theta": 0.04, "xi": 0.3, "rho": -0.5,
+    "scheme": "qe",
+    "monte_carlo": {
+      "seed": 20261017,
+      "paths": 100000,
+      "steps": 32,
+      "threads": 2,
+      "antithetic": true,
+      "control_variate": true
+    }
+  },
+  "options": [
+    { "id": "K1.00-1Y", "type": "call", "strike": 1.00, "expiry_years": 1.0 },
+    { "id": "K1.10-1Y", "type": "call", "strike": 1.10, "expiry_years": 1.0 },
+    { "id": "K1.20-1Y", "type": "call", "strike": 1.20, "expiry_years": 1.0 }
+  ]
+}
