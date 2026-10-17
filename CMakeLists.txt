@@ -23,6 +23,7 @@ if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
 endif()
 
 option(FXVAL_BUILD_TESTS "Build the unit and validation tests" ON)
+option(FXVAL_BUILD_BENCH "Build the benchmark programs in bench/" OFF)
 option(FXVAL_WARNINGS_AS_ERRORS "Treat compiler warnings as errors" ON)
 option(FXVAL_FETCH_DEPS "Download missing third-party dependencies with FetchContent" ON)
 option(FXVAL_COVERAGE "Instrument the build for line coverage (GCC or Clang)" OFF)
@@ -72,6 +73,10 @@ fxval_set_warnings(fxval)
 if(FXVAL_BUILD_TESTS)
   enable_testing()
   add_subdirectory(tests)
+endif()
+
+if(FXVAL_BUILD_BENCH)
+  add_subdirectory(bench)
 endif()
 
 # ---------------------------------------------------------------------------

@@ -1,6 +1,6 @@
 # Architecture
 
-Status: week 4. The `core`, `pricing`, `numerics`, `models` (Heston) and `mc` layers exist. The rest is the planned structure so that
+Status: week 5. The `core`, `pricing`, `numerics`, `models` (Heston) and `mc` layers exist. The rest is the planned structure so that
 each module added later has an obvious place and an obvious set of allowed dependencies.
 
 ## Layers and dependency rule
@@ -13,7 +13,7 @@ numerics      adaptive quadrature (implemented, week 3);           (week 3, 8)
               optimiser (planned)
 pricing       Garman-Kohlhagen (Greeks); Black-76 and barriers later (week 2, 9)
 models        semi-analytic Heston (implemented, week 3)           (week 3)
-mc            engine, random streams, GBM, Heston Euler FT        (implemented, week 4)
+mc            engine, random streams, GBM, Heston Euler FT and QE, variance reduction  (implemented, weeks 4-5)
               QE scheme, variance reduction (planned)              (week 5)
 smile         delta quotes, interpolation, arbitrage checks        (week 7)
 calibration   Heston calibrator, optimiser                         (week 8)

@@ -85,12 +85,14 @@ namespace detail {
 
 }  // namespace detail
 
-// Estimate E[ payoff(S_T) ] (undiscounted). Payoff must be callable as double(double), noexcept.
-template <PathModel Model, class Payoff>
-  requires std::is_nothrow_invocable_r_v<double, const Payoff&, double>
-[[nodiscard]] Result<McEstimate> run_monte_carlo(const Model& model,
-                                                 const Payoff& payoff,
-                                                 const McConfig& config) {
+// The lowest level of the engine: estimate the mean of any sample function of the path index.
+// `sample(path)` must be callable as double(std::uint64_t), noexcept, and may use only that index
+// (typically to build NormalStream(seed, path)); the engine calls it concurrently. Everything
+// else (blocks, threads, merge order, V-07) is decided here, so every estimator built on top of
+// it, plain, antithetic or control variate, is reproducible for any thread count.
+template <class Sample>
+  requires std::is_nothrow_invocable_r_v<double, const Sample&, std::uint64_t>
+[[nodiscard]] Result<McEstimate> run_samples(const Sample& sample, const McConfig& config) {
   Error problem{ErrorCode::invalid_argument, {}};
   if (!detail::validate(config, problem)) {
     return problem;
@@ -112,8 +114,7 @@ template <PathModel Model, class Payoff>
       const std::size_t last = std::min(first + block_size, config.paths);
       RunningStats local;
       for (std::size_t path = first; path < last; ++path) {
-        NormalStream rng(config.seed, path);
-        local.add(payoff(model.simulate_terminal_spot(rng, config.steps)));
+        local.add(sample(static_cast<std::uint64_t>(path)));
       }
       blocks[block] = local;
     }
@@ -135,6 +136,22 @@ template <PathModel Model, class Payoff>
   }  // all workers are joined here
 
   return detail::combine_blocks(blocks);
+}
+
+// Estimate E[ payoff(S_T) ] (undiscounted). Payoff must be callable as double(double), noexcept.
+template <PathModel Model, class Payoff>
+  requires std::is_nothrow_invocable_r_v<double, const Payoff&, double>
+[[nodiscard]] Result<McEstimate> run_monte_carlo(const Model& model,
+                                                 const Payoff& payoff,
+                                                 const McConfig& config) {
+  const std::uint64_t seed = config.seed;
+  const std::size_t steps = config.steps;
+  return run_samples(
+      [&](std::uint64_t path) noexcept {
+        NormalStream rng(seed, path);
+        return payoff(model.simulate_terminal_spot(rng, steps));
+      },
+      config);
 }
 
 }  // namespace fxval::mc

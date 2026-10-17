@@ -15,10 +15,10 @@ duplicated, or outside V-01 to V-21.
 | V-02 | GK Greeks vs finite differences | Relative error below 1e-6 (central difference) | 2 | passing | `tests/validation/test_v02_greeks_fd.cpp`. 120 points, 5-point fourth-order stencils. Worst: delta 1.8e-7, gamma 6.9e-8, vega 2.3e-8, volga 1.1e-7, vanna 2.3e-7, theta 6.6e-8, rho 2e-10. Volga is differenced from the analytic vega because a second difference of the price is limited by rounding noise (eps/h^2). |
 | V-03 | Heston semi-analytic vs GK as vol-of-vol goes to 0 | Prices agree within 1e-6 | 3 | passing | `tests/validation/test_v03_heston_vs_gk.cpp`. Exact at xi = 0 (worst 4.2e-16 on 60 cases). For xi > 0 the gap shrinks at the theoretical order: tenfold per tenfold in xi for rho != 0, hundredfold for rho = 0 (checked as ratios). Worst gap at xi = 1e-7: 2.8e-9. |
 | V-04 | Heston semi-analytic robustness over long maturities and extreme parameters | No branch-cut or discontinuity errors over a parameter grid | 3 | passing | `tests/validation/test_v04_heston_robustness.cpp`. (A) characteristic function walked along maturity to 30 years on 72 parameter/point combinations: worst relative step 0.023 against a jump threshold of 0.25; the original 1993 formulation, run as a control, shows 0.59, so the check can fail. (B) 576 parameter sets (432 violate Feller; vol of vol up to 5, rho +-0.95, kappa 0.05 to 10, expiry 1 week to 30 years) x 5 strikes: every price finite, inside the no-arbitrage bounds, decreasing and convex in strike, and the characteristic function respects its martingale bounds. |
-| V-05 | Heston Monte Carlo (each scheme) vs semi-analytic | Within 3 standard errors; bias vs step size reported | 4 | passing (Euler full truncation; QE added in week 5) | `tests/validation/test_v05_heston_mc_vs_analytic.cpp`. Engine check with exact GBM vs Garman-Kohlhagen: 16 comparisons, worst abs z 2.20. Heston Euler, Feller satisfied, 64 steps, 3 strikes: worst abs z 1.69. Bias vs steps in a Feller-violating case: 3.4e-2, 1.9e-2, 9.2e-3, 4.2e-3, 1.7e-3 for 8 to 128 steps; still 7.8 SE at 128 steps, which is also the power check (the test can reject a biased scheme). Assertions and seed were fixed before the results were seen. Fewer paths are used in Debug and sanitizer builds. |
-| V-06 | Scheme behaviour when the Feller condition fails | Bias documented for Euler full truncation and QE | 5 | planned | |
+| V-05 | Heston Monte Carlo (each scheme) vs semi-analytic | Within 3 standard errors; bias vs step size reported | 4 | passing (Euler full truncation; QE in V-06) | `tests/validation/test_v05_heston_mc_vs_analytic.cpp`. Engine check with exact GBM vs Garman-Kohlhagen: 16 comparisons, worst abs z 2.20. Heston Euler, Feller satisfied, 64 steps, 3 strikes: worst abs z 1.69. Bias vs steps in a Feller-violating case: 3.4e-2, 1.9e-2, 9.2e-3, 4.2e-3, 1.7e-3 for 8 to 128 steps; still 7.8 SE at 128 steps, which is also the power check (the test can reject a biased scheme). Assertions and seed were fixed before the results were seen. Fewer paths are used in Debug and sanitizer builds. |
+| V-06 | Scheme behaviour when the Feller condition fails | Bias documented for Euler full truncation and QE | 5 | passing | `tests/validation/test_v06_feller_study.cpp`. Four Feller-violating sets (ratio 0.03 to 0.1), 3 strikes, 4 to 64 steps, 100,000 paths. QE closer than Euler in 36 of 36 comparisons up to 16 steps (typically 50 to 150 times closer at 4 steps); QE within 4 SE of the semi-analytic price at 32 steps for all 12 set-strike pairs (worst 1.16 SE); Euler 3.0 to 37 SE away there (power check). QE martingale at 16 steps; insensitive to the switching level; Feller-ratio sweep recorded. The full table is in model documentation 5.8. Assertions and seed fixed before the results; one exploratory run on set A had been seen (stated in the file). |
 | V-07 | Monte Carlo reproducibility | Identical result for 1 and N threads with the same seed | 4 | passing | `tests/validation/test_v07_mc_reproducibility.cpp`. Bitwise equal (mean, standard error, variance) for 1, 2, 3, 4, 7, 8, 16 threads and hardware concurrency, GBM and Heston; 25 repeats with 8 threads. Control: a naive equal-share-per-thread sum differs from its 1-thread value for 4 of 4 thread counts, so the check can fail. Block size changes only rounding (agreement 1e-12), different seed changes the result. |
-| V-08 | Variance reduction | Variance ratio reported for control variate and antithetics | 5 | planned | |
+| V-08 | Variance reduction | Variance ratio reported for control variate and antithetics | 5 | passing | `tests/validation/test_v08_variance_reduction.cpp`. Heston QE, 200,000 paths, strikes 0.95 / 1.10 / 1.25. Cost-adjusted variance ratios: antithetic 4.5 / 2.0 / 1.2, control (`S_T`) 11.7 / 4.2 / 2.1, both 8.9 / 2.5 / 1.5. All estimators within 3 SE of the exact price (worst 1.5); a control with a 1% wrong mean rejected at 40 SE (power check); reported SE matches the spread over 80 seeds within 30%. Under GBM a Garman-Kohlhagen price works as a control (ratio 79). |
 | V-09 | Delta-quote to strike conversion round trip | Recovered quote error below 1e-8 | 7 | planned | |
 | V-10 | Smile arbitrage checks | Butterfly and calendar violations reported per scenario | 7 | planned | |
 | V-11 | Heston calibration parameter recovery | Parameters and implied vols recovered within stated tolerance across several seeds | 8 | planned | |
@@ -53,6 +53,13 @@ duplicated, or outside V-01 to V-21.
   (paths); worst difference on the development machine 0. Compared numerically because libm
   `log`/`cos`/`sin`/`exp` can differ in the last digits between machines. Python's Philox
   reproduces the three published known-answer vectors, which are also unit tests in C++.
+* **QE-PATH-REF** (`tests/validation/test_mc_qe_path_reference.cpp`): C++ QE terminal states
+  against the independent Python implementation `python/gen_qe_reference.py`, 160 rows in
+  `tests/validation/data/mc_qe_path_reference.csv` (44 antithetic, 8 that take the martingale
+  fallback, both variance branches, `psi_c` = 1 and 2, 64-bit seeds and streams, one-step paths).
+  Tolerance 1e-9; worst difference 3.0e-15 (spot, relative) and 8.7e-16 (variance, absolute). Same
+  author and same paper for both implementations: a misreading of the paper would be in both, so
+  V-06 and the exact-moment unit tests are the checks that do not share that risk.
 * **Mutation check, done by hand in week 4** (not automated). Each change below was made to the
   Monte Carlo code, the suite was run, and the change was reverted:
 
@@ -66,6 +73,33 @@ duplicated, or outside V-01 to V-21.
 
   The third row is why the independent path table exists: a statistical comparison with
   moderate path counts cannot see a small error in one drift term.
+* **Mutation check, done by hand in week 5** (not automated). Fifteen changes were made one at a time
+  to the QE scheme, the antithetic stream or the variance-reduction code; the Release build was rebuilt
+  and the new unit tests plus QE-PATH-REF, V-05, V-06, V-08 and MC-PATH-REF were run each time (script
+  kept outside the repository). Each change was reverted afterwards.
+
+  | Change | Caught by |
+  |---|---|
+  | sign of `rho/xi` flipped in `K2` | QE-PATH-REF, V-06 (4 tests), V-08 |
+  | sign of `rho/xi` flipped in `K1` | **QE-PATH-REF only** |
+  | martingale correction never applied | **QE-PATH-REF only** (the uncorrected scheme is already a martingale to within the resolution of the V-06 and unit martingale checks) |
+  | `A = K2` instead of `K2 + K4/2` in the correction | martingale unit test, QE-PATH-REF, V-06 (4 tests), V-08 |
+  | `K3` 10% too large | QE-PATH-REF, V-06 (2 tests), V-08 |
+  | spot shock built from `Z_v` instead of `Z_perp` | martingale unit test, QE-PATH-REF, V-06 (4 tests), V-08 (2 tests) |
+  | `p = psi/(psi+1)` in the exponential branch | point-mass and exact-moment unit tests, QE-PATH-REF, V-06 |
+  | constant term of `s2` divided by `kappa` instead of `2 kappa` | point-mass and exact-moment unit tests, QE-PATH-REF, V-06 (2 tests), V-08 |
+  | `theta` term of `m` 1% too large | point-mass unit test, QE-PATH-REF |
+  | `1 - U` computed as `1.0 - u` instead of from `erfc` | **caught only after a test was added for it**: the first run of this check found nothing (the loss of precision affects only draws with `z` beyond about 8, which a standard error cannot see); the unit test `ExponentialBranchRightTailStaysAccurateForLargeNormalDraws` now calls the variance step directly at `z` = 6 to 8.4 and checks growth against the Gaussian tail |
+  | antithetic flag ignored by `NormalStream` | antithetic stream unit test, odd-function unit test, QE-PATH-REF, V-08 |
+  | antithetic pair simulates the same path twice | odd-function unit test, V-08 |
+  | pilot run uses the same streams as the main run | pilot-stream unit test only |
+  | control mean added instead of subtracted | perfect-control unit test, V-08 (3 tests) |
+  | control coefficient twice too large | pilot-coefficient unit tests (2), V-08 (GBM control) |
+
+  Two mutations are seen by the independent path table only, which is the reason the table exists:
+  a statistical comparison with moderate path counts cannot see a sign error in one drift term, nor the
+  missing martingale correction. The `1 - U` mutation was the one the suite missed at first; the extra
+  unit test is the fix, and it was itself checked by re-running that mutation (now caught).
 * **Mutation check, done by hand in week 3** (not automated): flipping the sign of `rho` in the
   characteristic function is caught by HESTON-REF and the smile unit test but **not** by V-03 or
   V-04 (those do not depend on the sign of `rho`); corrupting one Gauss-Kronrod weight is caught by

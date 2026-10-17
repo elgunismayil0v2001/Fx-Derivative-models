@@ -21,15 +21,18 @@ namespace fxval::mc {
 //     largest value 1 - 2^-54 is not representable and would round to exactly 1.)
 //   * Box-Muller turns the two uniforms into two independent normals:
 //       z1 = sqrt(-2 ln u1) cos(2 pi u2),   z2 = sqrt(-2 ln u1) sin(2 pi u2).
+//   * An ANTITHETIC stream (constructor flag) returns the same numbers with the sign flipped:
+//     z -> -z. Because the normals are symmetric, (z, -z) are two equally valid draws that are
+//     perfectly negatively correlated, which is what antithetic variates need (week 5).
 //   * Box-Muller is used instead of an inverse-CDF routine because it needs no approximation
 //     formula that would have to be validated separately. The largest possible |z| is about 8.6
 //     (u1 >= 2^-53); real normals exceed that with probability below 1e-17.
 class NormalStream {
 public:
-  constexpr NormalStream(std::uint64_t seed, std::uint64_t stream) noexcept
+  constexpr NormalStream(std::uint64_t seed, std::uint64_t stream, bool antithetic = false) noexcept
       : key_{static_cast<std::uint32_t>(seed), static_cast<std::uint32_t>(seed >> 32U)},
         stream_lo_(static_cast<std::uint32_t>(stream)),
-        stream_hi_(static_cast<std::uint32_t>(stream >> 32U)) {}
+        stream_hi_(static_cast<std::uint32_t>(stream >> 32U)), sign_(antithetic ? -1.0 : 1.0) {}
 
   // Two independent standard normals (one Philox block). Call as often as needed; the stream is
   // 2^64 blocks long.
@@ -44,8 +47,8 @@ public:
     const double u2 = to_open_unit(bits[2], bits[3]);
     const double radius = std::sqrt(-2.0 * std::log(u1));
     const double angle = 2.0 * std::numbers::pi * u2;
-    z1 = radius * std::cos(angle);
-    z2 = radius * std::sin(angle);
+    z1 = sign_ * radius * std::cos(angle);
+    z2 = sign_ * radius * std::sin(angle);
   }
 
   // Number of blocks consumed so far (for tests).
@@ -62,6 +65,7 @@ private:
   Philox4x32::Key key_;
   std::uint32_t stream_lo_;
   std::uint32_t stream_hi_;
+  double sign_;  // +1, or -1 for an antithetic stream (exact: only the sign bit changes)
   std::uint64_t block_ = 0;
 };
 

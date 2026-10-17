@@ -215,8 +215,8 @@ In-the-money option: out-of-the-money value plus `df |F - K|` (parity).
 
 ## 5. Monte Carlo
 
-Status: the engine, exact GBM and the Heston Euler scheme with full truncation (week 4). The QE
-scheme, variance reduction and the Feller study follow in week 5.
+Status: the engine, exact GBM and the Heston Euler scheme with full truncation (week 4); the QE
+scheme, antithetic and control variates, the Feller study and the scaling benchmark (week 5).
 
 ### 5.1 Estimator and standard error
 
@@ -287,15 +287,151 @@ the distribution); this is documented behaviour and is checked to `1e-12` relati
   Philox, Box-Muller and the path. Worst differences on the development machine: 0 (bitwise);
   the tolerance (1e-13 for normals, 1e-9 for paths) allows for other libm versions.
 
-### 5.6 Limitations
+### 5.6 Heston QE scheme (week 5)
 
-* The Euler scheme is badly biased when Feller fails: in the stress case above the bias is still
-  7.8 standard errors at 128 steps. It is a baseline, not the recommended scheme; QE (week 5) is.
-* No variance reduction yet (week 5). Standard errors scale as `1/sqrt(N)` only.
-* The engine passes the terminal spot to the payoff. Path-dependent payoffs (barriers, week 9)
-  need a richer interface, and the `PathModel` concept will be extended then.
-* The throughput quoted for planning (about 3.5e7 time steps per second on two threads in the
-  development sandbox) is one unrepeated measurement, not a benchmark. Scaling benchmarks: week 5.
+Andersen (2008), `include/fxval/mc/heston_qe.hpp`, decision record ADR 0006. The variance is a
+square-root process; instead of a truncated Euler step, QE samples `v_{n+1}` from a distribution
+that has the exact conditional mean and variance of the true transition. With `e = exp(-kappa dt)`:
+
+```
+m   = theta + (v - theta) e
+s2  = v xi^2 e (1 - e) / kappa + theta xi^2 (1 - e)^2 / (2 kappa)
+psi = s2 / m^2
+```
+
+* `psi <= psi_c = 1.5` (quadratic): `v' = a (b + Z)^2`, `b^2 = 2/psi - 1 + sqrt(2/psi) sqrt(2/psi - 1)`,
+  `a = m / (1 + b^2)`, `Z ~ N(0, 1)`.
+* `psi > psi_c` (exponential with a point mass at zero): `p = (psi - 1)/(psi + 1)`,
+  `beta = (1 - p)/m`; `v' = 0` if `U <= p`, otherwise `v' = ln((1 - p)/(1 - U)) / beta`.
+  Here `U = Phi(Z_v)` (`erfc`), so one Philox block still gives all the randomness of a step.
+
+Both branches reproduce `m` and `s2` exactly (unit tests check the sample mean and variance of the
+variance step against these formulas in each branch, and the size of the point mass at zero).
+The spot uses the central discretisation (`gamma1 = gamma2 = 1/2`):
+
+```
+ln S' = ln S + (r_d - r_f) dt + K0 + K1 v + K2 v' + sqrt(K3 v + K4 v') Z_perp
+K1 = dt/2 (kappa rho/xi - 1/2) - rho/xi    K2 = dt/2 (kappa rho/xi - 1/2) + rho/xi
+K3 = K4 = dt/2 (1 - rho^2)                 K0 = -ln M - (K1 + K3/2) v,  M = E[exp(A v') | v],  A = K2 + K4/2
+```
+
+`M` has a closed form in each branch (quadratic: `exp(A b^2 a / (1 - 2 A a)) / sqrt(1 - 2 A a)`,
+exponential: `p + beta (1 - p) / (beta - A)`), so `K0` makes `E[S' | S, v] = S e^{(r_d - r_f) dt}`
+exactly: `E[S_T]` equals the forward for any number of steps. `M` exists only if `2 A a < 1` or
+`A < beta`; when it does not (steps of several years with large positive `rho`) the uncorrected
+`K0 = -rho kappa theta dt / xi` is used. `xi > 0` is required.
+
+### 5.7 Variance reduction (week 5)
+
+`include/fxval/mc/variance_reduction.hpp`; all estimators are built on `run_samples`, so they are
+reproducible for any thread count (unit tests repeat the V-07 check for them).
+
+* **Antithetic variates.** Each sample averages a path with its mirror image driven by `-z`.
+  `McConfig.paths` counts pairs; one pair costs two path simulations, so the fair comparison is plain
+  with `2n` paths against `n` pairs: ratio `Var(plain) / (2 Var(pair))`.
+* **Control variate.** `f(S) - c (g(S) - mu)` with `mu = E[g]` known exactly. Any fixed `c` is
+  unbiased; `c* = Cov(f, g) / Var(g)` minimises the variance, which falls by `1 - corr(f, g)^2`.
+  `c` comes from a pilot run on other streams (`pilot_stream_offset`), not from the main paths.
+  For Heston the control is `g(S_T) = S_T`, `mu` = forward. Under GBM any Garman-Kohlhagen price is
+  a valid control (V-08 d). **A GK price is not a valid control for Heston paths.** A wrong `mu` is
+  invisible in the standard error; only a comparison with an exact price shows it.
+
+### 5.8 Evidence (week 5)
+
+All runs: seed 20261016 (fixed before the results), Release build, 2 threads, results recomputed
+by `ctest`; Debug and sanitizer builds use fewer paths.
+
+* **QE-PATH-REF** (`test_mc_qe_path_reference.cpp`): 160 cases (44 antithetic, 8 that take the
+  fallback, both branches 1376 and 1155 times), worst relative difference to the independent Python
+  implementation 3.0e-15 (spot) and 8.7e-16 (variance, absolute). Same-author caveat in ADR 0006.
+* **V-06** (`test_v06_feller_study.cpp`): four parameter sets that violate Feller (ratio 0.03 to 0.1),
+  three strikes, 4 to 64 steps, 100,000 paths, both schemes on the same random numbers. At the money
+  (bias in price units, MC minus semi-analytic; QE / Euler):
+
+  | set | 4 steps | 8 steps | 16 steps | 32 steps | 64 steps |
+  |---|---|---|---|---|---|
+  | A (`kappa 0.5, xi 1.0, rho -0.9, T 2`) | -4.2e-4 / 5.5e-2 | -7.0e-5 / 3.5e-2 | -5.6e-6 / 1.9e-2 | -2.1e-4 / 9.6e-3 | 1.4e-4 / 4.6e-3 |
+  | B (`kappa 1.0, xi 1.5, rho -0.7, T 1`) | -3.3e-4 / 4.0e-2 | 6.4e-5 / 2.5e-2 | 3.1e-4 / 1.3e-2 | -6.8e-5 / 5.6e-3 | 5.1e-4 / 2.5e-3 |
+  | C (`kappa 0.3, xi 0.9, rho -0.3, T 3`) | -1.1e-3 / 6.3e-2 | -2.2e-4 / 4.6e-2 | 3.0e-4 / 2.8e-2 | -5.9e-4 / 1.5e-2 | 3.6e-4 / 7.9e-3 |
+  | D (`kappa 0.8, xi 0.8, rho +0.5, T 1`) | 8.0e-4 / 2.2e-2 | 1.0e-4 / 1.4e-2 | -7.6e-4 / 6.5e-3 | -1.3e-4 / 2.4e-3 | -5.3e-5 / 1.3e-3 |
+
+  QE is closer than Euler in every set, strike and step count up to 16 (36 of 36 comparisons), and
+  within 4 standard errors of the exact price at 32 steps for all 12 set-strike pairs (worst 1.16).
+  QE's differences from the exact price are at the level of sampling noise (standard error about
+  2e-4 to 7e-4 here), so the table does not show a QE bias, and it cannot rule out one below that
+  level. Euler at 32 steps is 37, 13, 17 and 3.0 standard errors away at the money (power check).
+  The terminal spot is a martingale for QE at 16 steps (z = 1.3, 0.8, 0.9, -1.3 for the four sets;
+  Euler 0.6, 1.8, 0.5, -0.1). QE is insensitive to `psi_c`: -0.11, -0.03 and -0.37 standard errors
+  for `psi_c` = 1.0, 1.5, 2.0. Feller-ratio sweep (`kappa 0.5, theta 0.04, rho -0.7, T 2`, 16 steps):
+  Euler bias grows from 9.2e-4 (ratio 1.0) to 3.4e-2 (ratio 0.018); QE stays between 1.1e-4 and 6.0e-4,
+  i.e. at noise level.
+* **V-08** (`test_v08_variance_reduction.cpp`): Heston QE, Feller satisfied, 16 steps, 200,000
+  plain paths, calls at 0.95 / 1.10 / 1.25 (spot 1.10, `T = 1`). Cost-adjusted variance ratios
+  (plain variance divided by reduced variance; antithetic uses `2 x pair variance`):
+
+  | strike | antithetic | control (`S_T`) | both | control coefficient |
+  |---|---|---|---|---|
+  | 0.95 (ITM) | 4.5 | 11.7 | 8.9 | 0.78 |
+  | 1.10 (ATM) | 2.0 | 4.2 | 2.5 | 0.54 |
+  | 1.25 (OTM) | 1.2 | 2.1 | 1.5 | 0.28 |
+
+  Every estimator is within 3 standard errors of the semi-analytic price (12 checks, worst |z| 1.5);
+  a control with a mean wrong by 1% of the forward is rejected at 40 standard errors. The linear
+  control beats antithetic variates here, and combining them is worse than the control alone: both
+  exploit the same monotone dependence of the payoff on the noise, so the gains overlap. The reported
+  standard error matches the spread across 80 seeds (SE / empirical sd in the test log; an
+  exploratory 400-seed run at the money gave 0.99 for plain and 1.01 for the control). Under exact GBM
+  with a Garman-Kohlhagen price (strike 1.05) as the control for the strike-1.10 call the ratio is 79
+  (`c` = 0.90), z = -1.4.
+* **Hand mutation check, week 5** (not automated): 15 deliberate changes, all caught in the end; 2 of
+  them only by the independent path table, and 1 (an inexact `1 - U` in the far tail) only after a unit
+  test was added because the first run found it uncaught. Table in `docs/test_catalogue.md`.
+
+### 5.9 Limitations
+
+* **Euler** is badly biased when Feller fails (V-05, V-06); keep it as a baseline.
+* **QE** needs `xi > 0`, has no exact-martingale guarantee in the fallback corner (steps of years),
+  and its accuracy was measured only on the parameter sets above, at the money and at two other
+  strikes. It is not known to be unbiased in general. Deep out-of-the-money prices, where the
+  standard error is small compared with the price, were not studied.
+* The only control for Heston is the terminal spot. A control with higher correlation to the payoff
+  (for example the Garman-Kohlhagen payoff with the model's implied volatility) would have to have
+  its mean computed under Heston, which needs the semi-analytic pricer.
+* The engine passes the terminal spot to the payoff. Path-dependent payoffs (barriers, week 9) need a
+  richer interface, and the `PathModel` concept will be extended then.
+* Throughput and scaling numbers come from `bench/` and are specific to the machine they were
+  measured on (section 5.10).
+
+### 5.10 Benchmark (`bench/bench_mc_scaling.cpp`)
+
+One run, in a cloud sandbox with **2 hardware threads**, GCC 13.3 Release, Heston QE (`v0 = theta =
+0.04`, `kappa = 2`, `xi = 0.3`, `rho = -0.5`, `T = 1`), 16 steps, 1,000,000 paths, median of 5 runs.
+Re-run it on your own machine before quoting any number; nothing here is asserted by a test.
+
+| threads | seconds | paths/s | speed-up | efficiency | bitwise equal to 1 thread |
+|---|---|---|---|---|---|
+| 1 | 1.651 | 605,599 | 1.00 | 100% | (reference) |
+| 2 | 0.842 | 1,187,168 | 1.96 | 98% | yes |
+| 4 | 0.839 | 1,191,278 | 1.97 | 49% | yes (more threads than cores) |
+| 8 | 0.783 | 1,277,036 | 2.11 | 26% | yes (more threads than cores) |
+
+Scaling up to the number of cores is close to linear (1.96x on 2 cores); the 4 and 8 thread rows
+only show that oversubscription neither helps nor changes the result. **Scaling beyond 2 cores was
+not measured.** One path costs 94 ns per step with QE and 65 ns per step with Euler (1 thread), so
+QE is 1.46 times as expensive per step; V-06 shows it needs far fewer steps for the same bias.
+
+Work-normalised variance (`SE^2 x time`, one thread, equal number of path simulations, at the
+money; the pilot run for the control coefficient, 20,000 paths, is not timed):
+
+| estimator | seconds | standard error | `SE^2 x s` | gain over plain |
+|---|---|---|---|---|
+| plain | 1.578 | 1.36e-4 | 2.90e-8 | 1.00x |
+| antithetic | 1.588 | 9.58e-5 | 1.46e-8 | 1.99x |
+| control variate | 1.545 | 6.63e-5 | 6.80e-9 | 4.26x |
+| antithetic + control | 1.471 | 8.49e-5 | 1.06e-8 | 2.73x |
+
+The gains agree with the variance ratios of V-08 at the money (2.0, 4.2, 2.5), which shows the
+estimators cost no more than the plain one per path simulation.
 
 ## 6. to 10. Planned sections
 
