@@ -37,3 +37,6 @@ coverage.info
 .DS_Store
 *.swp
 *~
+
+# Output of local runs of fxval-price (examples write run.json by convention)
+/run.json

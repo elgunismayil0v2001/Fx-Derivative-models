@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.25)
 
 project(
   fxval
-  VERSION 0.5.0
+  VERSION 0.6.0
   DESCRIPTION "FX derivative pricing and risk models with an independent validation suite"
   LANGUAGES CXX)
 
@@ -24,6 +24,7 @@ endif()
 
 option(FXVAL_BUILD_TESTS "Build the unit and validation tests" ON)
 option(FXVAL_BUILD_BENCH "Build the benchmark programs in bench/" OFF)
+option(FXVAL_BUILD_EXAMPLES "Build the runnable examples in examples/ (not the consumer project)" ON)
 option(FXVAL_BUILD_APPS "Build the command-line programs in apps/ (needs nlohmann_json)" ON)
 option(FXVAL_WARNINGS_AS_ERRORS "Treat compiler warnings as errors" ON)
 option(FXVAL_FETCH_DEPS "Download missing third-party dependencies with FetchContent" ON)
@@ -54,7 +55,9 @@ find_package(Threads REQUIRED)
 
 add_library(fxval STATIC src/contracts.cpp src/error.cpp src/units.cpp src/daycount.cpp
                         src/garman_kohlhagen.cpp src/heston.cpp src/mc_engine.cpp
-                        src/mc_models.cpp src/mc_vanilla.cpp src/sha256.cpp)
+                        src/mc_models.cpp src/mc_vanilla.cpp src/sha256.cpp src/normal.cpp
+                        src/delta_convention.cpp src/quotes.cpp src/smile_slice.cpp src/vol_surface.cpp
+                        src/arbitrage_checks.cpp)
 add_library(fxval::fxval ALIAS fxval)
 
 target_include_directories(
@@ -80,6 +83,10 @@ endif()
 # ---------------------------------------------------------------------------
 # Tests
 # ---------------------------------------------------------------------------
+if(FXVAL_BUILD_EXAMPLES)
+  add_subdirectory(examples/smile)
+endif()
+
 if(FXVAL_BUILD_TESTS)
   enable_testing()
   add_subdirectory(tests)

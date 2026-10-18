@@ -4,13 +4,14 @@ A C++20 library that prices FX options and measures FX portfolio market and coun
 together with an **independent validation** of those models: exact benchmarks, numerical tests,
 model comparison, and a written validation report.
 
-> **Status: week 6 of a 14-week plan (release v0.5).** The engineering foundation is in place, the
+> **Status: week 7 of a 14-week plan (library version 0.6.0).** The engineering foundation is in place, the
 > Garman-Kohlhagen benchmark is checked by V-01 and V-02, the Heston semi-analytic pricer by V-03,
 > V-04 and an independent Python table, and the multithreaded Monte Carlo engine (Euler full
 > truncation and Andersen's QE scheme, antithetic and control variates) by V-05 to V-08 and
 > independent path tables, and by a command-line program `fxval-price` whose reports record the
 > build, the input hash and the seed. A first validation report is in `docs/validation_report.md`.
-> Smile, calibration, risk and CVA are not started.
+> Week 7 adds FX smile construction from delta quotes and arbitrage checks (V-09, V-10).
+> Calibration, barriers, risk and CVA are not started.
 
 ## What exists today
 
@@ -22,11 +23,12 @@ model comparison, and a written validation report.
 | Heston semi-analytic European pricer (stable characteristic function, Lewis integral) | working; V-03, V-04 and reference table (589 rows) passing |
 | Monte Carlo engine: counter-based Philox random numbers, exact GBM, Heston Euler with full truncation, Heston QE, antithetic and control variates, results independent of the thread count | working; V-05 to V-08 and two path tables (120 and 160 rows) passing |
 | `fxval-price` command-line program: validated, versioned JSON configuration; JSON and CSV reports with run metadata (version, git commit, config SHA-256, seed, time); documented exit codes | working; see `docs/cli.md` |
-| Unit, validation, regression, allocation and end-to-end tests, independent Python references, catalogue consistency test | 280 tests in `ctest`, 59 Python tests |
+| Unit, validation, regression, allocation and end-to-end tests, independent Python references, catalogue consistency test | 334 tests in `ctest`, 65 Python tests |
 | Scaling benchmark (`bench/`, off by default) | measured on one machine, see model documentation 5.10 |
 | CI (format, four compilers, sanitizers, clang-tidy, coverage, install check, Python, Docker) | `.github/workflows/ci.yml` |
 | Data download scripts (NBP, ECB, FRED) with provenance files | parsers tested offline |
-| Smile, calibration, risk, CVA | not started (see `docs/test_catalogue.md`) |
+| FX smile from ATM, risk-reversal and butterfly quotes: delta to strike (one stated convention), quadratic smile, surface in total variance, butterfly and calendar arbitrage reports | working; V-09, V-10 and a reference table (256 rows) passing; figures in `docs/results/` |
+| Calibration, barriers, risk, CVA | not started (see `docs/test_catalogue.md`) |
 
 ## Build and test
 
@@ -54,7 +56,7 @@ ctest --preset release
 ## Use as a library
 
 ```cmake
-find_package(fxval 0.5 CONFIG REQUIRED)
+find_package(fxval 0.6 CONFIG REQUIRED)
 target_link_libraries(my_target PRIVATE fxval::fxval)
 ```
 
@@ -73,6 +75,16 @@ number can be traced to what produced it. Exit codes, the configuration format a
 format are in `docs/cli.md`. The library itself does not depend on the JSON parser used by the
 program; build without the program with `-DFXVAL_BUILD_APPS=OFF`.
 
+## Smile example
+
+```sh
+build/release/examples/smile/fxval-example-smile configs/scenarios/smile_scenarios.csv docs/results/smile_data
+python python/plot_smiles.py docs/results/smile_data docs/results     # needs matplotlib
+```
+
+Builds the smile for each synthetic scenario, runs the checks and writes the CSV files behind the
+figures `docs/results/smile_*.png`. The quotes are illustrative, not market data.
+
 ## Data
 
 `python/data_download.py` downloads free FX and rate history and writes a CSV plus a provenance
@@ -84,7 +96,7 @@ See `docs/model_documentation.md`, section 11.
 * `docs/repo_guide.md`: what every folder and file is for
 * `docs/model_documentation.md`: model specification and derivations (draft)
 * `docs/test_catalogue.md`: the 21 planned validation tests (V-01 to V-21) and their status
-* `docs/validation_report.md`: the validation report (draft for v0.5: Garman-Kohlhagen, Heston, Monte Carlo)
+* `docs/validation_report.md`: the validation report (draft for v0.6: Garman-Kohlhagen, Heston, Monte Carlo, smile)
 * `docs/cli.md`: the `fxval-price` program, its configuration, report and exit codes
 * `docs/architecture.md`: layers and rules
 * `docs/adr/`: architecture decision records
@@ -96,6 +108,9 @@ See `docs/model_documentation.md`, section 11.
   schemes. The Euler scheme is badly biased when the Feller condition fails; QE was measured on four
   Feller-violating parameter sets only (sections 5.8 and 5.9 of the model documentation). Do not read
   later roadmap items as results.
+* The smile uses one delta convention (premium-excluded, delta-neutral ATM), the simple butterfly and
+  a quadratic interpolation that is not arbitrage-free by construction; the checks report where it
+  fails (model documentation section 6, findings F-08 to F-10).
 * The program prices one model per file and only European options; Heston has no Greeks yet. The
   GitHub Actions workflows, Docker and vcpkg builds have not been run (validation report, L-05).
 * Interest rates will be deterministic in v1.0, and default probabilities in CVA are assumptions.

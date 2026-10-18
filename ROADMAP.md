@@ -10,6 +10,12 @@ first validation write-up on Heston and the Monte Carlo schemes (`docs/validatio
 the `fxval-price` command-line program with validated configuration and run metadata.
 Tests V-01 to V-08.
 
+## v0.6 (end of week 7)
+
+FX smile from ATM, risk-reversal and butterfly quotes with one stated delta convention, quadratic
+interpolation, a surface interpolated in total variance, and butterfly and calendar arbitrage reports.
+Tests V-09 and V-10.
+
 ## v1.0
 
 Smile construction from delta quotes, Heston calibration with parameter recovery, Vanna-Volga and

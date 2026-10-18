@@ -46,6 +46,12 @@ validation tests are what a model-validation team would ask for. Reasoning:
 | `mc/heston_qe.hpp` | `mc_models.cpp` | `HestonQuadraticExponential`: Andersen QE scheme with martingale correction (week 5); `next_variance` exposes the variance step for tests. |
 | `mc/variance_reduction.hpp` | none (header-only) | `run_antithetic`, `run_variance_reduced`, `estimate_control_coefficient`, `NoControl`: antithetic and control variates on top of `run_samples`. |
 | `mc/vanilla.hpp` | `mc_vanilla.cpp` | `gbm_mc_price`, `heston_euler_mc_price`, `heston_qe_mc_price` (and `McReduction` options): discounted vanilla price with standard error. |
+| `numerics/normal.hpp` | `normal.cpp` | `normal_pdf`, `normal_cdf`, `normal_quantile` (Acklam plus a Halley step). |
+| `smile/delta_convention.hpp` | `delta_convention.cpp` | `SmileMarket`, `strike_from_delta`, `atm_strike`, `delta_at_strike`: the one delta convention implemented (docs 6.2). |
+| `smile/quotes.hpp` | `quotes.cpp` | `VolSpread`, `DeltaQuotes`, `pivot_volatilities`: ATM, risk reversal, butterfly to the three pivot volatilities. |
+| `smile/smile_slice.hpp` | `smile_slice.cpp` | `SmileSlice`: the quadratic through the 25-delta put, ATM and 25-delta call, with analytic derivatives. |
+| `smile/vol_surface.hpp` | `vol_surface.cpp` | `VolSurface`: several smiles, linear in total variance at fixed log-moneyness, no extrapolation. |
+| `smile/arbitrage_checks.hpp` | `arbitrage_checks.cpp` | `check_butterfly`, `check_calendar`, `check_surface`, `density_factor`: reports, never repairs. |
 | `version.hpp.in` | none | Template turned into the version header by CMake. |
 
 ## `tests/`
@@ -80,6 +86,13 @@ validation tests are what a model-validation team would ask for. Reasoning:
 | `validation/data/mc_qe_path_reference.csv` | The QE reference table, written by `python/gen_qe_reference.py`. |
 | `validation/test_mc_path_reference.cpp` | Normals and Heston paths against the independent Python table (120 rows). |
 | `validation/data/mc_path_reference.csv` | The path reference table, written by `python/gen_mc_reference.py`. |
+| `support/smile_test_support.hpp` | `make_smile_market()`, `make_quotes()`, `make_slice()` and a reader for `configs/scenarios/smile_scenarios.csv`. |
+| `unit/test_normal.cpp`, `test_delta_convention.cpp`, `test_quotes.cpp`, `test_smile_slice.cpp`, `test_vol_surface.cpp`, `test_arbitrage_checks.cpp` | The smile code: quantile known values and round trip, strikes by hand and against Garman-Kohlhagen Greeks, quote definitions and errors, pivots, derivatives, surface interpolation, check reports. |
+| `validation/test_v09_delta_roundtrip.cpp` | V-09: 20,160 quote to strike to quote round trips, with a wrong-convention control. |
+| `validation/test_v10_smile_arbitrage.cpp` | V-10: density factor against option-price convexity, theory-based verdicts, per-scenario report, frozen observed counts. |
+| `validation/test_smile_reference.cpp` | C++ smile against the independent Python table (256 rows). |
+| `validation/data/smile_reference.csv` | The smile reference table, written by `python/gen_smile_reference.py`. |
+| `integration/run_smile_example.cmake` | End-to-end test of `fxval-example-smile` (exit code, files, row counts). |
 | `validation/test_catalogue_consistency.cpp` | Fails if `docs/test_catalogue.md` lists a V-ID twice, never, or outside V-01..V-21. |
 | `validation/data/heston_reference.csv` | The Heston reference table, written by `python/gen_heston_reference.py`. |
 | `validation/data/gk_reference.csv` | The independent reference table, written by `python/gen_gk_reference.py`. |
@@ -102,14 +115,19 @@ validation tests are what a model-validation team would ask for. Reasoning:
 | `gen_qe_reference.py` | Writes the QE path table: the scheme re-implemented in plain Python (same paper, separately written code; random numbers from `gen_mc_reference.py`). |
 | `gen_mc_reference.py` | Writes the Monte Carlo path table: Philox, Box-Muller and the Heston Euler path re-implemented in plain Python (no shared code with C++). |
 | `tests/test_price_examples.py` | Checks the example configurations against the JSON Schema (and that the schema rejects 14 damaged copies), and the frozen results against SciPy (Garman-Kohlhagen), the textbook Heston integrals and, for Monte Carlo, the independent price within 4 standard errors. |
+| `gen_smile_reference.py` | Writes the smile table: strikes by root finding on the spot-form delta, smile by a Vandermonde solve (different methods from the C++ code). |
+| `plot_smiles.py` | Draws `docs/results/smile_*.png` from the CSV files written by `fxval-example-smile` (needs matplotlib). |
 | `gen_gk_reference.py` | Writes the reference table with SciPy, in a different algebraic form from the C++ code, fixed seed. |
-| `tests/test_data_download.py`, `tests/test_gen_gk_reference.py`, `tests/test_gen_heston_reference.py`, `tests/test_gen_mc_reference.py`, `tests/test_gen_qe_reference.py` | Offline tests of the parsers and of the generators (the Monte Carlo one needs no third-party package). |
+| `tests/test_data_download.py`, `tests/test_gen_gk_reference.py`, `tests/test_gen_heston_reference.py`, `tests/test_gen_mc_reference.py`, `tests/test_gen_qe_reference.py`, `tests/test_gen_smile_reference.py` | Offline tests of the parsers and of the generators (the Monte Carlo one needs no third-party package). |
 
 ## Other
 
 | Path | Purpose |
 |---|---|
 | `cmake/` | Warning flags, sanitizer options, template for `find_package(fxval)`. |
+| `examples/smile/` | `fxval-example-smile`: builds and checks the synthetic smile scenarios and writes the CSV behind the figures. |
+| `configs/scenarios/` | `smile_scenarios.csv`: synthetic, illustrative smile quotes, shared by the example and the V-10 test. |
+| `docs/results/` | Figures and data of the smile scenarios. |
 | `examples/consumer/` | A tiny external project that links the installed library. |
 | `scripts/check.sh` | Runs format, builds, tests, sanitizers, clang-tidy and Python checks locally. |
 | `.github/workflows/ci.yml` | The same checks in GitHub Actions, plus the compiler matrix, coverage and Docker. |

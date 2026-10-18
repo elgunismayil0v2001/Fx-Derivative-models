@@ -18,5 +18,8 @@ inline constexpr double put_call_parity = 1e-12;            // V-01
 inline constexpr double greeks_relative_fd = 1e-6;          // V-02
 inline constexpr double heston_vs_gk_vanishing_vol = 1e-6;  // V-03
 inline constexpr double quote_roundtrip = 1e-8;             // V-09
+// V-10: a butterfly density factor below -arbitrage_slack, or a total variance that falls by more
+// than this fraction between maturities, is reported as a violation. It absorbs rounding only.
+inline constexpr double arbitrage_slack = 1e-12;
 
 }  // namespace fxval::tol

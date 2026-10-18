@@ -6,6 +6,31 @@ All notable changes are recorded here. The format follows
 
 ## [Unreleased]
 
+## [0.6.0] - 2026-10-18
+
+### Added (week 7: FX smile from delta quotes, arbitrage checks)
+
+- `numerics/normal.hpp`: normal density, distribution function and quantile (Acklam plus one Halley
+  step).
+- `smile/`: delta convention (spot or forward delta, premium-excluded, delta-neutral ATM), quotes
+  (`VolSpread`, `DeltaQuotes`), `SmileSlice` (quadratic in forward log-moneyness through the 25-delta put,
+  ATM and 25-delta call), `VolSurface` (linear in total variance at fixed log-moneyness, no
+  extrapolation), butterfly and calendar arbitrage reports. ADR 0008.
+- Validation: V-09 (20,160 round-trip cases with a wrong-convention control), V-10 (density factor against
+  option-price convexity, theory-based expectations, per-scenario report), SMILE-REF (256 rows against an
+  independent Python implementation using root finding).
+- `examples/smile/` runnable example, `configs/scenarios/smile_scenarios.csv` (synthetic, labelled),
+  `python/plot_smiles.py`, figures in `docs/results/`.
+- `tol::arbitrage_slack` in `core/limits.hpp`. Option `FXVAL_BUILD_EXAMPLES` (default on).
+- Documentation: model documentation section 6, validation report update (findings F-08 to F-10,
+  limitations L-09 to L-12), 25-change hand mutation table.
+
+### Fixed
+
+- `docs/test_catalogue.md`: the week-6 mutation table had cells where a phrase was repeated by mistake;
+  rewritten.
+- Removed `run.json` (output of a local run) from version control and ignored it.
+
 ## [0.5.0] - 2026-10-17
 
 ### Added (week 6: command-line program, run metadata, first validation report)

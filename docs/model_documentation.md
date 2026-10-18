@@ -1,6 +1,6 @@
 # Model documentation
 
-Status: **draft, week 3.** Sections marked *planned* are placeholders that name the week in
+Status: **draft, week 7.** Sections marked *planned* are placeholders that name the week in
 which they are written. Garman-Kohlhagen is implemented and checked by V-01 and V-02. The Heston
 semi-analytic pricer is implemented and checked by V-03, V-04 and an independent Python table.
 
@@ -11,7 +11,7 @@ semi-analytic pricer is implemented and checked by V-03, V-04 and an independent
 | 3. Garman-Kohlhagen (benchmark) | implemented; V-01 and V-02 passing |
 | 4. Heston | semi-analytic pricer implemented; V-03, V-04, reference table passing (week 3); calibration week 8 |
 | 5. Monte Carlo schemes | planned, weeks 4-5 |
-| 6. FX smile from delta quotes | planned, week 7 |
+| 6. FX smile from delta quotes | implemented; V-09, V-10, SMILE-REF passing (week 7) |
 | 7. Vanna-Volga | planned, week 9 |
 | 8. Barrier options | planned, week 9 |
 | 9. Market risk (VaR, ES, backtests) | planned, week 10 |
@@ -433,13 +433,133 @@ money; the pilot run for the control coefficient, 20,000 paths, is not timed):
 The gains agree with the variance ratios of V-08 at the money (2.0, 4.2, 2.5), which shows the
 estimators cost no more than the plain one per path simulation.
 
-## 6. to 10. Planned sections
+## 6. FX smile from delta quotes (week 7)
 
-* **Week 5 additions to section 5:** Andersen QE scheme, control variate using the GK price,
-  antithetic variates, the Feller study (V-06, V-08).
-* **6. FX smile from delta quotes** (week 7): ATM, 25-delta risk reversal and butterfly. The
-  delta convention (spot or forward delta, premium included or not, ATM definition) must be
-  chosen once, written here, and tested (V-09).
+The code is in `include/fxval/smile/` and `include/fxval/numerics/normal.hpp`; the decisions are in
+`docs/adr/0008-smile-construction.md`. All quotes used in tests and figures are **synthetic and
+illustrative** (`configs/scenarios/smile_scenarios.csv`); no market data is used.
+
+### 6.1 Quotes
+
+A smile at one expiry is quoted by three numbers, for wing options of absolute delta `Delta`
+(0.25 or 0.10 in practice): the at-the-money volatility `sigma_ATM`, the risk reversal
+`RR = sigma_C - sigma_P` and the butterfly `BF = (sigma_C + sigma_P)/2 - sigma_ATM`. Hence
+
+`sigma_C = sigma_ATM + BF + RR/2`,  `sigma_P = sigma_ATM + BF - RR/2`.
+
+This is the "simple" butterfly. Markets often quote a **market strangle** butterfly, defined through
+vega-weighted prices, which needs a root find; it is not implemented (limitation L-09). A wing
+volatility that is not positive is rejected with a message that names the wing.
+
+### 6.2 Delta convention (the one implemented)
+
+* **Delta is premium-excluded**: the plain Garman-Kohlhagen delta (as if the premium were paid in the
+  domestic currency).
+* Two flavours of the underlying: **spot delta** `e^{-r_f T} N(d1)` for a call and
+  `-e^{-r_f T} N(-d1)` for a put, and **forward delta** `N(d1)` and `-N(-d1)`. The caller chooses.
+* **ATM is the delta-neutral straddle**: the strike where call delta plus put delta is zero. Since
+  `N(d1) - N(-d1) = 0` means `d1 = 0`, `K_ATM = F exp(sigma_ATM^2 T / 2)` in both flavours.
+* `F = S exp((r_d - r_f) T)`; rates are deterministic and flat to the expiry.
+
+**Strike from delta.** Let `p = Delta e^{r_f T}` for spot delta and `p = Delta` for forward delta; it
+must lie in (0, 1). A call with `N(d1) = p` has `d1 = N^{-1}(p)`; a put with `N(-d1) = p` has
+`d1 = -N^{-1}(p)`. Since `ln(F/K) = sigma sqrt(T) d1 - sigma^2 T/2`,
+
+`K = F exp(-sigma sqrt(T) d1 + sigma^2 T / 2)`  (with `sigma` the volatility of that wing).
+
+The inverse normal is Acklam's rational approximation followed by one Halley step on the exact
+distribution function (`numerics::normal_quantile`).
+
+**Not implemented** (limitation L-09): premium-adjusted delta (used where the premium is paid in the
+foreign currency, and for many pairs at longer tenors), the ATM-forward definition, and the switch from
+spot to forward delta at long tenors that some markets use. A pair whose market uses them is not
+reproduced.
+
+### 6.3 One smile: the quadratic in log-moneyness
+
+With `k = ln(K/F)`, the three pivots `(k_P, sigma_P)`, `(k_A, sigma_ATM)`, `(k_C, sigma_C)` define a
+unique quadratic
+
+`sigma(k) = sigma_P + b (k - k_P) + c (k - k_P)(k - k_A)`,
+
+`b = (sigma_ATM - sigma_P)/(k_A - k_P)`, `c = [(sigma_C - sigma_ATM)/(k_C - k_A) - b]/(k_C - k_P)`.
+
+It passes through the three market points exactly (checked by V-09) and its derivatives are analytic.
+It is not a model of the smile: it is the simplest smooth interpolation, and it has two known
+weaknesses that the checks report (6.5): it can become non-positive, and because `sigma` grows like
+`k^2`, total variance grows like `k^4`, which **always** violates the butterfly condition far enough out
+(for a calm smile with ATM 8%, RR -0.75 and BF 0.28 vol points it happens between 15 and 20 standard deviations from the forward, section 6.7). Pivot strikes must be
+increasing; if the quotes, deltas and rates make them not so, construction fails (`numerical_failure`).
+
+### 6.4 Several expiries
+
+`VolSurface` holds smiles at strictly increasing expiries and interpolates **linearly in total
+variance `w = sigma^2 T`, at fixed forward log-moneyness `k`**. That is also the coordinate in which the
+calendar condition is checked, so interpolation cannot create a calendar violation that the slices do
+not already have. There is **no extrapolation**: a query outside the first and last expiry is an error.
+
+### 6.5 Arbitrage conditions
+
+* **Butterfly (inside one expiry).** The implied density of the terminal rate is non-negative exactly
+  when call prices are convex in strike. With `w(k) = sigma(k)^2 T` (Gatheral 2004),
+
+  `g(k) = (1 - k w'/(2w))^2 - (w'^2/4)(1/w + 1/4) + w''/2`,
+
+  and `g >= 0` is the condition. The density in strike is `g(k) exp(-d2^2/2) / (K sqrt(2 pi w))` with
+  `d2 = -k/sqrt(w) - sqrt(w)/2`. For a flat smile `g = 1`.
+* **Calendar (across expiries).** Total variance must not fall with maturity at fixed `k`.
+* A point where the quadratic is not positive has no density and is counted separately.
+
+The checks are evaluated on a grid of standardised log-moneyness `x = k/(sigma_ATM sqrt(T))` (default
+`x` from -4 to 4, 801 points; the calendar check uses the grid of the earlier expiry). A violation is
+a value below `-1e-12` (rounding level). Each report gives the counts, the smallest `g`, and the
+**innermost** violation (closest to the forward) in standard deviations, strike and absolute delta:
+that number says how far into the wings the smile can be used. Nothing is repaired.
+
+### 6.6 Evidence
+
+* **V-09** (20,160 cases): quote to strike to delta back to quote, worst error 2.0e-14 against a
+  criterion of 1e-8; a wrong-convention control misses by at least 1.2e-3.
+* **SMILE-REF** (256 rows): independent Python implementation (root finding for strikes, Vandermonde fit),
+  worst strike difference 1.1e-15 relative.
+* **V-10**: the density factor equals the second difference of option prices on 3,165 grid points
+  (67 negative, so the sign is tested); flat smile clean; designed calendar inversion and concave smile
+  flagged exactly as predicted from theory before the run.
+* 25 hand mutations, 24 caught (test catalogue).
+
+### 6.7 Observed results on the synthetic scenarios (default grid, `x` in [-4, 4])
+
+| Scenario | Butterfly | Calendar |
+|---|---|---|
+| flat | clean | clean |
+| calm_g10 (EURUSD-like, 1W to 2Y) | clean, smallest `g` 0.18 | clean |
+| stressed (ATM 14% falling to 11.5%, RR -3 to -1.8) | clean, smallest `g` 0.28 | violations 3M to 6M (34 points) and 1Y to 2Y (61 points), at 3.55 to 3.72 standard deviations, 10 to 11 delta |
+| emerging (USD/PLN-like, RR +1.2 to +2.2) | clean, smallest `g` 0.33 | violations 3M to 6M (41 points, 3.8 standard deviations, 4.9 delta) and 6M to 1Y (86 points, 3.5 standard deviations, 5.1 delta) |
+| extreme_skew (RR -8, ATM 10%) | violations: 83, 87, 100 points at 1M, 3M, 1Y; innermost at 0.12 to 0.27 standard deviations and about 40 delta; the polynomial is not positive at 376 to 411 points | not defined where a slice is not positive |
+| concave (BF -4) | violations: 69 points, innermost at the forward; not positive at 677 points | n/a (one expiry) |
+| calendar_inversion | clean | 1W to 2W violates at all 801 points; 2W to 1M clean |
+
+The calm scenarios are clean on the default grid. A separate probe of a calm 1-year smile (ATM 8%,
+RR -0.75, BF 0.28 vol points; the unit-test smile) found the density factor positive at 15 standard
+deviations and negative at 20, so the quadratic fails only far outside any traded strike range. The calendar violations of the stressed and emerging scenarios are the more useful finding: the
+quotes at each expiry are individually reasonable, yet interpolated total variance falls from one
+expiry to the next in the wings, (a likely cause, not tested separately: the risk reversal and butterfly
+term structure changes faster than the ATM term structure grows). Options priced from such a surface in the 5 to 11 delta range could
+be priced inconsistently across maturities (finding F-09 in the validation report).
+
+Figures: `docs/results/smile_<scenario>.png`, produced by
+`fxval-example-smile` and `python/plot_smiles.py`.
+
+### 6.8 Limitations of the smile construction
+
+L-09 market conventions (premium-adjusted delta, market-strangle butterfly, ATM forward) are not
+implemented; L-10 the quadratic is not arbitrage-free in the far wings by construction; L-11 only the
+three pivots are fitted, so a ten-delta quote cannot be used together with a 25-delta one; L-12
+interpolation in time at fixed forward log-moneyness is not the same as at fixed delta or at fixed
+strike, and the surface takes its query in `k`, so the caller supplies the forward.
+
+## 7. to 10. Planned sections
+
 * **7. Vanna-Volga** (week 9): which market variant of the barrier weighting is used, and how
   much the choice changes the price.
 * **8. Barrier options** (week 9): closed form (Reiner-Rubinstein) as benchmark, Monte Carlo with
@@ -457,6 +577,8 @@ estimators cost no more than the plain one per path simulation.
 * Default probabilities in the CVA calculation are an assumption, not market-implied.
 * Independent validation of Garman-Kohlhagen so far is put-call parity and finite-difference
   Greeks (V-01, V-02), not a market-price comparison.
+* Smile quotes are synthetic. The smile code implements one delta convention, the simple butterfly
+  and a quadratic interpolation (section 6.8).
 
 ## 12. References
 
@@ -466,6 +588,11 @@ Verify the bibliographic details of each entry before citing it in the validatio
   Money and Finance 2(3).
 * S. Heston (1993), *A closed-form solution for options with stochastic volatility*, Review of
   Financial Studies 6(2).
+* J. Gatheral (2004), *A parsimonious arbitrage-free implied volatility parameterization with
+  application to the valuation of volatility derivatives*, Global Derivatives & Risk Management.
+* P. Acklam, an algorithm for computing the inverse normal cumulative distribution function (web note).
+* I. Clark (2011), *Foreign Exchange Option Pricing*, Wiley; U. Wystup (2006), *FX Options and
+  Structured Products*, Wiley.
 * H. Albrecher, P. Mayer, W. Schoutens and J. Tistaert (2007), *The little Heston trap*, Wilmott
   Magazine.
 * R. Lord, R. Koekkoek and D. van Dijk (2010), *A comparison of biased simulation schemes for

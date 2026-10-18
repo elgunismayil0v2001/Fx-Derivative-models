@@ -1,10 +1,12 @@
-# Validation report: FX option pricing models, version 0.5
+# Validation report: FX option pricing models, version 0.6
 
 * **Models in scope:** Garman-Kohlhagen (benchmark), Heston semi-analytic pricer, Monte Carlo engine
   with Euler (full truncation) and Andersen QE schemes, antithetic and control variates.
-* **Out of scope for this version:** FX smile construction, Heston calibration, Vanna-Volga and barrier
-  models, VaR/ES, exposure and CVA (weeks 7 to 13; their sections will be added to this report).
-* **Version tested:** library 0.5.0. The commit is in the metadata of every output file
+* **Added in 0.6:** FX smile construction from delta quotes (one delta convention, quadratic smile,
+  surface in total variance) with butterfly and calendar arbitrage checks.
+* **Out of scope for this version:** Heston calibration, Vanna-Volga and barrier models, VaR/ES,
+  exposure and CVA (weeks 8 to 13; their sections will be added to this report).
+* **Version tested:** library 0.6.0. The commit is in the metadata of every output file
   (section 8).
 * **Status:** draft for release v0.5. Every number below comes from a test in this repository
   and can be reproduced with the commands in section 8. Numbers measured on one machine are
@@ -20,6 +22,7 @@
 | Euler full truncation | Baseline scheme | V-05, V-06 | Large bias when the Feller condition fails (finding F-05). Kept as a baseline, not recommended. |
 | QE scheme | Preferred Heston scheme | V-06, QE-PATH-REF | Unbiased to the resolution of the test at 32 steps on the four parameter sets studied; evidence limited to those sets (L-01). |
 | Variance reduction | Efficiency | V-08 | Variance ratios 1.2 to 11.7; all estimators unbiased to the resolution of the test. |
+| FX smile from delta quotes | Strike conversion, interpolation, arbitrage diagnostics (input to calibration and barriers) | V-09, V-10, SMILE-REF | Quotes, strikes and deltas agree to 2e-14 with an independent implementation and with the benchmark model's own Greeks. The quadratic smile has butterfly arbitrage near the money for an extreme risk reversal (F-08) and calendar arbitrage in the 5 to 11 delta wings for two of the four realistic scenarios (F-09); it always fails far enough out (F-10). Synthetic quotes only. |
 | Command-line program | Reproducible runs | unit, regression, end-to-end tests | Every output carries the hash of its input, the build, the seed and the time. |
 
 **Overall assessment.** Within the parameter ranges and the European vanilla payoffs tested, the
@@ -65,7 +68,9 @@ Specifications, derivations and numerical methods are in `docs/model_documentati
    had been seen are stated in the test file (V-06).
 4. **Hand mutation checks.** Deliberate bugs were planted one at a time and the suite run: 5 changes
    to the Monte Carlo code in week 4, 15 to the QE scheme and variance reduction in week 5, 16 to the
-   command-line layer in week 6 (tables in `docs/test_catalogue.md`). All are caught by something. Three
+   command-line layer in week 6 and 25 to the smile code in week 7 (tables in `docs/test_catalogue.md`).
+   All are caught by something except one week-7 change that is equivalent in practice (a rounding-level
+   threshold, section 7, L-13). Three
    Monte Carlo changes (a drift term in Euler, the missing martingale correction and a sign in `K1` in QE)
    are caught only by the independent path tables, which is a measure of how much weight those tables carry.
 5. **Not automated:** the mutation checks are run by a script kept outside the repository and recorded by
@@ -86,10 +91,13 @@ Specifications, derivations and numerical methods are in `docs/model_documentati
 | V-07 | Reproducibility | identical for any thread count | bitwise equal for 1, 2, 3, 4, 7, 8, 16 threads and the hardware count; 25 repeats |
 | V-08 | Variance reduction | ratios reported; estimators unbiased | cost-adjusted ratios: antithetic 4.5 / 2.0 / 1.2, control 11.7 / 4.2 / 2.1, both 8.9 / 2.5 / 1.5 (strikes 0.95 / 1.10 / 1.25); all within 3 SE (worst 1.5) |
 | MC-PATH-REF, QE-PATH-REF | C++ paths against plain Python | 1e-9 | 120 and 160 rows; worst 0 and 3.0e-15 |
+| V-09 | Delta quote to strike round trip | quotes recovered to 1e-8 | 20,160 cases (both delta conventions, 25 and 10 delta, expiries 1 week to 5 years); worst delta error 2.0e-14, worst quote error 9.7e-17; a wrong-convention control misses by at least 1.2e-3 in 7,920 of 7,920 cases |
+| V-10 | Smile arbitrage checks | violations reported per scenario; checker agrees with option-price convexity | 3,165 grid points, 67 with negative density, all agree; flat scenario clean; designed inversion and concave smile flagged as predicted; per-scenario counts in model documentation 6.7 |
+| SMILE-REF | C++ smile against Python | strikes 1e-10 relative | 256 rows; worst strike 1.1e-15, volatility 7.8e-15, density factor 2.2e-13 |
 | ALLOC | No allocation in the path loop | 0 allocations per path; engine allocations independent of path count | passes for GBM, Euler, QE, antithetic and control variate; a model that allocates is detected (control) |
 
-Test counts at version 0.5: 116 unit, 26 validation, 130 command-line-layer tests, 7 allocation tests and one
-end-to-end test of the real executable, 280 in `ctest`; 59 Python tests. Notes on the numbers:
+Test counts at version 0.6: 159 unit, 36 validation, 130 command-line-layer tests, 7 allocation tests and two
+end-to-end tests of real executables, 334 in `ctest`; 65 Python tests. Notes on the numbers:
 
 * V-06: QE's differences from the exact price are at the level of the sampling noise (standard errors of
   about 2e-4 to 7e-4), so the table shows no QE bias and cannot rule one out below that level.
@@ -113,6 +121,9 @@ project's own tests, during development of the code they concern (the same perso
 | F-05 | medium | Euler with full truncation is badly biased when the Feller condition fails (bias 3.4e-2 to 1.7e-3 for 8 to 128 steps in the first case studied, still 7.8 SE at 128 steps). | V-05, V-06 | Mitigated: QE added; Euler kept as a documented baseline. |
 | F-06 | low | A small error in one drift term of the Euler scheme (raw `v` instead of `v+` in the variance drift) is invisible to statistical comparison at moderate path counts. | hand mutation check | Closed: independent path table (MC-PATH-REF) catches it; recorded as the reason the table exists. |
 | F-07 | low | The `1 - U` tail computation in QE's exponential branch matters only for `z` beyond about 8; the first mutation run found nothing that detected a loss of precision there. | hand mutation check (week 5) | Closed: unit test calls the variance step at `z` = 6 to 8.4 and checks the tail growth against the Gaussian tail. |
+| F-08 | low | With an extreme risk reversal (-8 vol points on a 10% ATM, so the 25-delta put is 14.3% and the 25-delta call 6.3%) the quadratic smile has negative implied density over roughly -1.1 to -0.1 standard deviations (figure `docs/results/smile_extreme_skew.png`; innermost violation 0.12 to 0.27 standard deviations from the forward, about 40 delta) and a non-positive volatility in the wings. Quotes this skewed are outside any realistic G10 range, but the construction accepts them. | V-10 report | Open: reported by `check_butterfly`; the smile is not repaired. A caller must check the report. |
+| F-09 | medium | The interpolated surface has calendar arbitrage in the wings for two of four realistic scenarios: stressed 3M to 6M (34 of 801 grid points) and 1Y to 2Y (61), emerging 3M to 6M (41) and 6M to 1Y (86). The violations start 3.5 to 3.8 standard deviations from the forward, at 5 to 11 absolute delta, and every slice is individually clean. Barrier and touch prices that depend on that range (week 9) could be inconsistent across maturities. A likely cause, not tested separately, is that the risk reversal and butterfly term structure moves faster than ATM total variance grows. | V-10 report | Open: reported by `check_calendar`. Next step: a surface constructed with the condition built in (candidate for v1.1) or a restriction to the range where the check passes. |
+| F-10 | info | A quadratic volatility smile violates the butterfly condition far enough from the forward whatever the quotes (total variance grows like `k^4`). For one calm 1-year smile (ATM 8%, RR -0.75, BF 0.28 vol points) the density factor is still positive at 15 standard deviations and negative at 20. | theory, probe | Accepted: a property of the construction, outside any traded strike range. |
 
 ## 7. Limitations and open points
 
@@ -126,7 +137,7 @@ project's own tests, during development of the code they concern (the same perso
   (independent implementations, controls, mutation checks), not organisational. A real validation
   would be done by a second person who could also disagree with the specification itself.
 * **L-04 (scope of the models):** deterministic rates, constant day-count convention (ACT/365 fixed),
-  European payoffs on the terminal spot only, no Heston Greeks, no smile, no calibration.
+  European payoffs on the terminal spot only, no Heston Greeks, no calibration; the smile is built from synthetic quotes (L-09 to L-12).
 * **L-05 (not yet run):** the GitHub Actions workflows, the Docker build, the vcpkg build and the
   g++-14 and clang-17 builds have not been run. The tests were run with g++ 13 and clang 18 in release,
   debug, AddressSanitizer plus UBSan and ThreadSanitizer builds.
@@ -136,12 +147,25 @@ project's own tests, during development of the code they concern (the same perso
 * **L-08 (shared random numbers):** all options in a run use the same seed, so they share random
   numbers. This is deliberate and documented; it makes price differences smoother and standard errors
   of differences smaller than independent runs would give.
+* **L-09 (delta conventions):** only premium-excluded delta with a delta-neutral ATM is implemented, and the
+  simple (not the market-strangle) butterfly. A currency pair quoted with premium-adjusted delta or an
+  ATM-forward definition is not reproduced.
+* **L-10 (smile form):** the quadratic is exact at three points and arbitrage-free only where the
+  checks say so (F-08 to F-10). Ten-delta quotes cannot be added to 25-delta quotes in this construction.
+* **L-11 (synthetic quotes):** all smile inputs are made up. Their levels are plausible for G10 pairs,
+  but the findings F-08 and F-09 describe those inputs, not any market.
+* **L-12 (check grid):** the checks look at 801 points between plus and minus 4 standard deviations. A
+  violation between two grid points, or beyond the grid, is not seen.
+* **L-13 (one unobservable mutation):** the sign of the rounding-level slack in the butterfly check
+  can be changed without any test noticing, because no input produces a density factor within 1e-12 of 0.
 
 ## 8. Reproducing these results
 
 ```sh
-cmake --preset release && cmake --build --preset release && ctest --preset release   # 280 tests
+cmake --preset release && cmake --build --preset release && ctest --preset release   # 334 tests
 python -m pytest -q                                                                    # needs numpy, scipy, jsonschema
+build/release/examples/smile/fxval-example-smile configs/scenarios/smile_scenarios.csv docs/results/smile_data
+python python/plot_smiles.py docs/results/smile_data docs/results                      # needs matplotlib
 build/release/apps/fxval-price --config configs/examples/heston_mc_qe.json --output run.json
 sha256sum configs/examples/heston_mc_qe.json   # equals metadata.config_sha256 in run.json
 ```
@@ -156,4 +180,6 @@ same input and build give a byte-identical file. The path tables are regenerated
 The components in scope are fit for their stated purpose in this project: as a benchmark, a reference
 and a tested Monte Carlo engine for European FX vanillas. Use outside the tested parameter ranges, for
 other payoffs, or for any decision with money attached requires the open points in section 7 to be
-closed and an independent review. Findings F-01 to F-07 are closed or mitigated; no finding is open.
+closed and an independent review. Findings F-01 to F-07 are closed or mitigated. F-08 and F-09 are open: the smile and surface
+construction is fit as a source of three pivot volatilities per tenor, and not as an arbitrage-free
+surface for pricing options across the wings. F-10 is a property of the construction.
