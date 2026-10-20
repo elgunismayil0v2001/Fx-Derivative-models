@@ -6,6 +6,29 @@ All notable changes are recorded here. The format follows
 
 ## [Unreleased]
 
+## [0.7.0] - 2026-10-20
+
+### Added (week 8: Heston calibration to smile quotes)
+
+- `numerics/brent.hpp` (bracketed root finding), `numerics/least_squares.hpp` (Levenberg-Marquardt with
+  Marquardt scaling and Nielsen damping, central-difference Jacobian, standard errors that are infinite when the
+  data do not determine a parameter), `pricing/implied_volatility.hpp` (Garman-Kohlhagen implied volatility
+  through the out-of-the-money option).
+- `calibration/heston_smile.hpp`: Heston implied volatility and the delta quotes a Heston model implies.
+- `calibration/heston_calibration.hpp`: `calibrate_heston` (bounds by logistic map, data-driven and
+  counter-based random starts, per-start record, near-bound flags, standard errors). ADR 0009.
+- Validation: V-11 (exact quotes on 24 sets, one-expiry identification control that must fail, noise study),
+  CAL-REF (implied volatilities and delta quotes against independent Python),
+  `python/gen_calibration_reference.py` and its pytest file; unit tests for every new module.
+- Documentation: model documentation sections 4.6 to 4.11, validation report update (findings F-11 to F-13,
+  limitations L-14 to L-16), mutation table for the new code.
+
+### Fixed
+
+- Found by CAL-REF: `heston_delta_quotes` searched the wing volatility from five times the model level, where
+  a far wing option price underflows and the search failed on a 2-year, strongly skewed set. The upper end of
+  the bracket is now found by scanning upwards.
+
 ## [0.6.0] - 2026-10-18
 
 ### Added (week 7: FX smile from delta quotes, arbitrage checks)

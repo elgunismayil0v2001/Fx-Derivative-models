@@ -16,6 +16,12 @@ FX smile from ATM, risk-reversal and butterfly quotes with one stated delta conv
 interpolation, a surface interpolated in total variance, and butterfly and calendar arbitrage reports.
 Tests V-09 and V-10.
 
+## v0.7 (end of week 8)
+
+Implied volatility, Brent and Levenberg-Marquardt solvers, the Heston model in market units, and
+Heston calibration to delta quotes with parameter recovery, identification control and a noise study.
+Test V-11.
+
 ## v1.0
 
 Smile construction from delta quotes, Heston calibration with parameter recovery, Vanna-Volga and

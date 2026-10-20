@@ -21,7 +21,7 @@ duplicated, or outside V-01 to V-21.
 | V-08 | Variance reduction | Variance ratio reported for control variate and antithetics | 5 | passing | `tests/validation/test_v08_variance_reduction.cpp`. Heston QE, 200,000 paths, strikes 0.95 / 1.10 / 1.25. Cost-adjusted variance ratios: antithetic 4.5 / 2.0 / 1.2, control (`S_T`) 11.7 / 4.2 / 2.1, both 8.9 / 2.5 / 1.5. All estimators within 3 SE of the exact price (worst 1.5); a control with a 1% wrong mean rejected at 40 SE (power check); reported SE matches the spread over 80 seeds within 30%. Under GBM a Garman-Kohlhagen price works as a control (ratio 79). |
 | V-09 | Delta-quote to strike conversion round trip | Recovered quote error below 1e-8 | 7 | passing | `tests/validation/test_v09_delta_roundtrip.cpp`. 20,160 cases (3 spots x 4 rate pairs x 7 expiries from 1 week to 5 years x 4 ATM levels x 5 risk reversals x 3 butterflies x 25 and 10 delta x spot and forward delta). The quoted delta is recovered from the library's own Garman-Kohlhagen Greeks at the computed strikes: worst 2.0e-14; ATM straddle delta worst 3.3e-14; the smile returns the three pivot volatilities (worst 5.6e-17) and the quotes come back (worst 9.7e-17). Control: judging the same strikes in the other delta convention misses by at least 1.2e-3 in all 7,920 cases with `r_f T` above 0.01, so the check can see a convention mix-up. Criterion fixed before the results; one convention implemented (docs section 6.2). |
 | V-10 | Smile arbitrage checks | Butterfly and calendar violations reported per scenario | 7 | passing | `tests/validation/test_v10_smile_arbitrage.cpp`. Pre-registered: (1) the density factor `g` agrees with the second difference of Garman-Kohlhagen option prices (3,165 grid points over every slice of 8 scenarios, 67 with negative density, so the sign check has power), (2) the flat scenario is clean, (3) calendar inversion (1 week 20% to 2 weeks 9%) is flagged at every grid point and the next pair is clean, and the concave scenario is flagged. Reported per scenario (section 6.7 of the model documentation): calendar violations in the wings of the stressed and emerging scenarios (3.5 or more standard deviations, 5 to 11 delta), butterfly violations in the extreme-skew scenario. A frozen "observed" test keeps the counts. The first run used a stencil step that was too coarse for the concave smile; changed once, disclosed in the file. |
-| V-11 | Heston calibration parameter recovery | Parameters and implied vols recovered within stated tolerance across several seeds | 8 | planned | |
+| V-11 | Heston calibration parameter recovery | Parameters and implied vols recovered within stated tolerance across several seeds | 8 | passing | `tests/validation/test_v11_heston_calibration.cpp`. Quotes from independent Python for 24 random parameter sets (16 satisfy Feller, 8 violate it; 12 spot and 12 forward delta; expiries 1M to 2Y). (A) exact quotes, all 24 recovered: worst volatility error 8.3e-12 (criterion 1e-6), worst parameter error 3.7e-9 (criterion 1e-4), all converged. (B) control that must fail, 1Y only (3 quotes, 5 unknowns): quotes fitted to 4.3e-11, parameters off by more than 1% in 24 of 24 sets, standard errors infinite in 24 of 24 (criterion at least 80% and 100%). (C) noise 5e-4 on every pivot volatility, 3 sets times 40 copies: mean rms^2 0.86, 0.94, 0.85 times the linear-theory value (criterion within 25%); spread over reported standard error 0.85 to 1.50 (criterion 0.6 to 1.6); largest bias 3.45 standard errors of the mean (criterion 4). Criteria were fixed before the table was calibrated; disclosures are in the test header (exploratory single set, Feller rebalancing of the table, rebuild after a container reset). |
 | V-12 | Barrier: GK closed form vs Monte Carlo with Brownian bridge | Within 3 standard errors | 9 | planned | |
 | V-13 | Barrier: in-out parity | Knock-in plus knock-out equals vanilla within tolerance | 9 | planned | |
 | V-14 | Vanna-Volga reproduces the three pivot market prices | Exact to numerical precision | 9 | planned | |
@@ -46,6 +46,12 @@ duplicated, or outside V-01 to V-21.
   `rho xi > kappa`; rows where SciPy cannot certify its own integral are dropped). Tolerance
   `2e-11 * max(1, spot)` absolute; worst difference 1.6e-12. The table is compared numerically,
   not byte by byte, because quadrature results can differ in the last digits between SciPy versions.
+* **CAL-REF** (`tests/validation/test_calibration_reference.cpp`): the Heston implied volatility and the
+  Heston delta quotes against independent Python (`python/gen_calibration_reference.py`: textbook P1/P2 prices,
+  `brentq` inversion, nested `brentq` for delta strikes). 160 implied volatilities in
+  `tests/validation/data/heston_iv_reference.csv` (worst difference 2.1e-13) and 120 quote sets (24 parameter
+  sets times five expiries) in `calibration_reference.csv` (worst difference 7.5e-15); criterion 1e-8. It found
+  a defect in the bracket of the wing volatility search (finding F-11). Compared numerically, not byte by byte.
 * **MC-PATH-REF** (`tests/validation/test_mc_path_reference.cpp`): C++ normals and Heston Euler
   paths against an independent pure-Python implementation of Philox4x32-10, Box-Muller and the
   scheme, 120 rows in `tests/validation/data/mc_path_reference.csv` (64-bit seeds and streams,
@@ -133,6 +139,47 @@ duplicated, or outside V-01 to V-21.
   | QE allowed with xi = 0 | the parameterised rejection tests (several cases)|
   | CLI log written to stdout | CliTest.ConfigurationCanComeFromStandardInput; CliTest.ConfigurationLargerThanTheLimitIsRejected; CliTest.FailedOptionStillProducesTheReportAndExitsThree; CliTest.InlineEqualsFormIsAccepted; CliTest.InvalidConfigurationExitsTwoNamesTheFieldAndPricesNothing; CliTest.MissingConfigurationFileExitsFour, and others |
   | antithetic flag dropped from config | PriceConfigAcceptTest.HestonSemiAnalyticAndMonteCarloValuesAreConverted; RegressionTest.HestonMonteCarloQe; ReportJsonTest.MonteCarloReportEchoesSeedAndSettings; the parameterised rejection tests (several cases)|
+* **Mutation check, done by hand in week 8** (not automated). Twenty-eight changes were made one at a time to
+  the root finder, implied volatility, least squares, Heston smile maps and calibration code; the Release
+  build was rebuilt and the week-8 unit tests, CAL-REF and V-11 were run each time (script kept outside the
+  repository). Five changes did not compile the first time (unused variable or parameter under `-Werror`) and
+  were rewritten. **Twenty-six are caught; two survive.** Four of the twenty-six were first missed and
+  were caught only after a test was added or tightened (marked *added*); that is the main result of the check.
+
+  | Change | Caught by |
+  |---|---|
+  | Brent: result tolerance loosened by 1e-7 | 12 tests |
+  | Brent: bracket check removed | `BrentTest.RejectsBadBrackets`, one implied-volatility test |
+  | Brent: non-finite function value accepted | `BrentTest.ReportsNonFiniteValuesAndFunctionErrors` |
+  | implied volatility: parity conversion sign | 3 tests |
+  | implied volatility: in-the-money option inverted instead of the out-of-the-money one | `InTheMoneyPricesAreInvertedThroughTheOtmOption` |
+  | implied volatility: upper no-arbitrage bound loosened to twice the bound | *added*: the rejection test now checks the error code (`invalid_argument`); before, it only checked that no value came back, which the later failure also satisfied |
+  | implied volatility: lower bound loosened by 1 | `RejectsPricesThatViolateNoArbitrageBounds` |
+  | least squares: Marquardt scaling replaced by the identity | *added*: `IsInsensitiveToTheScaleOfTheParameters` (10 iterations scaled, 18 unscaled); the result of every other test is the same either way |
+  | least squares: step sign | 17 tests |
+  | least squares: every step accepted | **V-11 (C) only** |
+  | least squares: damping update fixed at 1/3 | **survives**: changes the number of iterations only, not the result; no test pins the iteration count of that rule |
+  | least squares: Jacobian divided by `h` instead of `2h` | 6 tests |
+  | standard errors without the residual variance | 3 tests (including V-11) |
+  | standard errors computed when `m == n` | `StandardErrorsAreInfiniteWhenTheDataDoNotDetermineTheParameters` |
+  | iteration limit reported as converged | `IterationLimitIsReportedAsNotConverged` |
+  | smile map: butterfly without the ATM subtraction | 10 tests (CAL-REF and calibration tests) |
+  | smile map: risk reversal sign | 9 tests |
+  | smile map: call wing solved as a put | 9 tests |
+  | smile map: upper bracket scan accepts the first candidate | **survives**: for every parameter set tried (including strongly skewed ones) the wing root lies below 1.25 times the model level, so the first candidate is already a valid bracket; equivalent on realistic inputs |
+  | smile map: lower bracket scan accepts the first candidate | `WingVolatilitiesFarBelowTheModelLevelAreBracketed` (written together with the fix for finding F-11) |
+  | calibration: residual sign changed | 7 tests |
+  | calibration: market put and call volatilities swapped | 10 tests |
+  | calibration: near-bound flag never set at the upper bound | `ParametersOutsideTheBoxAreReportedNearTheBound` |
+  | calibration: degrees of freedom `m` instead of `m - 5` | **V-11 (C) only** (with exact data the standard errors are too small to see the factor) |
+  | calibration: best start has the highest cost | 3 tests |
+  | calibration: all random starts use stream 0 | *added*: `IsDeterministic` now checks that the random starts differ from each other |
+  | calibration: data-driven start takes the opposite skew sign | *added*: `DataDrivenStartTakesItsSkewSignFromTheRiskReversal` (the fit converges from either start, so only the recorded start shows it) |
+  | calibration: fits that violate Feller rejected | 11 tests |
+
+  Two changes (every step accepted; degrees of freedom) are seen only by the V-11 noise study, which says how
+  much weight that test carries. Two survive because they change speed, or a bracket that is never needed,
+  not any result.
 * **Mutation check, done by hand in week 7** (not automated). Twenty-five changes were made one at a
   time to the normal quantile, delta conversion, quote, smile, surface and arbitrage-check code; the
   Release build was rebuilt and the smile unit tests, V-09, SMILE-REF and V-10 were run each time (script

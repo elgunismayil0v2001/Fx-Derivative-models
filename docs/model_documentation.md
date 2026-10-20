@@ -1,6 +1,6 @@
 # Model documentation
 
-Status: **draft, week 7.** Sections marked *planned* are placeholders that name the week in
+Status: **draft, week 8.** Sections marked *planned* are placeholders that name the week in
 which they are written. Garman-Kohlhagen is implemented and checked by V-01 and V-02. The Heston
 semi-analytic pricer is implemented and checked by V-03, V-04 and an independent Python table.
 
@@ -9,7 +9,7 @@ semi-analytic pricer is implemented and checked by V-03, V-04 and an independent
 | 1. Purpose and scope | draft |
 | 2. Notation and conventions | draft |
 | 3. Garman-Kohlhagen (benchmark) | implemented; V-01 and V-02 passing |
-| 4. Heston | semi-analytic pricer implemented; V-03, V-04, reference table passing (week 3); calibration week 8 |
+| 4. Heston | semi-analytic pricer (V-03, V-04, reference table, week 3); calibration to smile quotes (V-11, CAL-REF, week 8, sections 4.6 to 4.11) |
 | 5. Monte Carlo schemes | planned, weeks 4-5 |
 | 6. FX smile from delta quotes | implemented; V-09, V-10, SMILE-REF passing (week 7) |
 | 7. Vanna-Volga | planned, week 9 |
@@ -207,11 +207,122 @@ In-the-money option: out-of-the-money value plus `df |F - K|` (parity).
 ### 4.5 Limitations
 
 * Deep out-of-the-money prices have absolute accuracy about `1e-13 F`, not relative accuracy.
-* Parameters are constant in time; the model is fitted per expiry (calibration, week 8).
+* Parameters are constant in time; one parameter set is fitted to all expiries (calibration, section 4.7).
 * Interest rates are deterministic (as in the rest of v1.0).
 * The `not_converged` path is not exercised by a test: no input is known that triggers it.
-* Not covered yet: Heston Greeks (week 8, by finite differences of the price), implied volatility
-  output, and exotic payoffs (week 9 by Monte Carlo).
+* Not covered yet: Heston Greeks (by finite differences of the price) and exotic payoffs (week 9 by Monte Carlo). Implied volatility output and calibration are in sections 4.6 to 4.11.
+
+### 4.6 Heston in market units (week 8)
+
+Code: `include/fxval/pricing/implied_volatility.hpp`, `include/fxval/numerics/brent.hpp`,
+`include/fxval/calibration/heston_smile.hpp`. Decisions: `docs/adr/0009-heston-calibration.md`.
+
+FX markets quote Garman-Kohlhagen implied volatilities at delta strikes, so a calibration compares
+models in that unit. Two maps are needed.
+
+**Price to implied volatility.** For a strike `K` and forward `F`, the out-of-the-money option (a call if
+`K >= F`, otherwise a put) is priced and inverted with Brent's method on `sigma` in `[1e-6, 5]`. An
+in-the-money price would be converted to the out-of-the-money one by put-call parity, which is exact, so that the
+price carries the volatility information at full relative precision (vega is tiny deep in the money). Prices
+outside the no-arbitrage bounds, a zero expiry and volatilities outside the search range are errors, never NaN.
+Brent's method (bisection safeguarded by inverse quadratic interpolation and secant steps) is used because it
+cannot leave the bracket and cannot diverge; it is called thousands of times per calibration.
+
+**Heston parameters to delta quotes.** The strike of a 25-delta option depends on the volatility *at that
+strike*, so each quote is a fixed point `sigma = IV_Heston(K(sigma))`, with `K(sigma)` from
+`smile::strike_from_delta` or `smile::atm_strike` (section 6.2). It is solved by Brent on
+`f(sigma) = IV_Heston(K(sigma)) - sigma`. The bracket starts at `0.3` times the model volatility level
+`sqrt(E[integral of v] / tau)` and its upper end is found by scanning `1.25, 1.6, 2.2, 3.0` times that level
+and stopping at the first sign change. Starting at five times the level, as the first version did, fails: a
+25-delta call at `sigma = 1.08`, `T = 2` is eight forwards away and the Heston price underflows (finding F-11).
+The result is `(ATM, RR, BF)` in the simple-butterfly definition of section 6.1, so that `SmileSlice` built from
+them puts its pivot strikes exactly where the model has those deltas (unit test).
+
+### 4.7 The calibration problem
+
+Unknowns `p = (v_0, kappa, theta, xi, rho)`. Data: for each expiry `T_j`, the three pivots (25-delta put, ATM,
+25-delta call) at the strikes `K_{j,P} < K_{j,A} < K_{j,C}` that `SmileSlice` derives from the quotes, with
+market volatilities `sigma^mkt_{j,i}` (section 6.3). The residual vector has one entry per pivot:
+
+    r_{j,i}(p) = IV_Heston(K_{j,i}; T_j, p) - sigma^mkt_{j,i}.
+
+* **Volatility errors, not price errors.** Prices are dominated by long-dated at-the-money options; an error
+  in volatility points is comparable across strikes and expiries and is the unit in which a desk reads a fit.
+  All residuals have equal weight (no vega or expiry weighting, limitation L-16).
+* **Strikes are fixed.** The strikes come from the market quotes and are not recomputed from the model during the
+  fit; this avoids the nested root finds of section 4.6 inside the optimiser (a calibration costs about 0.5 s
+  instead of minutes). When the quotes come from a Heston model the two agree exactly, which is why V-11 recovers
+  the parameters to rounding level.
+* **Bounds** (defaults, adjustable): `v_0, theta` in `[1e-4, 1]`, `kappa` in `[0.05, 25]`, `xi` in `[0.02, 4]`,
+  `rho` in `[-0.98, 0.98]`. They keep the optimiser out of regions where the pricer is not meant to be used and
+  do not encode a view of the market.
+* **Feller is not imposed.** FX smiles with strong curvature often need `xi^2 > 2 kappa theta`; forcing the
+  condition would bias exactly those fits. The result reports `params.feller_satisfied()`.
+* **Starts.** One data-driven start (`v_0` from the shortest ATM, `theta` from the longest ATM, `kappa = 1.5`,
+  `xi = 0.5`, `rho = clamp(4 RR / ATM)`) plus a number of random starts (`random_starts`, default 6) drawn from
+  counter-based Philox streams keyed by `(seed, start number)`, so a calibration is reproducible and independent of
+  anything else that consumed random numbers. All starts are run and recorded (`starts`); the best converged one,
+  by cost, is returned.
+
+### 4.8 The optimiser (`fxval/numerics/least_squares.hpp`)
+
+Levenberg-Marquardt on `C(x) = (1/2) sum r_i^2`:
+
+    (J'J + lambda D) delta = -J'r,       D = diag(J'J) (Marquardt 1963 scaling, floored),   x <- x + delta.
+
+`J` is a central finite-difference Jacobian (step `1e-7 max(|x|, 1)`); the Heston price is smooth enough that this
+costs about `1e-9` of noise. `lambda` follows Nielsen (1999): after an accepted step it is multiplied by
+`max(1/3, 1 - (2 rho - 1)^3)`, `rho` being the ratio of the actual to the predicted decrease; after a rejected one
+by `nu`, which doubles each time. A step into a region where the pricer returns an error counts as rejected.
+Bounds are handled by a logistic map between an unbounded variable `u` and the parameter in `(lo, hi)`. The
+cost is that a parameter whose true value is at or beyond a bound drifts to `u -> infinity` and its gradient
+vanishes, so the run stops with the parameter within `0.1%` of the range of the bound: this is reported as
+`near_bound` and means "the data want a value outside the box", not an estimate.
+
+Termination: `gradient_small`, `step_small`, `cost_small` count as converged; `max_iterations` and `stalled` do
+not, and `converged` is false in the result.
+
+### 4.9 Identifiability and standard errors
+
+A single expiry provides three quotes for five unknowns: there are infinitely many parameter sets that fit it
+exactly, so a fit can be excellent and the parameters arbitrary. Test V-11 (B) is the control for this. With
+`N` quotes and `p = 5` parameters the standard errors are `sqrt(s^2 [(J'J)^{-1}]_jj)` with
+`s^2 = 2 C / (N - p)` and `J` the Jacobian in the natural parameters at the solution. They are `+infinity` when
+`N <= p` or `J'J` is numerically singular, and no finite number is ever reported in that case. They are linearised
+estimates (limitation L-14): V-11 (C) compares them with the actual spread of repeated noisy calibrations.
+
+### 4.10 Evidence
+
+* **CAL-REF** (`tests/validation/test_calibration_reference.cpp`, tables written by `python/gen_calibration_reference.py`).
+  Independent Python: textbook `P1/P2` Heston prices with QUADPACK, `brentq` for implied volatility, nested `brentq` for
+  delta strikes. 160 implied volatilities, worst difference 2.1e-13; 120 sets of quotes (24 parameter sets times five
+  expiries), worst difference 7.5e-15 (criterion 1e-8). It found the defect described in 4.6 (F-11).
+* **V-11 (A), exact quotes.** 24 parameter sets (16 satisfy Feller, 8 violate it; 12 spot delta, 12 forward delta),
+  quotes from the Python table at 1M, 3M, 6M, 1Y, 2Y. All 24 recovered: worst volatility error 8.3e-12 (criterion
+  1e-6), worst parameter error 3.7e-9 (criterion 1e-4), all converged.
+* **V-11 (B), one-expiry control.** The 1Y expiry only: all 24 fits reproduce the three quotes (worst error 4.3e-11)
+  and in 24 of 24 sets at least one parameter is off by more than 1%; all 24 report infinite standard errors.
+* **V-11 (C), noise.** Three sets, 40 noisy copies each, noise 5e-4 on every pivot volatility. Mean `rms^2` was 0.86,
+  0.94 and 0.85 times the value linear theory predicts, `sigma^2 (N - p) / N` (criterion within 25%). The ratio of the
+  observed spread of each parameter to its reported standard error was between 0.85 and 1.50 (criterion 0.6 to 1.6). On
+  set 0 it was 1.19 to 1.50 and on set 16 1.06 to 1.30, so there the reported errors are too small by up to a third
+  (limitation L-14); on set 8 the ratio is 0.85 to 0.99. The mean estimate was within 4 standard errors of the truth for all 15 parameter checks; the largest
+  was `rho` on set 16 at 3.45, followed by `xi` 2.61 and `theta` 2.22, which suggests a small estimator bias at this
+  noise level for that set (finding F-13; L-14).
+* Unit tests, including an exact property that no fitting code knows about: swapping the two currencies maps a
+  Heston model to the Heston model with `rho' = -rho`, `kappa' = kappa - rho xi`, `theta' = kappa theta / kappa'`
+  (same `v_0`, `xi`), and the calibration recovers parameters related by that map from the swapped market.
+* 28 hand mutations of the week-8 code: 26 caught, 2 survive (they change speed, or a bracket that is never needed,
+  not any result); two are seen only by V-11 (C) (test catalogue).
+
+### 4.11 Limitations of the calibration
+
+L-14 the standard errors are linearised and, as V-11 (C) shows (observed spread up to 1.5 times the reported error), can be too small by up to a third; L-15 the
+test quotes are generated by the same model family that is fitted ("inverse crime"): recovery shows the optimiser
+and the maps are right, not that Heston can fit a real smile; L-16 three quotes per expiry at one wing delta,
+equal weights, no regularisation and no Feller constraint; several starts reduce the chance of a local minimum but
+do not prove the global one. Run time is about 0.5 s per calibration (five expiries, three starts) on the machine
+used.
 
 ## 5. Monte Carlo
 
@@ -578,7 +689,8 @@ strike, and the surface takes its query in `k`, so the caller supplies the forwa
 * Independent validation of Garman-Kohlhagen so far is put-call parity and finite-difference
   Greeks (V-01, V-02), not a market-price comparison.
 * Smile quotes are synthetic. The smile code implements one delta convention, the simple butterfly
-  and a quadratic interpolation (section 6.8).
+  and a quadratic interpolation (section 6.8). The Heston calibration uses three quotes per expiry and is tested on
+  quotes made by Heston itself (section 4.11).
 
 ## 12. References
 
@@ -595,6 +707,10 @@ Verify the bibliographic details of each entry before citing it in the validatio
   Structured Products*, Wiley.
 * H. Albrecher, P. Mayer, W. Schoutens and J. Tistaert (2007), *The little Heston trap*, Wilmott
   Magazine.
+* K. Levenberg (1944), *A method for the solution of certain non-linear problems in least squares*, Quarterly of
+  Applied Mathematics 2; D. Marquardt (1963), *An algorithm for least-squares estimation of nonlinear parameters*,
+  SIAM Journal 11; H. Nielsen (1999), *Damping parameter in Marquardt's method*, IMM technical report; R. Brent (1973),
+  *Algorithms for Minimization without Derivatives*, Prentice-Hall.
 * R. Lord, R. Koekkoek and D. van Dijk (2010), *A comparison of biased simulation schemes for
   stochastic volatility models*, Quantitative Finance 10(2).
 * J. Salmon, M. Moraes, R. Dror and D. Shaw (2011), *Parallel random numbers: as easy as 1, 2, 3*,
