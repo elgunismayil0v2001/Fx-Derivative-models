@@ -4,7 +4,7 @@ A C++20 library that prices FX options and measures FX portfolio market and coun
 together with an **independent validation** of those models: exact benchmarks, numerical tests,
 model comparison, and a written validation report.
 
-> **Status: week 8 of a 14-week plan (library version 0.7.0).** The engineering foundation is in place, the
+> **Status: week 9 of a 14-week plan (library version 0.8.0).** The engineering foundation is in place, the
 > Garman-Kohlhagen benchmark is checked by V-01 and V-02, the Heston semi-analytic pricer by V-03,
 > V-04 and an independent Python table, and the multithreaded Monte Carlo engine (Euler full
 > truncation and Andersen's QE scheme, antithetic and control variates) by V-05 to V-08 and
@@ -12,7 +12,9 @@ model comparison, and a written validation report.
 > build, the input hash and the seed. A first validation report is in `docs/validation_report.md`.
 > Week 7 adds FX smile construction from delta quotes and arbitrage checks (V-09, V-10). Week 8 adds Heston
 > calibration to smile quotes with a parameter-recovery, identification and noise test (V-11).
-> Barriers, Vanna-Volga, risk and CVA are not started.
+> Week 9 adds barrier, one-touch and double no-touch options (closed forms and Brownian-bridge Monte Carlo),
+> Vanna-Volga, and a comparison of Garman-Kohlhagen, Vanna-Volga and Heston whose spread is the quantified
+> model risk (V-12 to V-15). Risk and CVA are not started.
 
 ## What exists today
 
@@ -58,7 +60,7 @@ ctest --preset release
 ## Use as a library
 
 ```cmake
-find_package(fxval 0.7 CONFIG REQUIRED)
+find_package(fxval 0.8 CONFIG REQUIRED)
 target_link_libraries(my_target PRIVATE fxval::fxval)
 ```
 
@@ -98,7 +100,7 @@ See `docs/model_documentation.md`, section 11.
 * `docs/repo_guide.md`: what every folder and file is for
 * `docs/model_documentation.md`: model specification and derivations (draft)
 * `docs/test_catalogue.md`: the 21 planned validation tests (V-01 to V-21) and their status
-* `docs/validation_report.md`: the validation report (draft for v0.7: Garman-Kohlhagen, Heston, Monte Carlo, smile, calibration)
+* `docs/validation_report.md`: the validation report (draft for v0.8: Garman-Kohlhagen, Heston, Monte Carlo, smile, calibration, barriers, Vanna-Volga)
 * `docs/cli.md`: the `fxval-price` program, its configuration, report and exit codes
 * `docs/architecture.md`: layers and rules
 * `docs/adr/`: architecture decision records

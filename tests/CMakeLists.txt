@@ -35,7 +35,8 @@ fxval_add_test_executable(fxval_unit_tests unit/test_error.cpp unit/test_units.c
                           unit/test_quotes.cpp unit/test_smile_slice.cpp unit/test_vol_surface.cpp
                           unit/test_arbitrage_checks.cpp unit/test_brent.cpp unit/test_implied_volatility.cpp
                           unit/test_least_squares.cpp unit/test_heston_smile.cpp
-                          unit/test_heston_calibration.cpp)
+                          unit/test_heston_calibration.cpp unit/test_barrier_closed_form.cpp
+                          unit/test_vanna_volga.cpp unit/test_barrier_mc.cpp)
 
 fxval_add_test_executable(fxval_validation_tests validation/test_catalogue_consistency.cpp
                           validation/test_v01_put_call_parity.cpp validation/test_v02_greeks_fd.cpp
@@ -52,7 +53,12 @@ fxval_add_test_executable(fxval_validation_tests validation/test_catalogue_consi
                           validation/test_smile_reference.cpp
                           validation/test_v10_smile_arbitrage.cpp
                           validation/test_calibration_reference.cpp
-                          validation/test_v11_heston_calibration.cpp)
+                          validation/test_v11_heston_calibration.cpp
+                          validation/test_barrier_reference.cpp
+                          validation/test_v12_barrier_mc.cpp
+                          validation/test_v13_in_out_parity.cpp
+                          validation/test_v14_vanna_volga_pivots.cpp
+                          validation/test_v15_model_comparison.cpp)
 target_compile_definitions(
   fxval_validation_tests
   PRIVATE "FXVAL_TEST_CATALOGUE_PATH=\"${PROJECT_SOURCE_DIR}/docs/test_catalogue.md\""
@@ -63,6 +69,7 @@ target_compile_definitions(
           "FXVAL_SMILE_REFERENCE_PATH=\"${PROJECT_SOURCE_DIR}/tests/validation/data/smile_reference.csv\""
           "FXVAL_HESTON_IV_REFERENCE_PATH=\"${PROJECT_SOURCE_DIR}/tests/validation/data/heston_iv_reference.csv\""
           "FXVAL_CALIBRATION_REFERENCE_PATH=\"${PROJECT_SOURCE_DIR}/tests/validation/data/calibration_reference.csv\""
+          "FXVAL_BARRIER_REFERENCE_PATH=\"${PROJECT_SOURCE_DIR}/tests/validation/data/barrier_reference.csv\""
           "FXVAL_SMILE_SCENARIOS_PATH=\"${PROJECT_SOURCE_DIR}/configs/scenarios/smile_scenarios.csv\"")
 target_include_directories(fxval_unit_tests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 target_include_directories(fxval_validation_tests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})

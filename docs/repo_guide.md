@@ -57,6 +57,10 @@ validation tests are what a model-validation team would ask for. Reasoning:
 | `pricing/implied_volatility.hpp` | `implied_volatility.cpp` | `garman_kohlhagen_implied_volatility`: price to volatility through the out-of-the-money option. |
 | `calibration/heston_smile.hpp` | `heston_smile.cpp` | `heston_implied_volatility`, `heston_delta_quotes`: the Heston model in market units (docs 4.6). |
 | `calibration/heston_calibration.hpp` | `heston_calibration.cpp` | `calibrate_heston`: bounded multi-start least squares on volatility errors; reports every start, near-bound flags and standard errors (docs 4.7 to 4.9). |
+| `pricing/barrier_closed_form.hpp` | `barrier_closed_form.cpp` | Contract types (`BarrierVanilla`, `TouchContract`, `DoubleNoTouchContract`, `FxMarket`) and the continuous-monitoring closed forms (docs 8.1). |
+| `mc/barrier_mc.hpp` | `mc_barrier.cpp` | `gbm_barrier_mc_price`, `heston_barrier_mc_price` with discrete or Brownian-bridge monitoring (docs 8.2, 8.3). |
+| `exotics/vanna_volga.hpp` | `vanna_volga.cpp` | `VannaVolga`: three variants, flat-volatility prices and Greeks (docs 7). |
+| `exotics/barrier_comparison.hpp` | `barrier_comparison.cpp` | `compare_barrier_models`: GK flat, Vanna-Volga, Heston and the model-risk spread (docs 7.5). |
 | `version.hpp.in` | none | Template turned into the version header by CMake. |
 
 ## `tests/`
@@ -97,6 +101,11 @@ validation tests are what a model-validation team would ask for. Reasoning:
 | `validation/test_v10_smile_arbitrage.cpp` | V-10: density factor against option-price convexity, theory-based verdicts, per-scenario report, frozen observed counts. |
 | `validation/test_smile_reference.cpp` | C++ smile against the independent Python table (256 rows). |
 | `validation/data/smile_reference.csv` | The smile reference table, written by `python/gen_smile_reference.py`. |
+| `support/barrier_test_support.hpp` | Typed `FxMarket`, barrier levels and contracts from plain numbers. |
+| `unit/test_barrier_closed_form.cpp`, `test_vanna_volga.cpp`, `test_barrier_mc.cpp` | The week-9 code: limits, parity, errors, weights, variants, reproducibility. |
+| `validation/test_barrier_reference.cpp` | BARRIER-REF: 700 prices against independent Python integration. |
+| `validation/test_v12_barrier_mc.cpp`, `test_v13_in_out_parity.cpp`, `test_v14_vanna_volga_pivots.cpp`, `test_v15_model_comparison.cpp` | V-12 to V-15. Criteria in the file headers. |
+| `validation/data/barrier_reference.csv` | The barrier reference table, written by `python/gen_barrier_reference.py`. |
 | `support/calibration_test_support.hpp` | `make_calibration_market()`, `heston_slices()` (quotes a Heston model implies) and a small CSV reader for the calibration tables. |
 | `unit/test_brent.cpp`, `test_implied_volatility.cpp`, `test_least_squares.cpp`, `test_heston_smile.cpp`, `test_heston_calibration.cpp` | The week-8 code: root finder, implied volatility round trips and error paths, Levenberg-Marquardt on problems with known answers and its standard errors, the Heston model in market units, calibration (recovery, determinism, bounds, one expiry, currency-swap invariance). |
 | `validation/test_calibration_reference.cpp` | CAL-REF: Heston implied volatility (160 rows) and delta quotes (120 rows) against independent Python. |
@@ -126,10 +135,11 @@ validation tests are what a model-validation team would ask for. Reasoning:
 | `gen_mc_reference.py` | Writes the Monte Carlo path table: Philox, Box-Muller and the Heston Euler path re-implemented in plain Python (no shared code with C++). |
 | `tests/test_price_examples.py` | Checks the example configurations against the JSON Schema (and that the schema rejects 14 damaged copies), and the frozen results against SciPy (Garman-Kohlhagen), the textbook Heston integrals and, for Monte Carlo, the independent price within 4 standard errors. |
 | `gen_smile_reference.py` | Writes the smile table: strikes by root finding on the spot-form delta, smile by a Vandermonde solve (different methods from the C++ code). |
+| `gen_barrier_reference.py` | Writes the 700-row barrier table by numerical integration (killed densities by images, first-passage integral, sum of images). |
 | `gen_calibration_reference.py` | Writes the two calibration tables with textbook Heston prices, `brentq` implied volatilities and nested `brentq` delta strikes. |
 | `plot_smiles.py` | Draws `docs/results/smile_*.png` from the CSV files written by `fxval-example-smile` (needs matplotlib). |
 | `gen_gk_reference.py` | Writes the reference table with SciPy, in a different algebraic form from the C++ code, fixed seed. |
-| `tests/test_data_download.py`, `tests/test_gen_gk_reference.py`, `tests/test_gen_heston_reference.py`, `tests/test_gen_mc_reference.py`, `tests/test_gen_qe_reference.py`, `tests/test_gen_smile_reference.py`, `tests/test_gen_calibration_reference.py` | Offline tests of the parsers and of the generators (the Monte Carlo one needs no third-party package). |
+| `tests/test_data_download.py`, `tests/test_gen_gk_reference.py`, `tests/test_gen_heston_reference.py`, `tests/test_gen_mc_reference.py`, `tests/test_gen_qe_reference.py`, `tests/test_gen_smile_reference.py`, `tests/test_gen_calibration_reference.py`, `tests/test_gen_barrier_reference.py` | Offline tests of the parsers and of the generators (the Monte Carlo one needs no third-party package). |
 
 ## Other
 

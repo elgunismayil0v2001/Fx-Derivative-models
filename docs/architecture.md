@@ -1,6 +1,6 @@
 # Architecture
 
-Status: week 8. The `core`, `pricing`, `numerics`, `models` (Heston), `mc`, `smile` and `calibration` layers exist, and the first program in `apps`. The rest is the planned structure so that
+Status: week 9. The `core`, `pricing`, `numerics`, `models` (Heston), `mc`, `smile`, `calibration` and `exotics` layers exist, and the first program in `apps`. The rest is the planned structure so that
 each module added later has an obvious place and an obvious set of allowed dependencies.
 
 ## Layers and dependency rule
@@ -11,13 +11,13 @@ Each layer may depend only on layers above it in this list. Nothing depends on `
 core          errors, typed units, day count, limits, contracts    (implemented)
 numerics      adaptive quadrature (week 3), normal quantile (week 7),
               Brent root finder, Levenberg-Marquardt (week 8)      (implemented)
-pricing       Garman-Kohlhagen (Greeks), implied volatility (week 8); Black-76 and barriers later (week 2, 9)
+pricing       Garman-Kohlhagen (Greeks), implied volatility (week 8); barrier, touch and double no-touch closed forms and the contract types (week 9); Black-76 later
 models        semi-analytic Heston (implemented, week 3)           (week 3)
-mc            engine, random streams, GBM, Heston Euler FT and QE, variance reduction  (implemented, weeks 4-5)
+mc            engine, random streams, GBM, Heston Euler FT and QE, variance reduction, barrier Monte Carlo with Brownian bridge  (implemented, weeks 4-5, 9)
               QE scheme, variance reduction (planned)              (week 5)
 smile         delta quotes, interpolation, arbitrage checks        (implemented, week 7)
 calibration   Heston smile maps, Heston calibrator                 (implemented, week 8)
-exotics       Vanna-Volga, barrier and touch options               (week 9)
+exotics       Vanna-Volga, GK / Vanna-Volga / Heston comparison    (implemented, week 9)
 instruments   FX forward, FX option, portfolio                     (weeks 9-11)
 timeseries    EWMA, GARCH, GJR-GARCH                               (week 10)
 risk          VaR, ES, backtests                                   (week 10)

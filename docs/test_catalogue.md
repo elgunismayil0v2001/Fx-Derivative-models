@@ -22,10 +22,10 @@ duplicated, or outside V-01 to V-21.
 | V-09 | Delta-quote to strike conversion round trip | Recovered quote error below 1e-8 | 7 | passing | `tests/validation/test_v09_delta_roundtrip.cpp`. 20,160 cases (3 spots x 4 rate pairs x 7 expiries from 1 week to 5 years x 4 ATM levels x 5 risk reversals x 3 butterflies x 25 and 10 delta x spot and forward delta). The quoted delta is recovered from the library's own Garman-Kohlhagen Greeks at the computed strikes: worst 2.0e-14; ATM straddle delta worst 3.3e-14; the smile returns the three pivot volatilities (worst 5.6e-17) and the quotes come back (worst 9.7e-17). Control: judging the same strikes in the other delta convention misses by at least 1.2e-3 in all 7,920 cases with `r_f T` above 0.01, so the check can see a convention mix-up. Criterion fixed before the results; one convention implemented (docs section 6.2). |
 | V-10 | Smile arbitrage checks | Butterfly and calendar violations reported per scenario | 7 | passing | `tests/validation/test_v10_smile_arbitrage.cpp`. Pre-registered: (1) the density factor `g` agrees with the second difference of Garman-Kohlhagen option prices (3,165 grid points over every slice of 8 scenarios, 67 with negative density, so the sign check has power), (2) the flat scenario is clean, (3) calendar inversion (1 week 20% to 2 weeks 9%) is flagged at every grid point and the next pair is clean, and the concave scenario is flagged. Reported per scenario (section 6.7 of the model documentation): calendar violations in the wings of the stressed and emerging scenarios (3.5 or more standard deviations, 5 to 11 delta), butterfly violations in the extreme-skew scenario. A frozen "observed" test keeps the counts. The first run used a stencil step that was too coarse for the concave smile; changed once, disclosed in the file. |
 | V-11 | Heston calibration parameter recovery | Parameters and implied vols recovered within stated tolerance across several seeds | 8 | passing | `tests/validation/test_v11_heston_calibration.cpp`. Quotes from independent Python for 24 random parameter sets (16 satisfy Feller, 8 violate it; 12 spot and 12 forward delta; expiries 1M to 2Y). (A) exact quotes, all 24 recovered: worst volatility error 8.3e-12 (criterion 1e-6), worst parameter error 3.7e-9 (criterion 1e-4), all converged. (B) control that must fail, 1Y only (3 quotes, 5 unknowns): quotes fitted to 4.3e-11, parameters off by more than 1% in 24 of 24 sets, standard errors infinite in 24 of 24 (criterion at least 80% and 100%). (C) noise 5e-4 on every pivot volatility, 3 sets times 40 copies: mean rms^2 0.86, 0.94, 0.85 times the linear-theory value (criterion within 25%); spread over reported standard error 0.85 to 1.50 (criterion 0.6 to 1.6); largest bias 3.45 standard errors of the mean (criterion 4). Criteria were fixed before the table was calibrated; disclosures are in the test header (exploratory single set, Feller rebalancing of the table, rebuild after a container reset). |
-| V-12 | Barrier: GK closed form vs Monte Carlo with Brownian bridge | Within 3 standard errors | 9 | planned | |
-| V-13 | Barrier: in-out parity | Knock-in plus knock-out equals vanilla within tolerance | 9 | planned | |
-| V-14 | Vanna-Volga reproduces the three pivot market prices | Exact to numerical precision | 9 | planned | |
-| V-15 | Barrier model comparison (GK vs Vanna-Volga vs Heston) | Spread table produced; model risk quantified | 9 | planned | |
+| V-12 | Barrier: GK closed form vs Monte Carlo with Brownian bridge | Within 3 standard errors | 9 | passing | `tests/validation/test_v12_barrier_mc.cpp`. (A) bridge MC vs closed form for 8 contracts (4 vanillas, 2 one-touch, no-touch, double no-touch), 400,000 paths, 16 steps, all within 3 SE. (B) control: discrete monitoring at 12 steps overprices a down-and-out call by 3.8e-3, above 3 SE. (C) Heston with xi = 1e-3 vs closed form. (D) Heston step study reported (L-17). Caught finding F-14 (knock-in stale terminal spot) on its first run. |
+| V-13 | Barrier: in-out parity | Knock-in plus knock-out equals vanilla within tolerance | 9 | passing | `tests/validation/test_v13_in_out_parity.cpp`. 96 contracts, knock-in and knock-out from separate formula tables, tolerance 1e-12; no-touch plus one-touch is the discount factor (1e-13). Control: shifted-barrier knock-in detected in 79 of 96 (threshold 75; the misses are cases where one leg is worth under 1e-4, asserted). |
+| V-14 | Vanna-Volga reproduces the three pivot market prices | Exact to numerical precision | 9 | passing | `tests/validation/test_v14_vanna_volga_pivots.cpp`. 6 slices x 3 pivots x 3 variants (54 cases) within 1e-11. Control: non-pivot vanilla at 95% and 105% of the forward not reproduced (differs from the smile price by more than 1e-8; reported). |
+| V-15 | Barrier model comparison (GK vs Vanna-Volga vs Heston) | Spread table produced; model risk quantified | 9 | passing | `tests/validation/test_v15_model_comparison.cpp`. Reported, not pass/fail: 5 scenarios x 5 contracts, spread in price, vol points and percent of notional (model documentation 7.5). Asserted: all prices finite; flat-smile control (Vanna-Volga equals GK to 1e-11, Heston within 5 SE); spread positive somewhere per scenario. |
 | V-16 | GARCH estimation vs Python `arch` | Parameters and log-likelihood within tolerance | 10 | planned | |
 | V-17 | VaR backtests (each method) | Exceptions, Kupiec and Christoffersen p-values, traffic-light zone reported | 10 | planned | |
 | V-18 | Delta-normal vs full revaluation for options | Gap in VaR quantified | 10 | planned | |
@@ -217,11 +217,42 @@ duplicated, or outside V-01 to V-21.
 
   Two changes are seen only by the frozen "observed" V-10 test, which says how much weight that test
   carries: it is a regression test of the scenario table, not a test of theory.
+* **Mutation check, week 9** (by hand with a script kept outside the repository; 15 single-line mutants of
+  the new code; each was built and the whole suite run except V-15, which takes 2 minutes and is a report):
+  14 are killed (two of them only after a test was added, see the table) and one survives. Two mutants did
+  not compile at first (an unused variable under `-Werror`) and were rewritten.
+
+  | Mutation | Caught by |
+  |---|---|
+  | drift sign in `mu` of the Reiner-Rubinstein blocks | BARRIER-REF, 1 unit test, V-12, V-13 (5 tests) |
+  | exponent `2(mu+1)` replaced by `2mu` | BARRIER-REF, V-12 (3) |
+  | knock-in table, down call, strike above barrier | BARRIER-REF, a unit test, V-13 (3) |
+  | knock-out table, up call, strike below barrier | BARRIER-REF, V-12, V-13 (3) |
+  | image-term sign in the touch probability | BARRIER-REF, unit tests, V-12 (4) |
+  | strike-above-barrier test shifted by 1% | **BARRIER-REF only** (1 test) |
+  | bridge crossing probability without the factor 2 | V-12 (2) |
+  | knocked-out path stops early (finding F-14 reintroduced) | **V-12 only** (1 test) |
+  | one-touch pays survival instead of `1 - survival` | V-12 (2) |
+  | Vanna-Volga: survival factor swapped (`p` for `1 - p`) | **one unit test only** (added after this mutant survived the first run, which had only a range check) |
+  | Vanna-Volga: sign of the cross difference in vanna | V-14, a unit test (2) |
+  | Vanna-Volga: sign of the smile cost | V-14 (1) |
+  | Vanna-Volga: volga denominator `2 h^2` | a unit test (the Greeks of a vanilla against Garman-Kohlhagen) |
+  | Vanna-Volga: spot step allowed to cross the barrier (cap of `0.25 d` replaced by `4 d`) | **one unit test only** (added after this mutant survived the first run: no test had a barrier closer than 0.1% to the spot) |
+  | **Heston bridge variance `(v0+v1)/2` replaced by `v0`: survives** | none. V-12 (C) uses `xi = 1e-3`, where `v0 = v1`, and the step study (D) has no exact reference. This is the limitation L-17: the Heston bridge has no independent value to be checked against. |
+
+  A first version of the spot-step mutation (spot step) added `0 * distance` to a variable and produced NaN
+  for plain vanillas (distance infinite), so 9 tests "killed" it for a reason unrelated to the step size;
+  it was replaced by the `4 d` version above.
 * **Mutation check, done by hand in week 3** (not automated): flipping the sign of `rho` in the
   characteristic function is caught by HESTON-REF and the smile unit test but **not** by V-03 or
   V-04 (those do not depend on the sign of `rho`); corrupting one Gauss-Kronrod weight is caught by
   11 tests; flipping a sign in `D` is caught by HESTON-REF, V-03, V-04 and a unit test. This is why
   the independent table is part of the suite.
+
+* **BARRIER-REF** (`tests/validation/test_barrier_reference.cpp`): 700 barrier, touch and double no-touch prices
+  against independent Python numerical integration (`python/gen_barrier_reference.py`, seed 20261021); criterion
+  1e-9 fixed first, worst error 6.7e-16.
+* **Mutation check, week 9:** see the validation report (section 5).
 
 ## Tests that are not part of the V-series
 

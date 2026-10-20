@@ -1,4 +1,4 @@
-# Validation report: FX option pricing models, version 0.7
+# Validation report: FX option pricing models, version 0.8
 
 * **Models in scope:** Garman-Kohlhagen (benchmark), Heston semi-analytic pricer, Monte Carlo engine
   with Euler (full truncation) and Andersen QE schemes, antithetic and control variates.
@@ -6,9 +6,12 @@
   surface in total variance) with butterfly and calendar arbitrage checks.
 * **Added in 0.7:** Heston calibration to delta quotes (bounded multi-start Levenberg-Marquardt on
   implied-volatility errors) with parameter-recovery, identification and noise tests (V-11).
-* **Out of scope for this version:** Vanna-Volga and barrier models, VaR/ES, exposure and CVA (weeks 9 to 13;
-  their sections will be added to this report).
-* **Version tested:** library 0.7.0. The commit is in the metadata of every output file
+* **Added in 0.8:** barrier, one-touch and double no-touch options (closed forms and Brownian-bridge Monte
+  Carlo), Vanna-Volga (three variants) and a comparison of Garman-Kohlhagen, Vanna-Volga and Heston with the
+  spread reported as model risk (V-12 to V-15, BARRIER-REF).
+* **Out of scope for this version:** VaR/ES, exposure and CVA (weeks 10 to 13; their sections will be added
+  to this report).
+* **Version tested:** library 0.8.0. The commit is in the metadata of every output file
   (section 8).
 * **Status:** draft for release v0.5. Every number below comes from a test in this repository
   and can be reproduced with the commands in section 8. Numbers measured on one machine are
@@ -26,6 +29,8 @@
 | Variance reduction | Efficiency | V-08 | Variance ratios 1.2 to 11.7; all estimators unbiased to the resolution of the test. |
 | FX smile from delta quotes | Strike conversion, interpolation, arbitrage diagnostics (input to calibration and barriers) | V-09, V-10, SMILE-REF | Quotes, strikes and deltas agree to 2e-14 with an independent implementation and with the benchmark model's own Greeks. The quadratic smile has butterfly arbitrage near the money for an extreme risk reversal (F-08) and calendar arbitrage in the 5 to 11 delta wings for two of the four realistic scenarios (F-09); it always fails far enough out (F-10). Synthetic quotes only. |
 | Heston calibration to smile quotes | Fit Heston to ATM, risk-reversal and butterfly quotes | V-11, CAL-REF, unit tests | Recovers the true parameters of 24 independent random sets from exact quotes (worst parameter error 3.7e-9). One expiry fits its three quotes but identifies nothing (24 of 24; standard errors infinite). Under 5 bp of noise the reported standard errors are up to a third too small (F-13). Tested on quotes made by Heston itself only (L-15). |
+| Barrier, touch and double no-touch options | Exotic pricing, benchmark for the model comparison | BARRIER-REF, V-12, V-13 | Closed forms match independent numerical integration to 6.7e-16 on 700 cases; the Monte Carlo with the Brownian bridge agrees within 3 standard errors for 8 contracts; discrete monitoring is biased as expected (control). One defect found and fixed (F-14). Heston bridge is approximate (L-17). |
+| Vanna-Volga and model comparison | Smile adjustment; model-risk spread | V-14, V-15 | Pivots reproduced to 1e-11. Spread between Garman-Kohlhagen, Vanna-Volga and Heston is a few vol points for vanillas and up to 35% of notional for touch products on the most skewed synthetic scenario; the choice of Vanna-Volga variant matters (model documentation 7.2). Can produce negative prices (F-15). |
 | Command-line program | Reproducible runs | unit, regression, end-to-end tests | Every output carries the hash of its input, the build, the seed and the time. |
 
 **Overall assessment.** Within the parameter ranges and the European vanilla payoffs tested, the
@@ -74,9 +79,10 @@ Specifications, derivations and numerical methods are in `docs/model_documentati
    had been seen are stated in the test file (V-06).
 4. **Hand mutation checks.** Deliberate bugs were planted one at a time and the suite run: 5 changes
    to the Monte Carlo code in week 4, 15 to the QE scheme and variance reduction in week 5, 16 to the
-   command-line layer in week 6, 25 to the smile code in week 7 and 28 to the calibration code in week 8 (tables in `docs/test_catalogue.md`).
+   command-line layer in week 6, 25 to the smile code in week 7, 28 to the calibration code in week 8 and 15 to the barrier and Vanna-Volga code in week 9 (tables in `docs/test_catalogue.md`).
    All are caught by something except one week-7 change that is equivalent in practice (a rounding-level
-   threshold, section 7, L-13) and two week-8 changes that alter speed or an unused bracket and not any result.
+   threshold, section 7, L-13) and two week-8 changes that alter speed or an unused bracket and not any result, and, in week 9, the Heston bridge variance (L-17: no exact value to compare with).
+   In week 9 two changes survived the first run and led to new unit tests.
    In week 8, four changes were first missed and led to new or tighter tests, and two are seen only by the
    V-11 noise study. Three
    Monte Carlo changes (a drift term in Euler, the missing martingale correction and a sign in `K1` in QE)
@@ -106,10 +112,15 @@ Specifications, derivations and numerical methods are in `docs/model_documentati
 | V-11 (A) | Calibration recovers known parameters from exact quotes | volatility error 1e-6; parameters 1e-4 relative (rho absolute) | 24 sets (16 satisfy Feller, 8 violate it), five expiries each: worst volatility error 8.3e-12, worst parameter error 3.7e-9, all converged |
 | V-11 (B) | One-expiry identification control | must fit the quotes, must not recover the parameters in at least 80% of sets, standard errors infinite | 24 of 24 fit (worst 4.3e-11), 24 of 24 not identified, 24 of 24 infinite |
 | V-11 (C) | Noise study, 5e-4 on each pivot volatility | mean rms^2 within 25% of theory, spread within 0.6 to 1.6 of reported error, bias below 4 standard errors, all copies converge | 3 sets times 40 copies: rms^2 ratio 0.86, 0.94, 0.85; spread ratio 0.85 to 1.50; largest bias 3.45 (rho, set 16); 120 of 120 converged |
+| BARRIER-REF | Barrier, touch and double no-touch closed forms against independent Python integration | 1e-9 | 700 rows (480 vanillas, 120 touches, 100 double no-touch); worst 6.7e-16 |
+| V-12 | Barrier Monte Carlo with Brownian bridge against closed forms | within 3 standard errors; control must fail | 8 contracts all within 3 SE; control (discrete monitoring, 12 steps) overprices a knock-out by 3.8e-3, above 3 SE; Heston with xi = 1e-3 agrees with Black-Scholes closed form; Heston step study reported (0.04687, 0.04639, 0.04640 at 16, 64, 256 steps) |
+| V-13 | In-out parity | 1e-12 | 96 contracts; no-touch plus one-touch equals the discount factor (1e-13); shifted-barrier control detected in 79 of 96 (the others have a leg worth under 1e-4) |
+| V-14 | Vanna-Volga reproduces the pivots | 1e-11 | 54 cases (6 slices x 3 pivots x 3 variants); control: non-pivot vanilla not reproduced exactly |
+| V-15 | Model comparison | reported, not pass/fail | 5 scenarios x 5 contracts; spread 0.003 to 32.8 vol points, 0.002% to 35% of notional (model documentation 7.5); flat-smile control passes |
 | ALLOC | No allocation in the path loop | 0 allocations per path; engine allocations independent of path count | passes for GBM, Euler, QE, antithetic and control variate; a model that allocates is detected (control) |
 
-Test counts at version 0.7: 385 in `ctest` (unit, validation, command-line-layer, allocation and two end-to-end tests of
-real executables; the week-8 additions are 44 unit tests, 2 CAL-REF tests and 3 V-11 tests); 75 Python tests. Notes on the numbers:
+Test counts at version 0.8: 414 in `ctest` (unit, validation, command-line-layer, allocation and two end-to-end tests of
+real executables; the week-9 additions are 19 unit tests, BARRIER-REF (1 test over 700 rows), V-12 (4), V-13 (2), V-14 (2) and V-15 (1)); Python tests as in 0.7 plus the barrier generator's. Notes on the numbers:
 
 * V-06: QE's differences from the exact price are at the level of the sampling noise (standard errors of
   about 2e-4 to 7e-4), so the table shows no QE bias and cannot rule one out below that level.
@@ -139,6 +150,9 @@ project's own tests, during development of the code they concern (the same perso
 | F-11 | low | `heston_delta_quotes` searched each wing volatility starting from five times the model volatility level. For a 2-year, strongly skewed set (rho = -0.6, spot delta) the 25-delta call strike at that volatility is eight forwards away, its price underflows and the search failed with an error. A second case, found while fixing the first (kappa = 0.3, xi = 1, T = 2, low variance), failed because the ATM volatility is below 0.3 times the level, the fixed lower end. The function returned an error, never a wrong value. | CAL-REF (the first); a probe (the second) | Fixed: both ends of the bracket are scanned outwards from the level and stop at the first sign change. Regression tests for both. Four further extreme sets (for example v0 = 0.01, kappa = 0.2, theta = 0.09, xi = 2, rho = -0.9, T = 1) failed with a bracket error before the fix and all succeed after it (probe, not a committed test). |
 | F-12 | info | One expiry gives three quotes for five Heston parameters. The calibration fits them (error 4.3e-11) and returns parameters that are wrong by more than 1% in 24 of 24 sets, while a naive reading of the fit quality would call it perfect. | V-11 (B) | Accepted and handled: standard errors are reported as infinite when the data cannot determine them; use at least two or three expiries. |
 | F-13 | low | The linearised standard errors are too small in the noise study: the observed spread of the estimates is 1.06 to 1.50 times the reported error on two of three sets, and on set 16 the mean of 40 estimates of rho, xi and theta lies 3.45, 2.61 and 2.22 standard errors of the mean from the truth, which points to a small bias at 5 bp of noise. All criteria were met; the margin on the bias criterion (4) is small. | V-11 (C) | Open: report standard errors as indicative (L-14). A larger noise study (more copies and sets) would show whether the bias is real. |
+| F-14 | medium | The first version of the barrier Monte Carlo stopped simulating a path as soon as it was knocked out. That is right for a knock-out and for touches, but a knock-in pays the vanilla of the TERMINAL spot, which was then stale. The up-and-in call was priced 11% low and the down-and-in put 0.9% low (5 SE). | V-12 (first run) | Fixed: the early stop is skipped for knock-ins; V-12 passes; a hand mutation reintroducing it is killed. |
+| F-15 | medium | Vanna-Volga can return negative prices. On the extreme_skew scenario (risk reversal -8 vol points) the up-and-out call is -0.0062 (unweighted) and -0.0016 (survival), and the double no-touch is -0.594 (unweighted). A negative price is a sign that the adjustment is outside the range where the method is meaningful. | V-15 | Open: the library returns the number and does not clamp it (ADR 0010). Do not use Vanna-Volga for contracts where the smile cost is comparable to the flat price. |
+| F-16 | info | The three Vanna-Volga variants disagree by amounts as large as the model spread: for the stressed 2Y one-touch down at 92% the unweighted price is 0.338, the survival 0.420, GK flat 0.532, Heston 0.454. The "Vanna-Volga price" is not unique. | V-15 | Reported (model documentation 7.2); `survival` is the project default. |
 
 ## 7. Limitations and open points
 
@@ -182,11 +196,24 @@ project's own tests, during development of the code they concern (the same perso
   constraint. Several starts lower the chance of a local minimum but do not prove a global one. Extreme parameter
   sets can still make `heston_delta_quotes` fail with a bracket error (never a wrong value). The noise study covers
   3 sets and 40 copies each.
+* **L-17 (Heston bridge):** the Brownian-bridge crossing probability under Heston uses the average of the
+  two end variances over the step. The true crossing probability under stochastic volatility has no closed
+  form; the error of the approximation shrinks with the step size and is only measured by a step study (V-12 D,
+  prices at 16, 64 and 256 steps differ by 4.8e-4 and 8e-6 on one skewed set). It is not validated against an
+  exact value.
+* **L-18 (barrier scope):** zero rebate, equally spaced monitoring, constant rates, no fixing calendar,
+  no windows, no payment lags; touch options pay at expiry, not at the touch.
+* **L-19 (Vanna-Volga):** the flat volatility is the ATM volatility, the pivots are the 25-delta put, the ATM
+  call and the 25-delta call, the Greeks are finite differences, and the variant is a convention (F-16). The
+  method is not an arbitrage-free model (F-15).
+* **L-20 (comparison inputs):** V-15 uses synthetic quotes (L-11) and a Heston fit of 0.005 to 28.5 bp rms
+  (worst on extreme_skew, which has two expiries from 3M outwards). The spreads are indicative, one seed, 300,000
+  paths; each Heston price has a standard error of 0.0001 to 0.0008 in the table.
 
 ## 8. Reproducing these results
 
 ```sh
-cmake --preset release && cmake --build --preset release && ctest --preset release   # 385 tests
+cmake --preset release && cmake --build --preset release && ctest --preset release   # 414 tests
 python -m pytest -q                                                                    # needs numpy, scipy, jsonschema
 build/release/examples/smile/fxval-example-smile configs/scenarios/smile_scenarios.csv docs/results/smile_data
 python python/plot_smiles.py docs/results/smile_data docs/results                      # needs matplotlib

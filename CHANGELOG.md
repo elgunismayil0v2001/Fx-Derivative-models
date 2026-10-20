@@ -6,6 +6,27 @@ All notable changes are recorded here. The format follows
 
 ## [Unreleased]
 
+## [0.8.0] - 2026-10-21
+
+### Added (week 9: barriers, Vanna-Volga, model comparison)
+
+- `pricing/barrier_closed_form.hpp`: contract types and closed forms for single-barrier vanillas
+  (Reiner-Rubinstein, knock-in and knock-out from separate tables), one-touch, no-touch and double no-touch.
+- `mc/barrier_mc.hpp`: Monte Carlo for the same contracts under Black-Scholes and Heston (QE), with discrete
+  monitoring or the Brownian-bridge correction. `HestonQuadraticExponential::simulate_path` with a step
+  observer (the arithmetic of `simulate_terminal_state` is unchanged).
+- `exotics/vanna_volga.hpp`: Vanna-Volga with three variants; `exotics/barrier_comparison.hpp`: GK flat,
+  Vanna-Volga and Heston side by side with the model-risk spread. ADR 0010.
+- Validation: BARRIER-REF (700 rows, independent Python), V-12, V-13, V-14, V-15;
+  `python/gen_barrier_reference.py` and its pytest file; 19 unit tests.
+- Documentation: model documentation sections 7 and 8, validation report (findings F-14 to F-16, limitations
+  L-17 to L-20).
+
+### Fixed
+
+- Found by V-12 during development: the barrier Monte Carlo stopped a knocked-out path early, leaving a stale
+  terminal spot for knock-ins (F-14). Never released.
+
 ## [0.7.0] - 2026-10-20
 
 ### Added (week 8: Heston calibration to smile quotes)

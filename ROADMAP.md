@@ -22,6 +22,13 @@ Implied volatility, Brent and Levenberg-Marquardt solvers, the Heston model in m
 Heston calibration to delta quotes with parameter recovery, identification control and a noise study.
 Test V-11.
 
+## v0.8 (end of week 9)
+
+Barrier, one-touch and double no-touch options: Reiner-Rubinstein closed forms checked against independent
+numerical integration, Monte Carlo with the Brownian-bridge correction (Black-Scholes and Heston), Vanna-Volga
+(three variants) and a comparison of Garman-Kohlhagen, Vanna-Volga and Heston with the spread reported in vol
+points and percent of notional. Tests V-12 to V-15, BARRIER-REF.
+
 ## v1.0
 
 Smile construction from delta quotes, Heston calibration with parameter recovery, Vanna-Volga and

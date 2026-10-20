@@ -76,9 +76,15 @@ public:
     return variance_step(c, v, z).value;
   }
 
-  // Full terminal state; used by tests that compare with an independent implementation.
-  [[nodiscard]] HestonState simulate_terminal_state(NormalStream& rng,
-                                                    std::size_t steps) const noexcept {
+  // One path, with a callback after every step:
+  //   observer(ln S_before, ln S_after, v_before, v_after, dt).
+  // The barrier Monte Carlo (mc/barrier_mc.hpp) uses it to apply a Brownian-bridge crossing
+  // probability to each step. The arithmetic is exactly that of simulate_terminal_state, which is
+  // implemented through this function, so both give bit-identical paths.
+  template <class Observer>
+  [[nodiscard]] HestonState simulate_path(NormalStream& rng,
+                                          std::size_t steps,
+                                          Observer&& observer) const noexcept {
     const double dt = expiry_ / static_cast<double>(steps);
     const Coefficients c = coefficients(dt);
     const double rho = params_.rho();
@@ -107,11 +113,19 @@ public:
         k0 = -log_m - (k1 + 0.5 * k3) * variance;
       }
       const double spot_variance = std::max(k3 * variance + k4 * step.value, 0.0);
+      const double log_before = log_spot;
       log_spot += rate_drift + k0 + k1 * variance + k2 * step.value +
                   std::sqrt(spot_variance) * z_independent;
+      observer(log_before, log_spot, variance, step.value, dt);
       variance = step.value;
     }
     return {std::exp(log_spot), variance};
+  }
+
+  // Full terminal state; used by tests that compare with an independent implementation.
+  [[nodiscard]] HestonState simulate_terminal_state(NormalStream& rng,
+                                                    std::size_t steps) const noexcept {
+    return simulate_path(rng, steps, [](double, double, double, double, double) noexcept {});
   }
 
   [[nodiscard]] double simulate_terminal_spot(NormalStream& rng, std::size_t steps) const noexcept {

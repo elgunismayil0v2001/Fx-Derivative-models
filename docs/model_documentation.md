@@ -12,8 +12,8 @@ semi-analytic pricer is implemented and checked by V-03, V-04 and an independent
 | 4. Heston | semi-analytic pricer (V-03, V-04, reference table, week 3); calibration to smile quotes (V-11, CAL-REF, week 8, sections 4.6 to 4.11) |
 | 5. Monte Carlo schemes | planned, weeks 4-5 |
 | 6. FX smile from delta quotes | implemented; V-09, V-10, SMILE-REF passing (week 7) |
-| 7. Vanna-Volga | planned, week 9 |
-| 8. Barrier options | planned, week 9 |
+| 7. Vanna-Volga | implemented, week 9 |
+| 8. Barrier options | implemented, week 9 |
 | 9. Market risk (VaR, ES, backtests) | planned, week 10 |
 | 10. Counterparty credit risk (EE, PFE, CVA) | planned, week 11 |
 | 11. Limitations | running list |
@@ -210,7 +210,7 @@ In-the-money option: out-of-the-money value plus `df |F - K|` (parity).
 * Parameters are constant in time; one parameter set is fitted to all expiries (calibration, section 4.7).
 * Interest rates are deterministic (as in the rest of v1.0).
 * The `not_converged` path is not exercised by a test: no input is known that triggers it.
-* Not covered yet: Heston Greeks (by finite differences of the price) and exotic payoffs (week 9 by Monte Carlo). Implied volatility output and calibration are in sections 4.6 to 4.11.
+* Not covered yet: Heston Greeks (by finite differences of the price) and exotic payoffs (barriers: sections 7 and 8). Implied volatility output and calibration are in sections 4.6 to 4.11.
 
 ### 4.6 Heston in market units (week 8)
 
@@ -669,12 +669,161 @@ three pivots are fitted, so a ten-delta quote cannot be used together with a 25-
 interpolation in time at fixed forward log-moneyness is not the same as at fixed delta or at fixed
 strike, and the surface takes its query in `k`, so the caller supplies the forward.
 
-## 7. to 10. Planned sections
+## 7. Vanna-Volga (week 9)
 
-* **7. Vanna-Volga** (week 9): which market variant of the barrier weighting is used, and how
-  much the choice changes the price.
-* **8. Barrier options** (week 9): closed form (Reiner-Rubinstein) as benchmark, Monte Carlo with
-  Brownian-bridge correction for discrete monitoring, model comparison (V-12 to V-15).
+### 7.1 Idea
+
+A flat-volatility price ignores the smile. Vanna-Volga (Castagna and Mercurio 2007; Wystup 2006) adds the
+cost of hedging the contract's smile risk with the three liquid pivots of section 6: the 25-delta put (`P`),
+the ATM call (`A`) and the 25-delta call (`C`). Under the flat volatility `sigma_ATM` the contract `X` has
+vega, vanna and volga `g_X = (vega, vanna, volga)`. The weights `w` solve the 3 x 3 system
+
+    G w = g_X,    G = [g_P g_A g_C]   (column i holds the Greeks of pivot i),
+
+so the pivot portfolio has the same vega, vanna and volga as `X`. Its smile cost is
+`sum_i w_i (V_i^market - V_i^flat)`, where `V_i^market` is the Garman-Kohlhagen price at the pivot's own
+quoted volatility and `V_i^flat` at `sigma_ATM`. The price is `V_X^flat + factor * smile cost`.
+
+All Greeks, of the pivots and of the contract, come from one finite-difference routine on the flat-volatility
+price (central differences, step 0.2% of the volatility, spot step 0.1% of spot capped at a quarter of the
+distance to the nearest barrier). Because the same routine serves the pivots and the contract, a pivot gets the
+weights (1, 0, 0) exactly and is reproduced exactly (test V-14) whatever the finite-difference error.
+
+### 7.2 The variants and the one used (`VannaVolgaVariant`)
+
+The "factor" is where practice differs. For a vanilla it is 1. For a barrier contract the pivots' smile cost is
+earned only while the contract is alive, and the plain adjustment (factor 1) pays it even on paths that were
+knocked out.
+
+| Variant | Factor | Remark |
+|---|---|---|
+| `unweighted` | 1 | Overstates the adjustment of knock-outs and no-touches. |
+| `survival` | probability that the contract still lives: no-touch probability for knock-outs, no-touch and double no-touch; touch probability for knock-ins and one-touch; 1 for vanillas | **The variant this project reports as "Vanna-Volga".** Probabilities are computed with the flat ATM volatility. |
+| `vanilla_less_knock_in` | knock-out = Vanna-Volga vanilla (factor 1) minus Vanna-Volga knock-in (touch-probability factor); a no-touch is the discounted cash minus the one-touch | Defined for single-barrier vanillas and touches; not for the double no-touch (an error). |
+
+The choice matters. On the synthetic scenarios of V-15 (section 7.5) the three variants differ by up to
+0.12 in price for a one-touch (stressed, 2Y), i.e. up to a fifth of the price, and for the double no-touch
+the unweighted adjustment is nearly 15 times the survival one in the calm scenario. None of the three is
+"right"; they are different market conventions. I chose `survival` because it is the only one that is defined
+for every contract here and has a stated meaning (the adjustment is paid with the probability that it is
+still owed). That is a choice, not a validated fact.
+
+### 7.3 What Vanna-Volga is not
+
+It is a price adjustment, not a model: there is no dynamics, so there is no guarantee of no-arbitrage. It can
+return a negative price (section 7.6, finding F-15). The library returns the number it computes and does not
+clamp it.
+
+### 7.4 Evidence
+
+* Unit tests: flat smile gives the flat price for every variant; pivot contracts get unit weights;
+  survival variant equals flat price plus factor times the unweighted adjustment; Greeks of a vanilla agree with
+  Garman-Kohlhagen; errors (breached barrier, decomposition of a double no-touch).
+* **V-14:** the three pivots are reproduced at their market prices to 1e-11 for 6 slices x 3 pivots x 3
+  variants (54 cases). Control: a non-pivot vanilla at 95% and 105% of the forward is NOT reproduced (the
+  Vanna-Volga price differs from the price at the smile's own volatility by 3.0e-4 and 5.6e-5 on the first
+  slice), so the exactness at the pivots is not a property of every strike.
+
+### 7.5 Model comparison (test V-15) and the model-risk spread
+
+For a contract the module prices (a) Garman-Kohlhagen at the flat ATM volatility, (b) the Vanna-Volga
+variants, (c) Heston by Monte Carlo with the Brownian-bridge correction, with parameters calibrated (section 4)
+to the scenario's expiries from 3M outwards. The model-risk spread is `max - min` of {GK flat, Vanna-Volga
+survival, Heston}, reported in price units, in volatility points (divided by the flat-volatility vega per vol
+point; shown as `n/a` when the vega is below 1e-9) and in percent of notional (price over spot for vanillas,
+price for touch products, which pay one domestic unit). Barriers at 92% and 108% of spot; contracts: down-and-out
+call, up-and-out call, one-touch down, one-touch up, double no-touch; 300,000 paths, 100 steps, seed 20261023.
+Synthetic quotes (L-11).
+
+| Scenario (expiry) | Heston fit rms | Spread, vol points (min to max over contracts) | Spread, % notional (min to max) |
+|---|---|---|---|
+| flat (1Y) | 0.005 bp | 0.003 to 0.013 | 0.002 to 0.08 |
+| calm_g10 (2Y) | 6.9 bp | 0.25 to 2.05 | 0.16 to 4.9 |
+| stressed (2Y) | 12.2 bp | 2.67 to 17.7 | 0.34 to 11.3 |
+| emerging (1Y) | 8.4 bp | 1.41 to 4.19 | 0.23 to 20.0 |
+| extreme_skew (1Y) | 28.5 bp | 1.11 to 32.8 | 0.31 to 35.2 |
+
+Reading: with a flat smile the three models agree (a control, asserted); with a smile the spread is a few
+vol points for vanillas and several percent of notional for touch products, and it grows with the skew. The
+largest spreads are for the double no-touch and the up-and-out call with an adverse skew: there the flat
+model is far from the other two, and the two smile-aware models are far from each other. The table is
+produced by `fxval_validation_tests --gtest_filter=V15*` and is not pass/fail (V-15 asserts finiteness, the
+flat control and that the spread is positive somewhere).
+
+### 7.6 Limitations
+
+* Variant choice (section 7.2) moves prices by an amount comparable to the model spread.
+* The Heston fit is imperfect on the harder scenarios (rms up to 28.5 bp on extreme_skew, which has only
+  two expiries from 3M outwards); the Heston column inherits that error. Treat the spread as indicative.
+* Negative prices (F-15).
+* The flat volatility is the ATM volatility of the slice, a convention: another choice (for example the
+  volatility at the barrier) gives other prices.
+
+## 8. Barrier options (week 9)
+
+### 8.1 Contracts and closed forms (`pricing/barrier_closed_form.hpp`)
+
+Zero rebate, continuous monitoring, spot strictly between barriers; a barrier already breached is an
+`invalid_argument` error. With `phi = +1` call, `-1` put and `eta = +1` down, `-1` up, the single-barrier
+vanillas use the Reiner-Rubinstein blocks `A, B, C, D` in the notation of Haug (2007), the knock-in and the
+knock-out each from their own table. They are not computed as "vanilla minus the other", so in-out parity
+(V-13) is a real check. Touch options pay one domestic unit at expiry. With the drift `nu = r_d - r_f - sigma^2/2` of the log spot and `x = |ln(H/S)|`, the touch probability of a
+barrier below the spot is `N((-x - nu T)/(sigma sqrt T)) + e^{-2 nu x/sigma^2} N((-x + nu T)/(sigma sqrt T))`
+(first passage of drifted Brownian motion); the barrier above uses the mirrored form. A no-touch is
+`e^{-r_d T}` minus the one-touch. The double no-touch is the eigenfunction (sine) series for Brownian motion
+killed at two boundaries, summed until the terms are below 1e-16, with a convergence check that returns an
+error rather than a wrong number.
+
+### 8.2 Discrete monitoring and the Brownian bridge
+
+Real contracts are monitored at discrete fixings. A simulation that checks the barrier only at its time steps
+misses crossings between steps, so it overprices knock-outs (the bias shrinks like `sqrt(dt)`). Conditional on
+the two endpoints `x_i, x_{i+1}` of a step, the log spot is a Brownian bridge and the probability that it
+crossed a barrier `b` in between is, for constant volatility,
+
+    p_i = exp(-2 (x_i - b)(x_{i+1} - b) / (sigma^2 dt)),    for x_i, x_{i+1} on the same side of b.
+
+The estimator multiplies the payoff by the survival probability `prod (1 - p_i)` (conditional Monte Carlo,
+lower variance than drawing a uniform for each step). For a knock-in the payoff is the vanilla times
+`1 - prod (1 - p_i)`; a one-touch pays `1 - prod(1 - p_i)`; a double barrier uses `(1 - p_lo)(1 - p_hi)`
+per step. Under constant volatility the bridge is exact, so with the bridge the estimator has no time-step
+bias for continuous monitoring. Under Heston it is approximate: the variance is taken as
+`(v_i + v_{i+1})/2` over the step. That is not the exact bridge of a stochastic-volatility process
+(limitation L-17).
+
+### 8.3 Monte Carlo (`mc/barrier_mc.hpp`)
+
+`gbm_barrier_mc_price` and `heston_barrier_mc_price` take a `BarrierMonitoring` option: `discrete` (check at
+the steps only) or `bridge` (the correction above). The Heston path uses the QE scheme of section 5.6 through
+`HestonQuadraticExponential::simulate_path`, which now reports each step to an observer; the arithmetic of the
+simulation is unchanged (QE-PATH-REF, V-05 to V-08 unchanged). Reproducibility and thread invariance are those of the
+engine (V-07). Path `p` draws from `NormalStream(seed, p)`.
+
+### 8.4 Evidence
+
+* **BARRIER-REF:** 700 prices (480 vanillas, 120 touches, 100 double no-touch) against independent Python
+  numerical integration (scipy QUADPACK over method-of-images densities; no Reiner-Rubinstein block and no
+  closed form appears there). Criterion 1e-9, fixed first; worst error 6.7e-16.
+* **V-12:** (A) bridge Monte Carlo against the closed forms within 3 standard errors for 8 contracts, 16
+  steps, 400,000 paths; (B) control: plain discrete monitoring at 12 steps overprices the down-and-out call by
+  3.8e-3, more than 3 standard errors; (C) Heston with `xi = 1e-3` against the Black-Scholes closed form;
+  (D) Heston step study (16, 64, 256 steps, a skewed set): 0.04687, 0.04639, 0.04640, reported without a
+  reference (no closed form exists).
+* **V-13:** knock-in plus knock-out equals the vanilla to 1e-12 on 96 contracts; control (barrier shifted by
+  0.5%) detected in 79 of 96, the other 17 being cases where one leg is worth almost nothing (asserted).
+* **Finding F-14:** the first version of the Monte Carlo stopped simulating a path once it was knocked out,
+  which is right for a knock-out but leaves the terminal spot stale for a knock-in. V-12 caught it: the
+  up-and-in call was low by 11%.
+
+### 8.5 Limitations
+
+* Rebates, windows, fixing calendars and day-count details are not modelled; monitoring is at equally spaced
+  steps.
+* Heston bridge approximation (L-17); Monte Carlo error bars are statistical only.
+* Closed forms assume constant rates and volatility.
+
+## 9. to 10. Planned sections
+
 * **9. Market risk** (week 10): EWMA and GARCH volatility, historical, parametric, delta-gamma,
   full revaluation and filtered historical simulation, backtests (V-16 to V-18, V-21).
 * **10. Counterparty credit risk** (week 11): exposure simulation, netting, EE, PFE, CVA with an
