@@ -37,7 +37,8 @@ fxval_add_test_executable(fxval_unit_tests unit/test_error.cpp unit/test_units.c
                           unit/test_least_squares.cpp unit/test_heston_smile.cpp
                           unit/test_heston_calibration.cpp unit/test_barrier_closed_form.cpp
                           unit/test_vanna_volga.cpp unit/test_barrier_mc.cpp unit/test_nelder_mead.cpp
-                          unit/test_volatility_models.cpp unit/test_var_and_backtest.cpp)
+                          unit/test_volatility_models.cpp unit/test_var_and_backtest.cpp
+                          unit/test_exposure_and_cva.cpp)
 
 fxval_add_test_executable(fxval_validation_tests validation/test_catalogue_consistency.cpp
                           validation/test_v01_put_call_parity.cpp validation/test_v02_greeks_fd.cpp
@@ -64,7 +65,10 @@ fxval_add_test_executable(fxval_validation_tests validation/test_catalogue_consi
                           validation/test_risk_reference.cpp
                           validation/test_v17_var_backtests.cpp
                           validation/test_v18_delta_normal_vs_revaluation.cpp
-                          validation/test_v21_lookahead.cpp)
+                          validation/test_v21_lookahead.cpp
+                          validation/test_credit_reference.cpp
+                          validation/test_v19_forward_exposure.cpp
+                          validation/test_v20_cva_nested.cpp)
 target_compile_definitions(
   fxval_validation_tests
   PRIVATE "FXVAL_TEST_CATALOGUE_PATH=\"${PROJECT_SOURCE_DIR}/docs/test_catalogue.md\""
@@ -79,6 +83,7 @@ target_compile_definitions(
           "FXVAL_RISK_VAR_REFERENCE_PATH=\"${PROJECT_SOURCE_DIR}/tests/validation/data/risk_var_reference.csv\""
           "FXVAL_GARCH_SERIES_PATH=\"${PROJECT_SOURCE_DIR}/tests/validation/data/garch_series.csv\""
           "FXVAL_GARCH_REFERENCE_PATH=\"${PROJECT_SOURCE_DIR}/tests/validation/data/garch_reference.csv\""
+          "FXVAL_CREDIT_REFERENCE_PATH=\"${PROJECT_SOURCE_DIR}/tests/validation/data/credit_reference.csv\""
           "FXVAL_BARRIER_REFERENCE_PATH=\"${PROJECT_SOURCE_DIR}/tests/validation/data/barrier_reference.csv\""
           "FXVAL_SMILE_SCENARIOS_PATH=\"${PROJECT_SOURCE_DIR}/configs/scenarios/smile_scenarios.csv\"")
 target_include_directories(fxval_unit_tests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})

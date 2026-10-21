@@ -66,6 +66,8 @@ validation tests are what a model-validation team would ask for. Reasoning:
 | `risk/var.hpp` | `var.cpp` | `historical_var_es`, `normal_var_es`, `cornish_fisher_var` (docs 9.4). |
 | `risk/portfolio.hpp` | `portfolio_risk.cpp` | `FxPortfolio`, delta-normal, delta-gamma, full-revaluation, historical and filtered-historical VaR (docs 9.5). |
 | `risk/backtest.hpp` | `backtest.cpp` | `evaluate_exceptions` (Kupiec, independence, conditional coverage, traffic light) and `rolling_backtest` (docs 9.6). |
+| `credit/exposure.hpp` | `exposure.cpp` | Exposure simulation: `simulate_spot_paths`, `simulate_netting_set_values`, `simulate_forward_values`, `simulate_option_values`, `exposure_profile` (docs 10.2). |
+| `credit/cva.hpp` | `cva.cpp` | `cva_weights`, `cva_from_profile`, `cva_estimate`, `cva_difference` (docs 10.3). |
 | `version.hpp.in` | none | Template turned into the version header by CMake. |
 
 ## `tests/`
@@ -82,6 +84,8 @@ validation tests are what a model-validation team would ask for. Reasoning:
 | `validation/test_v02_greeks_fd.cpp` | V-02: all Greeks against finite differences of the price on 120 points; records the worst error per Greek and where. |
 | `unit/test_nelder_mead.cpp`, `unit/test_volatility_models.cpp`, `unit/test_var_and_backtest.cpp` | Hand-computed values, limits, orderings and error paths of the week-10 code. |
 | `validation/test_v16_garch_estimation.cpp`, `test_risk_reference.cpp`, `test_v17_var_backtests.cpp`, `test_v18_delta_normal_vs_revaluation.cpp`, `test_v21_lookahead.cpp` | V-16, RISK-REF, V-17, V-18, V-21. `support/risk_test_support.hpp` has the shared forecasters and simulators. |
+| `unit/test_exposure_and_cva.cpp` | Exposure paths, netting, profile and CVA by hand, structural properties and error paths. |
+| `validation/test_credit_reference.cpp`, `test_v19_forward_exposure.cpp`, `test_v20_cva_nested.cpp` | CREDIT-REF, V-19, V-20. `support/credit_test_support.hpp` has the market and trade builders. |
 | `unit/test_quadrature.cpp` | The integrator on integrals with known answers: polynomials, sine, Gaussian, sqrt singularity, narrow peak, reversed interval, non-convergence, rounding-level stop rule. |
 | `unit/test_heston.cpp` | Parameter validation, characteristic-function identities (`phi(0) = phi(-i) = 1`, boundedness, first moment), `xi = 0` equals Garman-Kohlhagen, parity, bounds, convexity, smile sign, error paths. |
 | `validation/test_v03_heston_vs_gk.cpp` | V-03: Heston to Garman-Kohlhagen as vol of vol goes to 0, checked at the theoretical order of convergence. |
@@ -114,6 +118,7 @@ validation tests are what a model-validation team would ask for. Reasoning:
 | `validation/test_v12_barrier_mc.cpp`, `test_v13_in_out_parity.cpp`, `test_v14_vanna_volga_pivots.cpp`, `test_v15_model_comparison.cpp` | V-12 to V-15. Criteria in the file headers. |
 | `validation/data/garch_series.csv`, `garch_reference.csv` | The V-16 series and reference fits, written by `python/gen_garch_reference.py`. |
 | `validation/data/risk_hits_reference.csv`, `risk_var_reference.csv` | RISK-REF tables, written by `python/gen_risk_reference.py`. |
+| `validation/data/credit_reference.csv` | The CREDIT-REF and V-19 table, written by `python/gen_credit_reference.py`. |
 | `validation/data/barrier_reference.csv` | The barrier reference table, written by `python/gen_barrier_reference.py`. |
 | `support/calibration_test_support.hpp` | `make_calibration_market()`, `heston_slices()` (quotes a Heston model implies) and a small CSV reader for the calibration tables. |
 | `unit/test_brent.cpp`, `test_implied_volatility.cpp`, `test_least_squares.cpp`, `test_heston_smile.cpp`, `test_heston_calibration.cpp` | The week-8 code: root finder, implied volatility round trips and error paths, Levenberg-Marquardt on problems with known answers and its standard errors, the Heston model in market units, calibration (recovery, determinism, bounds, one expiry, currency-swap invariance). |
@@ -147,11 +152,12 @@ validation tests are what a model-validation team would ask for. Reasoning:
 | `gen_garch_reference.py` | Writes the 12 simulated return series and the independent SLSQP fits and Hessian standard errors for V-16. |
 | `gen_risk_reference.py` | Writes the 40 hit sequences and 186 VaR rows of RISK-REF. |
 | `compare_with_arch.py` | Optional comparison with the `arch` package; exits quietly when it is missing. Never run in this project. |
+| `gen_credit_reference.py` | Writes the 80-row credit table: forward EE and PFE (Black-76), option prices and exact CVA, CVA by intervals. |
 | `gen_barrier_reference.py` | Writes the 700-row barrier table by numerical integration (killed densities by images, first-passage integral, sum of images). |
 | `gen_calibration_reference.py` | Writes the two calibration tables with textbook Heston prices, `brentq` implied volatilities and nested `brentq` delta strikes. |
 | `plot_smiles.py` | Draws `docs/results/smile_*.png` from the CSV files written by `fxval-example-smile` (needs matplotlib). |
 | `gen_gk_reference.py` | Writes the reference table with SciPy, in a different algebraic form from the C++ code, fixed seed. |
-| `tests/test_data_download.py`, `tests/test_gen_gk_reference.py`, `tests/test_gen_heston_reference.py`, `tests/test_gen_mc_reference.py`, `tests/test_gen_qe_reference.py`, `tests/test_gen_smile_reference.py`, `tests/test_gen_calibration_reference.py`, `tests/test_gen_barrier_reference.py`, `tests/test_gen_risk_reference.py` | Offline tests of the parsers and of the generators (the Monte Carlo one needs no third-party package). |
+| `tests/test_data_download.py`, `tests/test_gen_gk_reference.py`, `tests/test_gen_heston_reference.py`, `tests/test_gen_mc_reference.py`, `tests/test_gen_qe_reference.py`, `tests/test_gen_smile_reference.py`, `tests/test_gen_calibration_reference.py`, `tests/test_gen_barrier_reference.py`, `tests/test_gen_risk_reference.py`, `tests/test_gen_credit_reference.py` | Offline tests of the parsers and of the generators (the Monte Carlo one needs no third-party package). |
 
 ## Other
 

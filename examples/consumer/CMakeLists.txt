@@ -7,7 +7,7 @@
 cmake_minimum_required(VERSION 3.25)
 project(fxval_consumer LANGUAGES CXX)
 
-find_package(fxval 0.9 CONFIG REQUIRED)
+find_package(fxval 0.10 CONFIG REQUIRED)
 
 add_executable(consumer main.cpp)
 target_link_libraries(consumer PRIVATE fxval::fxval)

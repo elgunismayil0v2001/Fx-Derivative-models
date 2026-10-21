@@ -6,6 +6,19 @@ All notable changes are recorded here. The format follows
 
 ## [Unreleased]
 
+## [0.10.0] - 2026-10-22
+
+### Added (week 11: counterparty credit risk)
+
+- `credit/exposure.hpp`: exact GBM exposure simulation on a date grid (one stream per path), forward and
+  option values, netting, exposure profile (EE with standard error, PFE, EPE), optional nested revaluation.
+- `credit/cva.hpp`: unilateral CVA with a flat hazard rate by a trapezoid rule on the discounted EE, per-path
+  estimate with standard error, paired difference of two CVAs. ADR 0012.
+- Validation: CREDIT-REF (14 + 6 + 6 rows, independent Python), V-19, V-20; `python/gen_credit_reference.py` and its
+  pytest file; 22 new tests.
+- Documentation: model documentation section 10, validation report (finding F-21, limitations L-28 to L-32), test
+  catalogue (week-11 mutation table).
+
 ## [0.9.0] - 2026-10-21
 
 ### Added (week 10: market risk)

@@ -21,7 +21,7 @@ exotics       Vanna-Volga, GK / Vanna-Volga / Heston comparison    (implemented,
 instruments   FX forward, FX option, portfolio                     (weeks 9-11)
 timeseries    EWMA, GARCH, GJR-GARCH                               (implemented, week 10)
 risk          VaR, ES, portfolio methods, backtests                (implemented, week 10)
-credit        exposure, netting, CVA                               (week 11)
+credit        exposure, netting, EE, PFE, CVA                      (implemented, week 11)
 apps          fxval-price (implemented, week 6); more programs     (week 6 onward)
               not part of the public API; the only code that uses a JSON parser
 ```

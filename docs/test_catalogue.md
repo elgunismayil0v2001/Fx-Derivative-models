@@ -29,12 +29,15 @@ duplicated, or outside V-01 to V-21.
 | V-16 | GARCH estimation vs independent code (not `arch`) | Parameters and log-likelihood within tolerance | 10 | passing | `tests/validation/test_v16_garch_estimation.cpp`. 12 simulated series (`tests/validation/data/garch_series.csv`, `garch_reference.csv`, from `python/gen_garch_reference.py`). (A) recursion at the true parameters; (B) C++ fit against an independent SLSQP fit: worst log-likelihood gap 1.1e-8, worst parameter difference 1.45e-4 SE; (C) standard errors within 5% (worst 0.12%); (D) control: asymmetry detected on 4 of 5 GJR series; (E) control: a poor fit is visible. Disclosed in the header: the SE step (F-18) and the 4-of-5 count. The `arch` package could not be installed, so `python/compare_with_arch.py` was never run. |
 | V-17 | VaR backtests (each method) | Exceptions, Kupiec and Christoffersen p-values, traffic-light zone reported | 10 | passing | `tests/validation/test_v17_var_backtests.cpp`. Two simulated series (normal and t6 innovations), 3750 returns, window 750, 3000 forecast days, 99% and 95%, five methods including a static-volatility control that must be rejected. Plus the size and power of the tests (size 0.044 and 0.017 at 5%, F-19). Reported values are in validation report section 5. |
 | V-18 | Delta-normal vs full revaluation for options | Gap in VaR quantified | 10 | passing | `tests/validation/test_v18_delta_normal_vs_revaluation.cpp`. Six portfolios, 1 and 10 days, 99%. Convexity ordering, understatement above 30% for the short straddles at ten days, delta-gamma closer than delta-normal for the four straddle and strangle portfolios, and a pure-spot control within 0.5%. Header discloses the P5 and P6 expiry change (one week to three). F-17. |
-| V-19 | Single-forward expected exposure vs Black-76 | Within 3 standard errors | 11 | planned | |
-| V-20 | CVA: Monte Carlo exposure vs nested simulation on a small case | Agreement within stated tolerance | 11 | planned | |
+| V-19 | Single-forward expected exposure vs Black-76 | Within 3 standard errors | 11 | passing | `tests/validation/test_v19_forward_exposure.cpp`. 60 forward cases from `python/gen_credit_reference.py` (long and short, strikes 1.00, 1.10, 1.25, risk-neutral and 5% real-world drift, five dates), 200,000 paths: EE within 4 standard errors (worst z 2.81, mean z^2 0.98; 4 and not 3 because 60 comparisons at 3 would fail by chance about once in six runs); PFE at 95% and 99% equal to the exact order statistic and the share below the closed-form PFE within 4 binomial standard errors (120 checks, worst 2.29); netting applied before the floor; CVA of a long option equal to `(1 - R) price (1 - Q)` (6 cases, worst z 2.29); control with 12% instead of 10% volatility rejected for 14 of 15 values. |
+| V-20 | CVA: Monte Carlo exposure vs nested simulation on a small case | Agreement within stated tolerance | 11 | passing | `tests/validation/test_v20_cva_nested.cpp`. 20,000 outer paths, four dates, paired. Case 1 (long call): nested minus closed form within 4 paired standard errors (z 0.19). Case 2 (long forward and short ATM straddle): the bias from flooring a noisy inner value is visible and shrinks with M: +2.5e-6 (z 6.4) at M = 25, +5.0e-7 at 100, +7.1e-8 at 400 on a CVA of 3.79e-4 (F-21). Header discloses that case 2 was first a short call, which hid the bias. |
 | V-21 | Look-ahead and leakage check in backtests | Proof that VaR at date t uses data up to t-1 only | 10 | passing | `tests/validation/test_v21_lookahead.cpp`. Not a proof: bitwise equality of forecasts up to day t0 when the returns from t0 on are replaced, for 4 methods and 4 values of t0, plus a leaky control caught at 3 of 3 values; the structural guarantee is that `rolling_backtest` hands the forecaster only the preceding `window` returns. A sanity check that later forecasts do change was relaxed from day t0+1 to days t0+1..t0+49 (historical simulation does not move at once). |
 
 ## Other validation evidence (not a V-number)
 
+* **CREDIT-REF** (`tests/validation/test_credit_reference.cpp`): CVA from 14 given profiles and the telescoped CVA of 6 option prices against
+  `python/gen_credit_reference.py`, which shares no code with the C++ (scipy closed forms, an explicit loop over intervals); the
+  Garman-Kohlhagen price used in V-19 against the table. Worst relative errors 2.4e-16 (CVA) and 1.6e-14.
 * **RISK-REF** (`tests/validation/test_risk_reference.cpp`): backtest statistics (40 hit sequences,
   `risk_hits_reference.csv`) and VaR methods (186 rows, `risk_var_reference.csv`: historical, normal,
   Cornish-Fisher, delta-gamma, full revaluation) against `python/gen_risk_reference.py`, which shares no code with
@@ -221,6 +224,33 @@ duplicated, or outside V-01 to V-21.
 
   Two changes are seen only by the frozen "observed" V-10 test, which says how much weight that test
   carries: it is a regression test of the scenario table, not a test of theory.
+* **Mutation check, week 11** (by hand with a script kept outside the repository; 20 single-line mutants of the
+  new code; each was built and the credit tests run, the other tests being unaffected by the code changed): all 20 are
+  killed, one of them only after a test was added (see the table). One pattern did not match after formatting and was rewritten.
+
+  | Mutation | Caught by |
+  |---|---|
+  | exposure profile without the floor `max(V, 0)` | 4 tests: 2 unit tests, V-19 (2) |
+  | Ito term sign in the spot step | 4: 2 unit tests, V-19 (2) |
+  | risk-neutral drift `r_d + r_f` | 3: a unit test, V-19 (2) |
+  | risk-neutral default drift drops `r_f` | 3: a unit test, V-19 (2) |
+  | forward value: sign of the foreign discount exponent | 3: 2 unit tests, V-19 |
+  | PFE rank by floor instead of ceil | **one unit test only** (V-19 compares with the exact order statistic, but 200,000 x 0.95 is an integer, so floor and ceil agree there) |
+  | EE standard error divisor `n` instead of `n - 1` | **one unit test only** |
+  | EPE trapezoid factor 1 for 0.5 | **one unit test only** |
+  | option still valued on its own expiry date | **one unit test only** (added after this mutant survived the first run: no test had an exposure date equal to the expiry) |
+  | nested revaluation also at t = 0 | **one unit test only** |
+  | inner value undiscounted | 3: a unit test, V-20 (2) |
+  | inner Ito term lost | 3: a unit test, V-20 (2) |
+  | inner streams shared across dates | **V-20 only** (the bias test) |
+  | CVA weight uses only the left interval | 3: CREDIT-REF, 2 unit tests |
+  | CVA discount factor sign | 4: CREDIT-REF, unit tests, V-19 |
+  | CVA with the recovery rate instead of `1 - R` | 4 tests, among them CREDIT-REF and a unit test |
+  | default probability from zero, not per interval | 3: CREDIT-REF, a unit test, V-19 |
+  | paired difference with `+` for `-` | 3: a unit test, V-20 (2) |
+  | netting sum with `-=` | 3: a unit test, V-19, V-20 |
+  | every path on the same random stream | 5 tests |
+
 * **Mutation check, week 10** (by hand with a script kept outside the repository; 20 single-line mutants of the
   new code; each was built and the whole suite run except V-15): 19 are killed (one only after a test was added)
   and one survives. Two mutants did not compile at first (an unused variable under `-Werror`) and were rewritten.

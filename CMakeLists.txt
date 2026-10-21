@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.25)
 
 project(
   fxval
-  VERSION 0.9.0
+  VERSION 0.10.0
   DESCRIPTION "FX derivative pricing and risk models with an independent validation suite"
   LANGUAGES CXX)
 
@@ -60,7 +60,8 @@ add_library(fxval STATIC src/contracts.cpp src/error.cpp src/units.cpp src/dayco
                         src/arbitrage_checks.cpp src/barrier_closed_form.cpp src/implied_volatility.cpp src/least_squares.cpp
                         src/heston_smile.cpp src/heston_calibration.cpp
                         src/nelder_mead.cpp src/volatility_models.cpp
-                        src/var.cpp src/portfolio_risk.cpp src/backtest.cpp)
+                        src/var.cpp src/portfolio_risk.cpp src/backtest.cpp
+                        src/exposure.cpp src/cva.cpp)
 add_library(fxval::fxval ALIAS fxval)
 
 target_include_directories(

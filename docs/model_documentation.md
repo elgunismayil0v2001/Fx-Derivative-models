@@ -15,7 +15,7 @@ semi-analytic pricer is implemented and checked by V-03, V-04 and an independent
 | 7. Vanna-Volga | implemented, week 9 |
 | 8. Barrier options | implemented, week 9 |
 | 9. Market risk (VaR, ES, backtests) | implemented, week 10; V-16, V-17, V-18, V-21, RISK-REF |
-| 10. Counterparty credit risk (EE, PFE, CVA) | planned, week 11 |
+| 10. Counterparty credit risk (EE, PFE, CVA) | implemented, week 11; V-19, V-20, CREDIT-REF |
 | 11. Limitations | running list |
 | 12. References | running list |
 
@@ -929,10 +929,68 @@ exceptions (L-24). ES is not backtested (L-27).
 L-21 to L-27 in the validation report: zero mean; boundary optima; indicative standard errors; chi-square
 approximation with few exceptions; Cornish-Fisher range; spot-only risk factor; no ES backtest.
 
-## 10. Counterparty credit risk (week 11, planned)
+## 10. Counterparty credit risk (week 11)
 
-Exposure simulation, netting, EE, PFE, CVA with an assumed flat hazard rate, checks against closed forms
-(V-19, V-20).
+### 10.1 Scope
+
+Exposure and credit valuation adjustment (CVA) of FX forwards and European options with one counterparty on one
+currency pair. Spot is the only risk factor; it is simulated exactly as a geometric Brownian motion on a date grid
+(`credit/exposure.hpp`). Values and exposures are in domestic currency. CVA is unilateral: the counterparty can
+default, the bank cannot (L-32).
+
+### 10.2 Exposure
+
+Dates `0 = t_0 < t_1 < ... < t_n`. Path `p` uses random stream `p` of the seed (the convention of the Monte Carlo
+engine), so a result does not depend on any ordering. The spot is `S_j = S_{j-1} exp((mu - sigma^2/2) dt + sigma sqrt(dt) Z)`
+with `mu = r_d - r_f` (risk-neutral, used for CVA) or a user-given real-world drift (used for PFE).
+
+* **Trade values at date `t`:** forward `N (S e^{-r_f tau} - K e^{-r_d tau})` with `tau = T - t`; option position `q` times
+  the Garman-Kohlhagen price at `S` with the trade's volatility (constant, so no smile dynamics: L-30). A trade with
+  `tau <= 0` has value 0 (it has settled).
+* **Netting:** the values of the trades of a netting set are added path by path before the floor. Exposure is
+  `max(V_net, 0)`; with no netting the floors are taken trade by trade. `max(a + b, 0) <= max(a, 0) + max(b, 0)`.
+* **Profile:** `EE(t) = mean(max(V, 0))` with its standard error, `PFE(q)` the `ceil(n q)`-th smallest exposure,
+  `EPE` the trapezoid time average of EE. No collateral, no margin period of risk (L-28).
+* **Nested revaluation (a cross-check):** with `inner_paths = M > 0` an option is revalued at every date after today by
+  the average of `M` exact terminal payoffs from the simulated spot, discounted. Forwards are always exact.
+
+### 10.3 CVA
+
+With hazard `lambda`, recovery `R`, discount factor `DF(t) = e^{-r_d t}`, survival `Q(t) = e^{-lambda t}`:
+
+`CVA = (1 - R) integral DF(t) EE(t) dPD(t)`, discretised by the trapezoid rule on `DF * EE` over each interval:
+
+`CVA = (1 - R) sum_i [DF(t_{i-1}) EE(t_{i-1}) + DF(t_i) EE(t_i)] / 2 * (Q(t_{i-1}) - Q(t_i))`.
+
+The code collects this into one weight per date, `c_j = (1 - R) DF(t_j) (dQ_j + dQ_{j+1}) / 2`, and applies it path by path
+to `max(V, 0)`, which gives the CVA and its standard error across paths. Default and exposure are independent and the
+discount rate is deterministic (L-29). For the long option the discounted expected exposure is the option price at
+every date (martingale), so the sum telescopes to `(1 - R) price (1 - Q(t_n))` exactly: a check that needs no simulation
+of the exposure model, used in V-19.
+
+### 10.4 Evidence
+
+* **CREDIT-REF:** 14 CVA profiles (hazard 0 to 0.3, recovery 0 to 0.8, discount rate -1% to 6%, irregular dates) against an
+  explicit loop over intervals in Python: worst relative difference 2.4e-16; the telescoped CVA of 6 option prices and the
+  C++ Garman-Kohlhagen price: 1.6e-14.
+* **V-19 forward exposure:** 60 cases (long and short, three strikes, risk-neutral and 5% real-world drift, five dates),
+  200,000 paths each, EE against the Black-76 closed form: worst |z| 2.81, mean of z^2 0.98 (the criterion is 4 standard errors
+  per case because 60 comparisons at 3 would fail by chance about once in six runs, as the test header says); PFE at 95% and
+  99%: the C++ value equals the exact k-th smallest exposure, and the share of paths below the closed-form PFE is within
+  worst |z| 2.29 of the level (120 checks). Netting of two forwards is applied before the floor (exact). CVA of a long option
+  equals `(1 - R) price (1 - Q(0.8))` (6 cases, worst |z| 2.29). Control: simulating with 12% instead of 10% volatility
+  is rejected for 14 of 15 EE values.
+* **V-20 nested simulation:** 20,000 outer paths, four dates. Case 1, a long call (exposure linear in the inner average, so unbiased):
+  nested minus closed form 2.5e-8 on a CVA of 7.8e-4 (z 0.19). Case 2, two units of a long forward and a short ATM straddle (the
+  net value changes sign where the straddle is worth most): the closed-form CVA is 3.79e-4 and nested minus closed form is
+  +2.5e-6 (z 6.4) at `M = 25`, +5.0e-7 (z 2.5) at 100 and +7.1e-8 (z 0.7) at 400: the bias from flooring a noisy inner
+  value is upward and shrinks roughly like `1 / M` (F-21).
+
+### 10.5 Limitations
+
+L-28 to L-32 in the validation report: no collateral, no margin period of risk; independence of default and
+exposure; constant-volatility spot dynamics; trapezoid grid error not studied; unilateral CVA and a user-supplied
+hazard rate and recovery.
 
 ## 11. Limitations (running list)
 

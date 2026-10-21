@@ -1,4 +1,4 @@
-# Validation report: FX option pricing models, version 0.9
+# Validation report: FX option pricing models, version 0.10
 
 * **Models in scope:** Garman-Kohlhagen (benchmark), Heston semi-analytic pricer, Monte Carlo engine
   with Euler (full truncation) and Andersen QE schemes, antithetic and control variates.
@@ -13,9 +13,10 @@
   Cornish-Fisher, delta-gamma, full-revaluation and filtered-historical VaR and ES for a spot-and-options portfolio,
   and backtests (Kupiec, Christoffersen, Basel traffic light) with a look-ahead check (V-16, V-17, V-18, V-21,
   RISK-REF).
-* **Out of scope for this version:** exposure and CVA (weeks 11 to 13; their sections will be added to this
-  report).
-* **Version tested:** library 0.9.0. The commit is in the metadata of every output file
+* **Added in 0.10:** counterparty credit risk: exposure simulation for FX forwards and options, netting, EE, PFE, EPE,
+  unilateral CVA with a flat hazard rate, and a nested-simulation cross-check (V-19, V-20, CREDIT-REF).
+* **Out of scope for this version:** wrong-way risk, collateral, bilateral adjustments (weeks 12 to 13 and later).
+* **Version tested:** library 0.10.0. The commit is in the metadata of every output file
   (section 8).
 * **Status:** draft for release v0.5. Every number below comes from a test in this repository
   and can be reproduced with the commands in section 8. Numbers measured on one machine are
@@ -38,6 +39,8 @@
 | GARCH and GJR-GARCH estimation | Conditional volatility for VaR | V-16, unit tests | Log-likelihood within 1.1e-8 of an independent SLSQP fit and parameters within 1.5e-4 standard errors on 12 simulated series; standard errors within 0.12% of an independent Hessian, but only once both use the same step (F-18). Not compared with the Python `arch` package (it could not be installed). |
 | VaR and ES methods | Historical, normal, Cornish-Fisher, delta-gamma, full revaluation, FHS | RISK-REF, V-17, V-18 | Agree with independent Python to 4e-11 relative (186 rows). Delta-normal understates the 99% VaR of short-option positions by 50% to 92% and overstates that of long ones (V-18); Cornish-Fisher delta-gamma can return a negative VaR (F-17). |
 | VaR backtests and look-ahead check | Exceptions, Kupiec, independence, traffic light | V-17, V-21, RISK-REF | Statistics agree with independent Python to 4e-15 (40 sequences). A static-volatility control is rejected at both levels; GARCH-normal is rejected on fat-tailed data at 99% and FHS is not. The forecast for day t is bitwise independent of returns from day t on (V-21; a leaky control is caught). One simulated history per innovation type, spot risk factor only. |
+| Exposure, netting, EE, PFE | Counterparty exposure of FX forwards and options | V-19, unit tests | Expected exposure of 60 forward cases agrees with the Black-76 closed form within 4 standard errors (worst z 2.81); PFE agrees with the closed-form quantile (worst z 2.29); a wrong-volatility control is rejected. Spot only, no collateral (L-28, L-30). |
+| CVA | Unilateral CVA, flat hazard rate | CREDIT-REF, V-19, V-20 | CVA arithmetic agrees with independent Python to 2.4e-16 and the CVA of a long option with its exact value (worst z 2.29). Nested simulation agrees where the exposure is linear (z 0.19) and is biased upward, shrinking like 1/M, where the net value changes sign (F-21). No wrong-way risk (L-29). |
 | Command-line program | Reproducible runs | unit, regression, end-to-end tests | Every output carries the hash of its input, the build, the seed and the time. |
 
 **Overall assessment.** Within the parameter ranges and the European vanilla payoffs tested, the
@@ -129,9 +132,12 @@ Specifications, derivations and numerical methods are in `docs/model_documentati
 | V-17 | VaR backtests of five methods on two simulated series | reported; size and power of the tests; static control must be rejected | 3000 days. Series A: GARCH-normal 31 exceptions at 99% (Kupiec p 0.855), EWMA 40 (0.081), static control 57 (below 0.001). Series B (t6): GARCH-normal 45 (0.010), EWMA 59 (below 0.001), historical 41 (0.056), FHS 34 (0.472). Size at 5%: Kupiec 0.044, independence 0.017; power against a 2% rate 0.985 |
 | V-18 | Delta-normal, delta-gamma and full-revaluation VaR for six option portfolios | convexity ordering; short-straddle understatement above 30%; delta-gamma closer than delta-normal; pure-spot control within 0.5% | all assertions hold; 99% one-day VaR: short ATM straddle 1,483 / 2,963 / 2,935 (DN / DG / full), long ATM straddle 1,483 / 206 / 367, short 1M strangle 457 / 1,654 / 1,630; ten-day long straddle: delta-gamma -2,480 against 366 (F-17) |
 | V-21 | Look-ahead and leakage check | forecasts up to day t0 bitwise equal when later returns are replaced; leaky control caught | 4 methods x 4 values of t0 pass; the leaky forecaster is caught at 3 of 3 values of t0 |
+| CREDIT-REF | CVA arithmetic and the Garman-Kohlhagen price against independent Python | 1e-12 relative | 14 CVA profiles, worst 2.4e-16; 6 telescoped CVA values, worst 1.6e-14; 6 prices, worst 1.6e-14 |
+| V-19 | Forward exposure against Black-76; CVA of a long option against its exact value | EE within 4 standard errors (60 cases) and mean z^2 in 0.5 to 1.6; PFE equal to the exact order statistic and the share below the closed-form PFE within 4 binomial standard errors; netting before the floor exact to 1e-6; CVA of a long option within 4 standard errors (6 cases); control must be rejected in at least 9 of 15 | worst EE |z| 2.81, mean z^2 0.98; PFE worst |z| 2.29 (120 checks); CVA worst |z| 2.29; control rejected 14 of 15. Header notes why 4 and not 3 standard errors |
+| V-20 | CVA by closed-form revaluation against nested simulation | case 1 within 4 paired standard errors; case 2 never below -4 standard errors, above +4 at M = 25 and less than half of that at M = 400, within 3% of the CVA at M = 400 | case 1: z 0.19; case 2: +2.5e-6 (z 6.4), +5.0e-7 (z 2.5), +7.1e-8 (z 0.7) on a CVA of 3.79e-4. Header discloses that case 2 was changed from a short call to a short straddle before acceptance |
 | ALLOC | No allocation in the path loop | 0 allocations per path; engine allocations independent of path count | passes for GBM, Euler, QE, antithetic and control variate; a model that allocates is detected (control) |
 
-Test counts at version 0.9: 456 in `ctest` (week-10 additions: 42 tests: 4 Nelder-Mead, 8 volatility-model, 5 VaR, 6 backtest and 7 portfolio unit tests, RISK-REF (2), V-16 (4), V-17 (2), V-18 (2), V-21 (2)); Python tests as in 0.8 plus the risk generator's (6). Version 0.8 had 414 in `ctest` (unit, validation, command-line-layer, allocation and two end-to-end tests of
+Test counts at version 0.10: 478 in `ctest` (week-11 additions: 22 tests: 15 unit tests in `test_exposure_and_cva.cpp`, CREDIT-REF (1), V-19 (4) and V-20 (2)); Python tests as in 0.9 plus the credit generator's (5). Version 0.9 had 456 in `ctest` (week-10 additions: 42 tests: 4 Nelder-Mead, 8 volatility-model, 5 VaR, 6 backtest and 7 portfolio unit tests, RISK-REF (2), V-16 (4), V-17 (2), V-18 (2), V-21 (2)); Python tests as in 0.8 plus the risk generator's (6). Version 0.8 had 414 in `ctest` (unit, validation, command-line-layer, allocation and two end-to-end tests of
 real executables; the week-9 additions are 19 unit tests, BARRIER-REF (1 test over 700 rows), V-12 (4), V-13 (2), V-14 (2) and V-15 (1)); Python tests as in 0.7 plus the barrier generator's. Notes on the numbers:
 
 * V-06: QE's differences from the exact price are at the level of the sampling noise (standard errors of
@@ -169,6 +175,7 @@ project's own tests, during development of the code they concern (the same perso
 | F-18 | low | GARCH standard errors depend strongly on the finite-difference step near the stationarity boundary: for series g01 the standard error of beta is 0.0019, 0.0124 and 0.0143 at relative steps 2e-2, 2e-3 and 2e-4, and a first comparison with independent code differed by up to 14% because the two used different steps. | V-16 | Both implementations now use 2e-4 and agree to 0.12%. The error bars are indicative (L-23). |
 | F-19 | info | The Christoffersen independence test rejects 1.7% of independent sequences at a 5% level and Kupiec 4.4% (1% exception rate, 2000 sequences): both are conservative with few exceptions. | V-17 | Not a defect. The size is reported and a lower bound on it was dropped from the criteria after the first run (L-24). |
 | F-20 | low | A mutant of the Nelder-Mead stop rule (the simplex-size test replaced by `true`) is not detected by any test. The restart loop and the function-value test still stop the search at the same optima on every case in the suite, so the effect, if any, is on iteration counts. | hand mutation check (week 10) | Open. Documented, not investigated further. |
+| F-21 | low | Nested simulation biases CVA upward when the netted value changes sign: the floor of a noisy inner estimate has a positive expectation. For two units of a long forward and a short ATM straddle (CVA 3.79e-4) the bias is +2.5e-6 at 25 inner paths, +5.0e-7 at 100 and +7.1e-8 at 400. A first version of the test case (a short far-out-of-the-money call) hid it, because the inner estimate of a nearly worthless option has almost no noise where the sign changes. | V-20 | Property of the method, shown and measured. The closed-form revaluation is the default; nested values are a cross-check (L-30). |
 
 ## 7. Limitations and open points
 
@@ -243,10 +250,22 @@ project's own tests, during development of the code they concern (the same perso
 * **L-27 (ES):** expected shortfall is computed, not backtested. Data are simulated; no market series was used and
   the Python `arch` package was not run.
 
+* **L-28 (collateral):** no collateral, thresholds or margin period of risk: exposure is `max(V_net, 0)` at the grid dates,
+  so it is the exposure of an uncollateralised netting set. Exposure between grid dates is not observed.
+* **L-29 (credit model):** a flat hazard rate and a recovery rate given by the user, a deterministic discount rate, and
+  independence between default and exposure: no wrong-way risk. The CVA is not calibrated to credit spreads.
+* **L-30 (market model):** spot only, geometric Brownian motion with constant volatility; options are revalued with
+  Garman-Kohlhagen at the trade's volatility, so the smile does not move with the spot. Nested revaluation uses the same
+  dynamics and is a cross-check of the revaluation step, not a second model.
+* **L-31 (grid):** CVA is a trapezoid rule on the exposure dates. The discretisation error against a finer grid was not measured; the
+  tests use exact identities and the same grid on both sides.
+* **L-32 (scope of the numbers):** unilateral CVA only (no DVA, FVA or capital). PFE is computed under the simulation measure and under a
+  user-given real-world drift; neither is calibrated and PFE is not backtested. Forward and option trades on one pair only.
+
 ## 8. Reproducing these results
 
 ```sh
-cmake --preset release && cmake --build --preset release && ctest --preset release   # 456 tests
+cmake --preset release && cmake --build --preset release && ctest --preset release   # 478 tests
 python -m pytest -q                                                                    # needs numpy, scipy, jsonschema
 build/release/examples/smile/fxval-example-smile configs/scenarios/smile_scenarios.csv docs/results/smile_data
 python python/plot_smiles.py docs/results/smile_data docs/results                      # needs matplotlib
@@ -274,3 +293,8 @@ components against independent code, on simulated data and for a spot risk facto
 production risk numbers: no market data, no volatility or rate risk factors (L-26), ES not backtested (L-27).
 F-17 and F-20 are open; F-18 and F-19 are properties of the methods. The delta-normal VaR of an option portfolio
 must not be used for a short-gamma position (V-18).
+
+**Counterparty credit risk (0.10).** The exposure simulation, netting and CVA are fit as tested components against closed
+forms and independent Python, for forwards and European options on one pair with a flat hazard rate and no collateral. They are
+not fit for a counterparty valuation: no wrong-way risk, no collateral, no calibrated credit curve (L-28 to L-32). F-21 is a
+property of nested simulation; use the closed-form revaluation where one exists.

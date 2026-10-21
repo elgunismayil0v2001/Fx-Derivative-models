@@ -36,6 +36,11 @@ Cornish-Fisher, delta-gamma, full-revaluation and filtered-historical VaR/ES, Ku
 traffic-light backtests, a look-ahead check, and the quantified gap between delta-normal and full
 revaluation. Tests V-16, V-17, V-18, V-21, RISK-REF.
 
+## v0.10 (end of week 11)
+
+Counterparty credit risk: exposure simulation for FX forwards and options, netting, EE, PFE, unilateral CVA with a
+flat hazard rate, checked against Black-76, an exact CVA identity and nested simulation. Tests V-19, V-20, CREDIT-REF.
+
 ## v1.0
 
 Smile construction from delta quotes, Heston calibration with parameter recovery, Vanna-Volga and
