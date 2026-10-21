@@ -61,6 +61,11 @@ validation tests are what a model-validation team would ask for. Reasoning:
 | `mc/barrier_mc.hpp` | `mc_barrier.cpp` | `gbm_barrier_mc_price`, `heston_barrier_mc_price` with discrete or Brownian-bridge monitoring (docs 8.2, 8.3). |
 | `exotics/vanna_volga.hpp` | `vanna_volga.cpp` | `VannaVolga`: three variants, flat-volatility prices and Greeks (docs 7). |
 | `exotics/barrier_comparison.hpp` | `barrier_comparison.cpp` | `compare_barrier_models`: GK flat, Vanna-Volga, Heston and the model-risk spread (docs 7.5). |
+| `numerics/nelder_mead.hpp` | `nelder_mead.cpp` | `nelder_mead`: simplex minimiser with restarts; an objective error counts as +infinity. |
+| `timeseries/volatility_models.hpp` | `volatility_models.cpp` | `ewma_variance`, `fit_garch` (GARCH and GJR, constrained by a softmax map, Hessian standard errors), `standardised_residuals` (docs 9.2, 9.3). |
+| `risk/var.hpp` | `var.cpp` | `historical_var_es`, `normal_var_es`, `cornish_fisher_var` (docs 9.4). |
+| `risk/portfolio.hpp` | `portfolio_risk.cpp` | `FxPortfolio`, delta-normal, delta-gamma, full-revaluation, historical and filtered-historical VaR (docs 9.5). |
+| `risk/backtest.hpp` | `backtest.cpp` | `evaluate_exceptions` (Kupiec, independence, conditional coverage, traffic light) and `rolling_backtest` (docs 9.6). |
 | `version.hpp.in` | none | Template turned into the version header by CMake. |
 
 ## `tests/`
@@ -75,6 +80,8 @@ validation tests are what a model-validation team would ask for. Reasoning:
 | `unit/test_garman_kohlhagen_errors.cpp` | Textbook values, currency-inversion symmetry, degenerate inputs, every error path. |
 | `validation/test_v01_put_call_parity.cpp` | V-01 on a grid of 8000 markets; records the worst error. |
 | `validation/test_v02_greeks_fd.cpp` | V-02: all Greeks against finite differences of the price on 120 points; records the worst error per Greek and where. |
+| `unit/test_nelder_mead.cpp`, `unit/test_volatility_models.cpp`, `unit/test_var_and_backtest.cpp` | Hand-computed values, limits, orderings and error paths of the week-10 code. |
+| `validation/test_v16_garch_estimation.cpp`, `test_risk_reference.cpp`, `test_v17_var_backtests.cpp`, `test_v18_delta_normal_vs_revaluation.cpp`, `test_v21_lookahead.cpp` | V-16, RISK-REF, V-17, V-18, V-21. `support/risk_test_support.hpp` has the shared forecasters and simulators. |
 | `unit/test_quadrature.cpp` | The integrator on integrals with known answers: polynomials, sine, Gaussian, sqrt singularity, narrow peak, reversed interval, non-convergence, rounding-level stop rule. |
 | `unit/test_heston.cpp` | Parameter validation, characteristic-function identities (`phi(0) = phi(-i) = 1`, boundedness, first moment), `xi = 0` equals Garman-Kohlhagen, parity, bounds, convexity, smile sign, error paths. |
 | `validation/test_v03_heston_vs_gk.cpp` | V-03: Heston to Garman-Kohlhagen as vol of vol goes to 0, checked at the theoretical order of convergence. |
@@ -105,6 +112,8 @@ validation tests are what a model-validation team would ask for. Reasoning:
 | `unit/test_barrier_closed_form.cpp`, `test_vanna_volga.cpp`, `test_barrier_mc.cpp` | The week-9 code: limits, parity, errors, weights, variants, reproducibility. |
 | `validation/test_barrier_reference.cpp` | BARRIER-REF: 700 prices against independent Python integration. |
 | `validation/test_v12_barrier_mc.cpp`, `test_v13_in_out_parity.cpp`, `test_v14_vanna_volga_pivots.cpp`, `test_v15_model_comparison.cpp` | V-12 to V-15. Criteria in the file headers. |
+| `validation/data/garch_series.csv`, `garch_reference.csv` | The V-16 series and reference fits, written by `python/gen_garch_reference.py`. |
+| `validation/data/risk_hits_reference.csv`, `risk_var_reference.csv` | RISK-REF tables, written by `python/gen_risk_reference.py`. |
 | `validation/data/barrier_reference.csv` | The barrier reference table, written by `python/gen_barrier_reference.py`. |
 | `support/calibration_test_support.hpp` | `make_calibration_market()`, `heston_slices()` (quotes a Heston model implies) and a small CSV reader for the calibration tables. |
 | `unit/test_brent.cpp`, `test_implied_volatility.cpp`, `test_least_squares.cpp`, `test_heston_smile.cpp`, `test_heston_calibration.cpp` | The week-8 code: root finder, implied volatility round trips and error paths, Levenberg-Marquardt on problems with known answers and its standard errors, the Heston model in market units, calibration (recovery, determinism, bounds, one expiry, currency-swap invariance). |
@@ -135,11 +144,14 @@ validation tests are what a model-validation team would ask for. Reasoning:
 | `gen_mc_reference.py` | Writes the Monte Carlo path table: Philox, Box-Muller and the Heston Euler path re-implemented in plain Python (no shared code with C++). |
 | `tests/test_price_examples.py` | Checks the example configurations against the JSON Schema (and that the schema rejects 14 damaged copies), and the frozen results against SciPy (Garman-Kohlhagen), the textbook Heston integrals and, for Monte Carlo, the independent price within 4 standard errors. |
 | `gen_smile_reference.py` | Writes the smile table: strikes by root finding on the spot-form delta, smile by a Vandermonde solve (different methods from the C++ code). |
+| `gen_garch_reference.py` | Writes the 12 simulated return series and the independent SLSQP fits and Hessian standard errors for V-16. |
+| `gen_risk_reference.py` | Writes the 40 hit sequences and 186 VaR rows of RISK-REF. |
+| `compare_with_arch.py` | Optional comparison with the `arch` package; exits quietly when it is missing. Never run in this project. |
 | `gen_barrier_reference.py` | Writes the 700-row barrier table by numerical integration (killed densities by images, first-passage integral, sum of images). |
 | `gen_calibration_reference.py` | Writes the two calibration tables with textbook Heston prices, `brentq` implied volatilities and nested `brentq` delta strikes. |
 | `plot_smiles.py` | Draws `docs/results/smile_*.png` from the CSV files written by `fxval-example-smile` (needs matplotlib). |
 | `gen_gk_reference.py` | Writes the reference table with SciPy, in a different algebraic form from the C++ code, fixed seed. |
-| `tests/test_data_download.py`, `tests/test_gen_gk_reference.py`, `tests/test_gen_heston_reference.py`, `tests/test_gen_mc_reference.py`, `tests/test_gen_qe_reference.py`, `tests/test_gen_smile_reference.py`, `tests/test_gen_calibration_reference.py`, `tests/test_gen_barrier_reference.py` | Offline tests of the parsers and of the generators (the Monte Carlo one needs no third-party package). |
+| `tests/test_data_download.py`, `tests/test_gen_gk_reference.py`, `tests/test_gen_heston_reference.py`, `tests/test_gen_mc_reference.py`, `tests/test_gen_qe_reference.py`, `tests/test_gen_smile_reference.py`, `tests/test_gen_calibration_reference.py`, `tests/test_gen_barrier_reference.py`, `tests/test_gen_risk_reference.py` | Offline tests of the parsers and of the generators (the Monte Carlo one needs no third-party package). |
 
 ## Other
 

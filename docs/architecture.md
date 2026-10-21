@@ -19,8 +19,8 @@ smile         delta quotes, interpolation, arbitrage checks        (implemented,
 calibration   Heston smile maps, Heston calibrator                 (implemented, week 8)
 exotics       Vanna-Volga, GK / Vanna-Volga / Heston comparison    (implemented, week 9)
 instruments   FX forward, FX option, portfolio                     (weeks 9-11)
-timeseries    EWMA, GARCH, GJR-GARCH                               (week 10)
-risk          VaR, ES, backtests                                   (week 10)
+timeseries    EWMA, GARCH, GJR-GARCH                               (implemented, week 10)
+risk          VaR, ES, portfolio methods, backtests                (implemented, week 10)
 credit        exposure, netting, CVA                               (week 11)
 apps          fxval-price (implemented, week 6); more programs     (week 6 onward)
               not part of the public API; the only code that uses a JSON parser

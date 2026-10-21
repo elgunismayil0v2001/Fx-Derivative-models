@@ -14,7 +14,7 @@ semi-analytic pricer is implemented and checked by V-03, V-04 and an independent
 | 6. FX smile from delta quotes | implemented; V-09, V-10, SMILE-REF passing (week 7) |
 | 7. Vanna-Volga | implemented, week 9 |
 | 8. Barrier options | implemented, week 9 |
-| 9. Market risk (VaR, ES, backtests) | planned, week 10 |
+| 9. Market risk (VaR, ES, backtests) | implemented, week 10; V-16, V-17, V-18, V-21, RISK-REF |
 | 10. Counterparty credit risk (EE, PFE, CVA) | planned, week 11 |
 | 11. Limitations | running list |
 | 12. References | running list |
@@ -822,12 +822,117 @@ engine (V-07). Path `p` draws from `NormalStream(seed, p)`.
 * Heston bridge approximation (L-17); Monte Carlo error bars are statistical only.
 * Closed forms assume constant rates and volatility.
 
-## 9. to 10. Planned sections
+## 9. Market risk (week 10)
 
-* **9. Market risk** (week 10): EWMA and GARCH volatility, historical, parametric, delta-gamma,
-  full revaluation and filtered historical simulation, backtests (V-16 to V-18, V-21).
-* **10. Counterparty credit risk** (week 11): exposure simulation, netting, EE, PFE, CVA with an
-  assumed flat hazard rate, checks against closed forms (V-19, V-20).
+### 9.1 Scope
+
+One-day (and ten-day) value at risk and expected shortfall of an FX portfolio on one currency pair
+(spot position and Garman-Kohlhagen options), with conditional volatility from EWMA and GARCH(1,1) or
+GJR-GARCH(1,1), five VaR methods, and backtests. The only risk factor is the spot (limitation L-26).
+Sign convention: P&L is positive for a gain, VaR and ES are positive losses.
+
+### 9.2 Volatility models (`timeseries/volatility_models.hpp`)
+
+Daily log returns `r_t`, zero mean (L-21). Variance paths have `n + 1` entries: `v[t]` is the forecast for
+return `t` from returns `0..t-1`, and `v[n]` is the forecast for the next day. The start `v[0]` is the sample
+mean of `r^2` over the span passed in.
+
+* **EWMA (RiskMetrics):** `v[t+1] = lambda v[t] + (1 - lambda) r[t]^2`, `lambda = 0.94` for daily data.
+* **GARCH(1,1):** `v[t+1] = omega + alpha r[t]^2 + beta v[t]`.
+* **GJR-GARCH(1,1):** `v[t+1] = omega + (alpha + gamma 1{r[t] < 0}) r[t]^2 + beta v[t]`.
+  Constraints `omega > 0`, `alpha, gamma, beta >= 0`, persistence `alpha + beta + gamma/2 < 1` (a negative
+  return occurs about half the time). The long-run variance is `omega / (1 - persistence)`.
+* **Gaussian quasi-likelihood:** `ll = sum_t -(1/2)(ln 2 pi + ln v[t] + r[t]^2 / v[t])`.
+
+### 9.3 Estimation (`fit_garch`, `numerics/nelder_mead.hpp`)
+
+The parameters are mapped to the constraint region by a softmax: `omega = exp(u_0)` and
+`(alpha, gamma/2, beta) = exp(u_i) / (1 + sum exp(u_j))`, so persistence `= 1 - 1/(1 + sum exp(u_j))` is below 1 for
+every iterate. The likelihood is maximised by a Nelder-Mead simplex that is restarted from its best point until a
+restart gains less than 1e-13 (ADR 0011), from up to four starting points; the best is kept. Standard errors
+come from a central-difference Hessian of the negative log-likelihood at a relative step of 2e-4, and are
+`+infinity` where the matrix is not positive definite. They are indicative only (L-23): near the stationarity
+boundary the likelihood is far from quadratic, and the standard error of `beta` of one series moved from
+0.0019 to 0.0143 as the step went from 2e-2 to 2e-4 (finding F-18). An optimum on the boundary (persistence
+1) is approached, never reached (L-22).
+
+### 9.4 VaR and ES from a P&L distribution (`risk/var.hpp`)
+
+With level `alpha` and tail probability `q = 1 - alpha`:
+
+* **Historical:** sort `n` scenario P&Ls, `k = ceil(n q)`, `VaR = -pnl_(k)`, `ES = -mean(pnl_(1..k))` (the `k`-th
+  worst outcome, no interpolation).
+* **Normal:** `VaR = -(mu + sigma z_q)`, `ES = -mu + sigma phi(z_q) / q`.
+* **Cornish-Fisher:** `z_cf = z + (z^2-1) s/6 + (z^3-3z) k/24 - (2z^3-5z) s^2/36`, `VaR = -(mu + sigma z_cf)`
+  with skewness `s` and excess kurtosis `k`. An expansion around the normal, reliable only for moderate `s` and
+  `k` (L-25, F-17).
+
+### 9.5 Portfolio methods (`risk/portfolio.hpp`)
+
+A portfolio is a spot position and Garman-Kohlhagen legs; the spot moves to `S0 (1 + x)` (simple return `x`) in the
+delta-gamma and full-revaluation functions and to `S0 exp(r)` in the historical ones. Volatility, rates and expiries
+are held fixed (no vega, theta or rate risk, L-26).
+
+1. **Delta-normal:** `P&L = Delta S0 x`, `x ~ N(0, sigma^2)`.
+2. **Delta-gamma:** `P&L = c_1 w + c_2 w^2`, `w ~ N(0,1)`, `c_1 = Delta S0 sigma`, `c_2 = Gamma S0^2 sigma^2 / 2`. The
+   exact moments of the quadratic form are `mean = c_2`, `var = c_1^2 + 2 c_2^2`, `m_3 = 6 c_1^2 c_2 + 8 c_2^3`,
+   `m_4 = 3 c_1^4 + 60 c_1^2 c_2^2 + 60 c_2^4`; VaR by Cornish-Fisher from those moments, ES from the quantile
+   grid of the same quadratic.
+3. **Full revaluation with normal returns:** revalue at the quantile grid `x_i = sigma z_{(i - 1/2)/N}`,
+   `N = 100,000`, and take the historical VaR of the P&Ls. Deterministic (no random numbers).
+4. **Historical simulation with full revaluation:** the last `W` log returns as scenarios.
+5. **Filtered historical simulation (FHS):** standardised residuals `z_t = r_t / sqrt(v[t])` from a GARCH fit,
+   scaled by the next-day forecast, `sigma_{n+1} z_j`, revalued (Barone-Adesi, Giannopoulos and Vosper 1999).
+
+### 9.6 Backtests (`risk/backtest.hpp`)
+
+An exception on day `t` is a loss above that day's VaR. `rolling_backtest` hands the forecaster the `window` returns
+before day `t` and nothing else. Statistics (definitions in the header, recomputed in Python):
+Kupiec proportion-of-failures (chi-square, 1 df), Christoffersen independence (1 df), conditional coverage
+(their sum, 2 df), and the Basel traffic light from the binomial cumulative probability (green below 0.95,
+yellow below 0.9999; for 250 days at 99%: 0-4, 5-9, 10 or more). The chi-square approximations are poor with few
+exceptions (L-24). ES is not backtested (L-27).
+
+### 9.7 Evidence
+
+* **V-16 GARCH estimation:** 12 simulated series (750 to 2000 returns, two with t(6) innovations). (A) at the true
+  parameters the log-likelihood and variance path are checked against an independent Python recursion to within
+  1e-9 and 1e-12 relative. (B) The C++ maximum-likelihood fit matches the independent SLSQP fit: log-likelihood within
+  1.1e-8, worst parameter difference 1.5e-4 standard errors. (C) Standard errors within 0.12% of an independent
+  Hessian once both use the same step (the first run differed by up to 14%, F-18). (D) The asymmetry is detected
+  (likelihood ratio above 6.63) on four of the five GJR series with `gamma >= 0.08`; the fifth (750 returns) gives 4.7.
+  The Python package `arch` could not be installed, so it was not the reference.
+* **RISK-REF:** 40 hit sequences (Kupiec, independence, conditional coverage, binomial cdf, zone) and 186 VaR
+  rows (historical, normal, Cornish-Fisher, delta-gamma, full revaluation) against independent Python; worst
+  errors 4e-15 on p-values and 4e-11 relative on the revaluation grid.
+* **V-17 backtests:** 3000 forecast days on two simulated series (normal and t(6) innovations), five methods, 99% and
+  95%. On the normal series GARCH-normal (the true model) has 31 exceptions at 99% (expected 30; Kupiec p 0.86); the
+  EWMA has 40 (p 0.081); the static-volatility control has 57 and conditional-coverage p below 0.001 at both levels.
+  On the t(6) series GARCH-normal has 45 exceptions at 99% (1.5%, Kupiec p 0.010), EWMA 59 (2.0%, p below 0.001),
+  historical simulation 41 (p 0.056), and GARCH-FHS 34 (1.1%, p 0.47). The tests themselves: at a 1% exception rate,
+  Kupiec rejects 4.4% of 2000 independent sequences at the 5% level and the independence test only 1.7%
+  (conservative, F-19); Kupiec has power 0.985 against a 2% rate.
+* **V-18 delta-normal against full revaluation:** at 99%, one day, per 1,000,000 notional per leg and 8% volatility:
+  the short ATM 3-month straddle has delta-normal VaR 1,483 against 2,935 by full revaluation (49.5% too low); the
+  short 1-month strangle 457 against 1,630 (72% too low); the long ATM straddle 1,483 against 367 (4 times too high).
+  Delta-gamma by Cornish-Fisher is within 1.0% and 1.5% for the short straddle and the short strangle at one day, and 13% and 4% at ten days,
+  but gives a NEGATIVE 99% VaR (-2,480) for the long straddle at ten days where the true value is +366 (F-17).
+  The convexity ordering `VaR(full) <= VaR(delta-normal)` for the long-gamma positions (long straddle, long call) and `>=` for
+  the short-gamma ones (short straddles, short strangle) holds in every case tested; the risk reversal, which has no definite
+  gamma sign, is not asserted (its delta-normal VaR is 1% above full revaluation at one day and 8% below at ten). A pure spot position agrees to 0.5% across methods (control).
+* **V-21 look-ahead:** the forecasts for days up to `t_0` are bitwise equal on the original and on a series whose
+  returns from `t_0` on were replaced, for four methods and four values of `t_0`; a deliberately leaky forecaster is
+  detected at each of three values of `t_0`.
+
+### 9.8 Limitations
+
+L-21 to L-27 in the validation report: zero mean; boundary optima; indicative standard errors; chi-square
+approximation with few exceptions; Cornish-Fisher range; spot-only risk factor; no ES backtest.
+
+## 10. Counterparty credit risk (week 11, planned)
+
+Exposure simulation, netting, EE, PFE, CVA with an assumed flat hazard rate, checks against closed forms
+(V-19, V-20).
 
 ## 11. Limitations (running list)
 

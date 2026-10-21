@@ -26,15 +26,19 @@ duplicated, or outside V-01 to V-21.
 | V-13 | Barrier: in-out parity | Knock-in plus knock-out equals vanilla within tolerance | 9 | passing | `tests/validation/test_v13_in_out_parity.cpp`. 96 contracts, knock-in and knock-out from separate formula tables, tolerance 1e-12; no-touch plus one-touch is the discount factor (1e-13). Control: shifted-barrier knock-in detected in 79 of 96 (threshold 75; the misses are cases where one leg is worth under 1e-4, asserted). |
 | V-14 | Vanna-Volga reproduces the three pivot market prices | Exact to numerical precision | 9 | passing | `tests/validation/test_v14_vanna_volga_pivots.cpp`. 6 slices x 3 pivots x 3 variants (54 cases) within 1e-11. Control: non-pivot vanilla at 95% and 105% of the forward not reproduced (differs from the smile price by more than 1e-8; reported). |
 | V-15 | Barrier model comparison (GK vs Vanna-Volga vs Heston) | Spread table produced; model risk quantified | 9 | passing | `tests/validation/test_v15_model_comparison.cpp`. Reported, not pass/fail: 5 scenarios x 5 contracts, spread in price, vol points and percent of notional (model documentation 7.5). Asserted: all prices finite; flat-smile control (Vanna-Volga equals GK to 1e-11, Heston within 5 SE); spread positive somewhere per scenario. |
-| V-16 | GARCH estimation vs Python `arch` | Parameters and log-likelihood within tolerance | 10 | planned | |
-| V-17 | VaR backtests (each method) | Exceptions, Kupiec and Christoffersen p-values, traffic-light zone reported | 10 | planned | |
-| V-18 | Delta-normal vs full revaluation for options | Gap in VaR quantified | 10 | planned | |
+| V-16 | GARCH estimation vs independent code (not `arch`) | Parameters and log-likelihood within tolerance | 10 | passing | `tests/validation/test_v16_garch_estimation.cpp`. 12 simulated series (`tests/validation/data/garch_series.csv`, `garch_reference.csv`, from `python/gen_garch_reference.py`). (A) recursion at the true parameters; (B) C++ fit against an independent SLSQP fit: worst log-likelihood gap 1.1e-8, worst parameter difference 1.45e-4 SE; (C) standard errors within 5% (worst 0.12%); (D) control: asymmetry detected on 4 of 5 GJR series; (E) control: a poor fit is visible. Disclosed in the header: the SE step (F-18) and the 4-of-5 count. The `arch` package could not be installed, so `python/compare_with_arch.py` was never run. |
+| V-17 | VaR backtests (each method) | Exceptions, Kupiec and Christoffersen p-values, traffic-light zone reported | 10 | passing | `tests/validation/test_v17_var_backtests.cpp`. Two simulated series (normal and t6 innovations), 3750 returns, window 750, 3000 forecast days, 99% and 95%, five methods including a static-volatility control that must be rejected. Plus the size and power of the tests (size 0.044 and 0.017 at 5%, F-19). Reported values are in validation report section 5. |
+| V-18 | Delta-normal vs full revaluation for options | Gap in VaR quantified | 10 | passing | `tests/validation/test_v18_delta_normal_vs_revaluation.cpp`. Six portfolios, 1 and 10 days, 99%. Convexity ordering, understatement above 30% for the short straddles at ten days, delta-gamma closer than delta-normal for the four straddle and strangle portfolios, and a pure-spot control within 0.5%. Header discloses the P5 and P6 expiry change (one week to three). F-17. |
 | V-19 | Single-forward expected exposure vs Black-76 | Within 3 standard errors | 11 | planned | |
 | V-20 | CVA: Monte Carlo exposure vs nested simulation on a small case | Agreement within stated tolerance | 11 | planned | |
-| V-21 | Look-ahead and leakage check in backtests | Proof that VaR at date t uses data up to t-1 only | 10 | planned | |
+| V-21 | Look-ahead and leakage check in backtests | Proof that VaR at date t uses data up to t-1 only | 10 | passing | `tests/validation/test_v21_lookahead.cpp`. Not a proof: bitwise equality of forecasts up to day t0 when the returns from t0 on are replaced, for 4 methods and 4 values of t0, plus a leaky control caught at 3 of 3 values; the structural guarantee is that `rolling_backtest` hands the forecaster only the preceding `window` returns. A sanity check that later forecasts do change was relaxed from day t0+1 to days t0+1..t0+49 (historical simulation does not move at once). |
 
 ## Other validation evidence (not a V-number)
 
+* **RISK-REF** (`tests/validation/test_risk_reference.cpp`): backtest statistics (40 hit sequences,
+  `risk_hits_reference.csv`) and VaR methods (186 rows, `risk_var_reference.csv`: historical, normal,
+  Cornish-Fisher, delta-gamma, full revaluation) against `python/gen_risk_reference.py`, which shares no code with
+  the C++. Worst errors: likelihood ratios 0, p-values 4e-15, VaR methods 4e-11 relative.
 * **GK-REF** (`tests/validation/test_gk_reference.cpp`): C++ price and Greeks against an
   independent Python (SciPy) implementation, 616 rows in `tests/validation/data/gk_reference.csv`
   (8 boundary cases plus 300 random markets, call and put, seed 20261010). Tolerance 1e-11; worst
@@ -217,6 +221,33 @@ duplicated, or outside V-01 to V-21.
 
   Two changes are seen only by the frozen "observed" V-10 test, which says how much weight that test
   carries: it is a regression test of the scenario table, not a test of theory.
+* **Mutation check, week 10** (by hand with a script kept outside the repository; 20 single-line mutants of the
+  new code; each was built and the whole suite run except V-15): 19 are killed (one only after a test was added)
+  and one survives. Two mutants did not compile at first (an unused variable under `-Werror`) and were rewritten.
+
+  | Mutation | Caught by |
+  |---|---|
+  | GJR indicator reversed (`r > 0`) | 4 tests: a unit test, V-16 (3) |
+  | GJR shock coefficient `gamma/2` for `gamma` | 3: a unit test, V-16 (2) |
+  | persistence without the 1/2 on gamma | 3: a unit test, V-16 (2) |
+  | EWMA weights swapped | 1 unit test |
+  | log-likelihood without `ln 2 pi` | 4: a unit test, V-16 (3) |
+  | initial variance divided by `n - 1` | 4: 2 unit tests, V-16 (2) |
+  | Hessian step 100 times larger | **V-16 only** (1) |
+  | historical `k` by floor instead of ceil | RISK-REF, a unit test |
+  | historical ES divisor `k + 1` | RISK-REF, a unit test |
+  | normal ES divided by the level | RISK-REF, 2 unit tests |
+  | Cornish-Fisher `s^2` term sign | RISK-REF, V-18 |
+  | delta-gamma fourth-moment coefficient (60 for 6) | RISK-REF, V-18 |
+  | delta-gamma `gamma` for `gamma/2` | RISK-REF, V-18 |
+  | historical revaluation uses the other tail | **one unit test only** (added after this mutant survived the first run: V-17 uses the method but has no exact value) |
+  | chi-square(1) p-value argument | 4: 2 unit tests, RISK-REF, V-17 (size) |
+  | chi-square(2) p-value | **RISK-REF only** (1) |
+  | traffic-light green threshold 0.90 for 0.95 | **RISK-REF only** (1) |
+  | LOOK-AHEAD: window shifted to include the forecast day | a unit test, V-17, V-21 |
+  | independence statistic: `pi11` term | **RISK-REF only** (1) |
+  | **Nelder-Mead stop rule without the simplex-size test: survives** | none. The restart loop and the function-value test stop the search at the same points on every case here (F-20). |
+
 * **Mutation check, week 9** (by hand with a script kept outside the repository; 15 single-line mutants of
   the new code; each was built and the whole suite run except V-15, which takes 2 minutes and is a report):
   14 are killed (two of them only after a test was added, see the table) and one survives. Two mutants did

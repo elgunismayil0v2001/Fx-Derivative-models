@@ -29,6 +29,13 @@ numerical integration, Monte Carlo with the Brownian-bridge correction (Black-Sc
 (three variants) and a comparison of Garman-Kohlhagen, Vanna-Volga and Heston with the spread reported in vol
 points and percent of notional. Tests V-12 to V-15, BARRIER-REF.
 
+## v0.9 (end of week 10)
+
+Market risk: EWMA and GARCH volatility estimation checked against independent code, historical, normal,
+Cornish-Fisher, delta-gamma, full-revaluation and filtered-historical VaR/ES, Kupiec, Christoffersen and Basel
+traffic-light backtests, a look-ahead check, and the quantified gap between delta-normal and full
+revaluation. Tests V-16, V-17, V-18, V-21, RISK-REF.
+
 ## v1.0
 
 Smile construction from delta quotes, Heston calibration with parameter recovery, Vanna-Volga and

@@ -1,4 +1,4 @@
-# Validation report: FX option pricing models, version 0.8
+# Validation report: FX option pricing models, version 0.9
 
 * **Models in scope:** Garman-Kohlhagen (benchmark), Heston semi-analytic pricer, Monte Carlo engine
   with Euler (full truncation) and Andersen QE schemes, antithetic and control variates.
@@ -9,9 +9,13 @@
 * **Added in 0.8:** barrier, one-touch and double no-touch options (closed forms and Brownian-bridge Monte
   Carlo), Vanna-Volga (three variants) and a comparison of Garman-Kohlhagen, Vanna-Volga and Heston with the
   spread reported as model risk (V-12 to V-15, BARRIER-REF).
-* **Out of scope for this version:** VaR/ES, exposure and CVA (weeks 10 to 13; their sections will be added
-  to this report).
-* **Version tested:** library 0.8.0. The commit is in the metadata of every output file
+* **Added in 0.9:** market risk: EWMA and GARCH(1,1)/GJR-GARCH maximum-likelihood estimation, historical, normal,
+  Cornish-Fisher, delta-gamma, full-revaluation and filtered-historical VaR and ES for a spot-and-options portfolio,
+  and backtests (Kupiec, Christoffersen, Basel traffic light) with a look-ahead check (V-16, V-17, V-18, V-21,
+  RISK-REF).
+* **Out of scope for this version:** exposure and CVA (weeks 11 to 13; their sections will be added to this
+  report).
+* **Version tested:** library 0.9.0. The commit is in the metadata of every output file
   (section 8).
 * **Status:** draft for release v0.5. Every number below comes from a test in this repository
   and can be reproduced with the commands in section 8. Numbers measured on one machine are
@@ -31,6 +35,9 @@
 | Heston calibration to smile quotes | Fit Heston to ATM, risk-reversal and butterfly quotes | V-11, CAL-REF, unit tests | Recovers the true parameters of 24 independent random sets from exact quotes (worst parameter error 3.7e-9). One expiry fits its three quotes but identifies nothing (24 of 24; standard errors infinite). Under 5 bp of noise the reported standard errors are up to a third too small (F-13). Tested on quotes made by Heston itself only (L-15). |
 | Barrier, touch and double no-touch options | Exotic pricing, benchmark for the model comparison | BARRIER-REF, V-12, V-13 | Closed forms match independent numerical integration to 6.7e-16 on 700 cases; the Monte Carlo with the Brownian bridge agrees within 3 standard errors for 8 contracts; discrete monitoring is biased as expected (control). One defect found and fixed (F-14). Heston bridge is approximate (L-17). |
 | Vanna-Volga and model comparison | Smile adjustment; model-risk spread | V-14, V-15 | Pivots reproduced to 1e-11. Spread between Garman-Kohlhagen, Vanna-Volga and Heston is a few vol points for vanillas and up to 35% of notional for touch products on the most skewed synthetic scenario; the choice of Vanna-Volga variant matters (model documentation 7.2). Can produce negative prices (F-15). |
+| GARCH and GJR-GARCH estimation | Conditional volatility for VaR | V-16, unit tests | Log-likelihood within 1.1e-8 of an independent SLSQP fit and parameters within 1.5e-4 standard errors on 12 simulated series; standard errors within 0.12% of an independent Hessian, but only once both use the same step (F-18). Not compared with the Python `arch` package (it could not be installed). |
+| VaR and ES methods | Historical, normal, Cornish-Fisher, delta-gamma, full revaluation, FHS | RISK-REF, V-17, V-18 | Agree with independent Python to 4e-11 relative (186 rows). Delta-normal understates the 99% VaR of short-option positions by 50% to 92% and overstates that of long ones (V-18); Cornish-Fisher delta-gamma can return a negative VaR (F-17). |
+| VaR backtests and look-ahead check | Exceptions, Kupiec, independence, traffic light | V-17, V-21, RISK-REF | Statistics agree with independent Python to 4e-15 (40 sequences). A static-volatility control is rejected at both levels; GARCH-normal is rejected on fat-tailed data at 99% and FHS is not. The forecast for day t is bitwise independent of returns from day t on (V-21; a leaky control is caught). One simulated history per innovation type, spot risk factor only. |
 | Command-line program | Reproducible runs | unit, regression, end-to-end tests | Every output carries the hash of its input, the build, the seed and the time. |
 
 **Overall assessment.** Within the parameter ranges and the European vanilla payoffs tested, the
@@ -117,9 +124,14 @@ Specifications, derivations and numerical methods are in `docs/model_documentati
 | V-13 | In-out parity | 1e-12 | 96 contracts; no-touch plus one-touch equals the discount factor (1e-13); shifted-barrier control detected in 79 of 96 (the others have a leg worth under 1e-4) |
 | V-14 | Vanna-Volga reproduces the pivots | 1e-11 | 54 cases (6 slices x 3 pivots x 3 variants); control: non-pivot vanilla not reproduced exactly |
 | V-15 | Model comparison | reported, not pass/fail | 5 scenarios x 5 contracts; spread 0.003 to 32.8 vol points, 0.002% to 35% of notional (model documentation 7.5); flat-smile control passes |
+| RISK-REF | VaR methods and backtest statistics against independent Python | historical, normal, Cornish-Fisher 1e-12 relative; delta-gamma and full revaluation 1e-9 relative or 1e-7 absolute; test statistics and p-values 1e-9 absolute, binomial cdf 1e-12 | 186 VaR rows, worst 4e-11 relative; 40 hit sequences, worst likelihood-ratio error 0, worst p-value error 4e-15 |
+| V-16 | GARCH and GJR estimation against independent code | recursion 1e-9 (log-likelihood) and 1e-12 (variance path); log-likelihood within 1e-5 and not lower; parameters within 0.05 SE; standard errors within 5%; asymmetry detected in at least 4 of 5 GJR series; poor-optimiser control must be visible | 12 series: worst log-likelihood gap 1.1e-8, worst parameter difference 1.45e-4 SE, worst SE ratio-1 1.2e-3; GJR detected in 4 of 5 (the fifth, 750 returns, LR 4.7); control passes. Disclosures in the test header: SE step and the 4-of-5 count (F-18) |
+| V-17 | VaR backtests of five methods on two simulated series | reported; size and power of the tests; static control must be rejected | 3000 days. Series A: GARCH-normal 31 exceptions at 99% (Kupiec p 0.855), EWMA 40 (0.081), static control 57 (below 0.001). Series B (t6): GARCH-normal 45 (0.010), EWMA 59 (below 0.001), historical 41 (0.056), FHS 34 (0.472). Size at 5%: Kupiec 0.044, independence 0.017; power against a 2% rate 0.985 |
+| V-18 | Delta-normal, delta-gamma and full-revaluation VaR for six option portfolios | convexity ordering; short-straddle understatement above 30%; delta-gamma closer than delta-normal; pure-spot control within 0.5% | all assertions hold; 99% one-day VaR: short ATM straddle 1,483 / 2,963 / 2,935 (DN / DG / full), long ATM straddle 1,483 / 206 / 367, short 1M strangle 457 / 1,654 / 1,630; ten-day long straddle: delta-gamma -2,480 against 366 (F-17) |
+| V-21 | Look-ahead and leakage check | forecasts up to day t0 bitwise equal when later returns are replaced; leaky control caught | 4 methods x 4 values of t0 pass; the leaky forecaster is caught at 3 of 3 values of t0 |
 | ALLOC | No allocation in the path loop | 0 allocations per path; engine allocations independent of path count | passes for GBM, Euler, QE, antithetic and control variate; a model that allocates is detected (control) |
 
-Test counts at version 0.8: 414 in `ctest` (unit, validation, command-line-layer, allocation and two end-to-end tests of
+Test counts at version 0.9: 456 in `ctest` (week-10 additions: 42 tests: 4 Nelder-Mead, 8 volatility-model, 5 VaR, 6 backtest and 7 portfolio unit tests, RISK-REF (2), V-16 (4), V-17 (2), V-18 (2), V-21 (2)); Python tests as in 0.8 plus the risk generator's (6). Version 0.8 had 414 in `ctest` (unit, validation, command-line-layer, allocation and two end-to-end tests of
 real executables; the week-9 additions are 19 unit tests, BARRIER-REF (1 test over 700 rows), V-12 (4), V-13 (2), V-14 (2) and V-15 (1)); Python tests as in 0.7 plus the barrier generator's. Notes on the numbers:
 
 * V-06: QE's differences from the exact price are at the level of the sampling noise (standard errors of
@@ -153,6 +165,10 @@ project's own tests, during development of the code they concern (the same perso
 | F-14 | medium | The first version of the barrier Monte Carlo stopped simulating a path as soon as it was knocked out. That is right for a knock-out and for touches, but a knock-in pays the vanilla of the TERMINAL spot, which was then stale. The up-and-in call was priced 11% low and the down-and-in put 0.9% low (5 SE). | V-12 (first run) | Fixed: the early stop is skipped for knock-ins; V-12 passes; a hand mutation reintroducing it is killed. |
 | F-15 | medium | Vanna-Volga can return negative prices. On the extreme_skew scenario (risk reversal -8 vol points) the up-and-out call is -0.0062 (unweighted) and -0.0016 (survival), and the double no-touch is -0.594 (unweighted). A negative price is a sign that the adjustment is outside the range where the method is meaningful. | V-15 | Open: the library returns the number and does not clamp it (ADR 0010). Do not use Vanna-Volga for contracts where the smile cost is comparable to the flat price. |
 | F-16 | info | The three Vanna-Volga variants disagree by amounts as large as the model spread: for the stressed 2Y one-touch down at 92% the unweighted price is 0.338, the survival 0.420, GK flat 0.532, Heston 0.454. The "Vanna-Volga price" is not unique. | V-15 | Reported (model documentation 7.2); `survival` is the project default. |
+| F-17 | medium | Delta-gamma VaR by Cornish-Fisher can be negative or far off for a long-gamma position. For a long ATM 3M straddle the ten-day 99% VaR is -2,480 against 366 by full revaluation, and 206 against 367 at one day. The expansion is not reliable for the strong skew of a quadratic form of a normal. | V-18 | Open. Reported, not corrected; the method is documented as a diagnostic and delta-gamma is never used alone (L-25). |
+| F-18 | low | GARCH standard errors depend strongly on the finite-difference step near the stationarity boundary: for series g01 the standard error of beta is 0.0019, 0.0124 and 0.0143 at relative steps 2e-2, 2e-3 and 2e-4, and a first comparison with independent code differed by up to 14% because the two used different steps. | V-16 | Both implementations now use 2e-4 and agree to 0.12%. The error bars are indicative (L-23). |
+| F-19 | info | The Christoffersen independence test rejects 1.7% of independent sequences at a 5% level and Kupiec 4.4% (1% exception rate, 2000 sequences): both are conservative with few exceptions. | V-17 | Not a defect. The size is reported and a lower bound on it was dropped from the criteria after the first run (L-24). |
+| F-20 | low | A mutant of the Nelder-Mead stop rule (the simplex-size test replaced by `true`) is not detected by any test. The restart loop and the function-value test still stop the search at the same optima on every case in the suite, so the effect, if any, is on iteration counts. | hand mutation check (week 10) | Open. Documented, not investigated further. |
 
 ## 7. Limitations and open points
 
@@ -210,10 +226,27 @@ project's own tests, during development of the code they concern (the same perso
   (worst on extreme_skew, which has two expiries from 3M outwards). The spreads are indicative, one seed, 300,000
   paths; each Heston price has a standard error of 0.0001 to 0.0008 in the table.
 
+* **L-21 (zero mean):** the volatility models assume a zero conditional mean of daily FX returns; no mean is
+  estimated. The variance start is the mean of the squared returns of the window.
+* **L-22 (boundary optima):** the softmax map keeps persistence below 1, so an optimum on or beyond the boundary
+  (integrated GARCH) is approached and never reached; it is not flagged.
+* **L-23 (standard errors):** Hessian standard errors are indicative near the stationarity boundary (F-18) and are
+  `+infinity` where the Hessian is not positive definite. No profile-likelihood intervals.
+* **L-24 (backtest power and size):** with a handful of exceptions the chi-square approximations are poor; the
+  independence test is conservative (F-19). Each method has one simulated history per innovation type; V-17 is
+  not a measure of which method is best in general. The window is 750 days and GARCH is refitted every 50.
+* **L-25 (Cornish-Fisher):** valid only for moderate skewness and excess kurtosis (F-17). Delta-gamma ES is taken from
+  a quantile grid of the quadratic, not from the expansion.
+* **L-26 (risk factors):** spot only. Volatility, interest rates, theta and the smile are held fixed; options are
+  revalued with Garman-Kohlhagen at constant volatility. P&L ten-day figures use the square-root-of-time return
+  volatility, not a ten-day model.
+* **L-27 (ES):** expected shortfall is computed, not backtested. Data are simulated; no market series was used and
+  the Python `arch` package was not run.
+
 ## 8. Reproducing these results
 
 ```sh
-cmake --preset release && cmake --build --preset release && ctest --preset release   # 414 tests
+cmake --preset release && cmake --build --preset release && ctest --preset release   # 456 tests
 python -m pytest -q                                                                    # needs numpy, scipy, jsonschema
 build/release/examples/smile/fxval-example-smile configs/scenarios/smile_scenarios.csv docs/results/smile_data
 python python/plot_smiles.py docs/results/smile_data docs/results                      # needs matplotlib
@@ -235,3 +268,9 @@ closed and an independent review. Findings F-01 to F-07 and F-11 are closed or m
 construction is fit as a source of three pivot volatilities per tenor, and not as an arbitrage-free
 surface for pricing options across the wings. F-10 is a property of the construction. The calibration is fit as a tested tool for
 fitting Heston to synthetic Heston-generated smiles with five expiries; it has not been shown on a market smile (L-15).
+
+**Market risk (0.9).** The estimation code, the five VaR methods and the backtest statistics are fit as tested
+components against independent code, on simulated data and for a spot risk factor. They are not fit for
+production risk numbers: no market data, no volatility or rate risk factors (L-26), ES not backtested (L-27).
+F-17 and F-20 are open; F-18 and F-19 are properties of the methods. The delta-normal VaR of an option portfolio
+must not be used for a short-gamma position (V-18).

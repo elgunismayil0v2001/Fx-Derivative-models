@@ -6,6 +6,23 @@ All notable changes are recorded here. The format follows
 
 ## [Unreleased]
 
+## [0.9.0] - 2026-10-21
+
+### Added (week 10: market risk)
+
+- `numerics/nelder_mead.hpp`: Nelder-Mead simplex with restarts.
+- `timeseries/volatility_models.hpp`: EWMA, GARCH(1,1) and GJR-GARCH(1,1) Gaussian quasi-maximum-likelihood
+  (softmax constraint map, Hessian standard errors), standardised residuals.
+- `risk/var.hpp`: historical, normal and Cornish-Fisher VaR and ES. `risk/portfolio.hpp`: spot-and-options
+  portfolio, delta-normal, delta-gamma, full-revaluation, historical and filtered-historical VaR.
+  `risk/backtest.hpp`: Kupiec, Christoffersen, conditional coverage, Basel traffic light, and a rolling backtest
+  that hands the forecaster only the preceding window. ADR 0011.
+- Validation: V-16, V-17, V-18, V-21, RISK-REF (186 + 40 rows, independent Python);
+  `python/gen_garch_reference.py`, `python/gen_risk_reference.py` and a pytest file for the latter; optional
+  `python/compare_with_arch.py` (never run: `arch` could not be installed); 42 new tests.
+- Documentation: model documentation section 9, validation report (findings F-17 to F-20, limitations L-21 to
+  L-27), test catalogue (week-10 mutation table).
+
 ## [0.8.0] - 2026-10-21
 
 ### Added (week 9: barriers, Vanna-Volga, model comparison)
