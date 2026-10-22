@@ -49,7 +49,12 @@ Result<VarEs> historical_var_es(std::span<const double> pnl, double level) {
   for (std::size_t i = 0; i < k; ++i) {
     tail_sum += sorted[i];  // after nth_element the k smallest are in the first k slots
   }
-  return VarEs{-kth, -tail_sum / static_cast<double>(k)};
+  const VarEs out{-kth, -tail_sum / static_cast<double>(k)};
+  if (!std::isfinite(out.es)) {
+    return Error{ErrorCode::numerical_failure,
+                 "the tail sum overflowed; rescale the P&L scenarios"};
+  }
+  return out;
 }
 
 Result<VarEs> normal_var_es(double mean, double sd, double level) {
@@ -62,7 +67,11 @@ Result<VarEs> normal_var_es(double mean, double sd, double level) {
     return z.error();
   }
   const double q = 1.0 - level;
-  return VarEs{-(mean + sd * z.value()), -mean + sd * numerics::normal_pdf(z.value()) / q};
+  const VarEs out{-(mean + sd * z.value()), -mean + sd * numerics::normal_pdf(z.value()) / q};
+  if (!std::isfinite(out.var) || !std::isfinite(out.es)) {
+    return Error{ErrorCode::numerical_failure, "the normal VaR or ES overflowed"};
+  }
+  return out;
 }
 
 Result<double> cornish_fisher_var(
@@ -81,7 +90,11 @@ Result<double> cornish_fisher_var(
   const double k = excess_kurtosis;
   const double z_cf = z + (z * z - 1.0) * s / 6.0 + (z * z * z - 3.0 * z) * k / 24.0 -
                       (2.0 * z * z * z - 5.0 * z) * s * s / 36.0;
-  return -(mean + sd * z_cf);
+  const double var = -(mean + sd * z_cf);
+  if (!std::isfinite(var)) {
+    return Error{ErrorCode::numerical_failure, "the Cornish-Fisher VaR overflowed"};
+  }
+  return var;
 }
 
 }  // namespace fxval::risk

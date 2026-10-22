@@ -90,6 +90,10 @@ Result<CvaEstimate> cva_estimate(const ValueMatrix& values, const CreditInputs& 
   if (values.paths() < 2) {
     return Error{ErrorCode::invalid_argument, "at least two paths are needed"};
   }
+  if (!std::all_of(
+          values.data().begin(), values.data().end(), [](double x) { return std::isfinite(x); })) {
+    return Error{ErrorCode::invalid_argument, "a simulated value is not finite"};
+  }
   std::vector<double> per_path(values.paths(), 0.0);
   for (std::size_t j = 0; j < values.rows(); ++j) {
     for (std::size_t p = 0; p < values.paths(); ++p) {

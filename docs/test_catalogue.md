@@ -35,6 +35,9 @@ duplicated, or outside V-01 to V-21.
 
 ## Other validation evidence (not a V-number)
 
+* **FUZZ-REPLAY** (`tests/fuzz/test_fuzz_replay.cpp`, seven tests): the fuzz targets of `docs/fuzzing.md` run on the seed corpus, the saved
+  regressions, seeded mutations and random inputs. Pass criterion: no invariant violated, and a minimum share of inputs past validation
+  (10% for pricing, 5% for credit). Not a V-number because it checks invariants, not agreement with an independent oracle; it produced F-22 to F-24.
 * **CREDIT-REF** (`tests/validation/test_credit_reference.cpp`): CVA from 14 given profiles and the telescoped CVA of 6 option prices against
   `python/gen_credit_reference.py`, which shares no code with the C++ (scipy closed forms, an explicit loop over intervals); the
   Garman-Kohlhagen price used in V-19 against the table. Worst relative errors 2.4e-16 (CVA) and 1.6e-14.
@@ -314,6 +317,15 @@ duplicated, or outside V-01 to V-21.
   against independent Python numerical integration (`python/gen_barrier_reference.py`, seed 20261021); criterion
   1e-9 fixed first, worst error 6.7e-16.
 * **Mutation check, week 9:** see the validation report (section 5).
+* **Mutation check, week 13** (scripted: `scripts/mutation_check.py scripts/mutants/week13_hardening.json`). Each guard added in
+  week 13 was removed in turn: the 100-year date cap, the spot-range check, the finite checks in the netting-set values, `exposure_profile`
+  and `cva_estimate`, the overflow checks in historical, normal and Cornish-Fisher VaR/ES, and the barrier volatility floor. The first run
+  (11 changes) left four alive. Two were real gaps in the new tests, now closed: the spot-range check was never reached once dates
+  were capped (a unit test with a drift of 1e6 now reaches it), and a test of `cva_estimate` passed for the wrong reason (its matrix
+  had no date 0, so it was refused by the date check before the finiteness check was reached; the test now uses a matrix that is
+  otherwise valid, and a control shows the same matrix without the NaN is accepted). The other two were a no-arbitrage envelope on the barrier price: no input in the deep runs reached it once the volatility
+  floor was in place, so it was removed rather than kept untested. Final run: 9 of 9 killed. The same script re-ran the week-10 mutants
+  (19 of 20 killed, F-20 still alive) and the week-11 mutants (20 of 20).
 
 ## Tests that are not part of the V-series
 

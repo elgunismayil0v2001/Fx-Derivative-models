@@ -86,6 +86,10 @@ validation tests are what a model-validation team would ask for. Reasoning:
 | `validation/test_v16_garch_estimation.cpp`, `test_risk_reference.cpp`, `test_v17_var_backtests.cpp`, `test_v18_delta_normal_vs_revaluation.cpp`, `test_v21_lookahead.cpp` | V-16, RISK-REF, V-17, V-18, V-21. `support/risk_test_support.hpp` has the shared forecasters and simulators. |
 | `unit/test_exposure_and_cva.cpp` | Exposure paths, netting, profile and CVA by hand, structural properties and error paths. |
 | `validation/test_credit_reference.cpp`, `test_v19_forward_exposure.cpp`, `test_v20_cva_nested.cpp` | CREDIT-REF, V-19, V-20. `support/credit_test_support.hpp` has the market and trade builders. |
+| `fuzz/fuzz_targets.hpp`, `fuzz/fuzz_config_target.hpp` | The seven fuzz targets as functions from bytes to a verdict (an empty string, or the violated invariant). |
+| `fuzz/fuzz_<target>.cpp` | libFuzzer entry points (`LLVMFuzzerTestOneInput`), built with `-DFXVAL_BUILD_FUZZERS=ON` under clang. |
+| `fuzz/test_fuzz_replay.cpp` | `fxval_fuzz_replay_tests`: seeds, regressions, seeded mutations and random inputs through every target, in every build. |
+| `fuzz/corpus/`, `fuzz/regressions/`, `fuzz/make_seeds.py` | Seed inputs (generated deterministically), inputs that once failed (replayed forever) and the seed generator. See `docs/fuzzing.md`. |
 | `unit/test_quadrature.cpp` | The integrator on integrals with known answers: polynomials, sine, Gaussian, sqrt singularity, narrow peak, reversed interval, non-convergence, rounding-level stop rule. |
 | `unit/test_heston.cpp` | Parameter validation, characteristic-function identities (`phi(0) = phi(-i) = 1`, boundedness, first moment), `xi = 0` equals Garman-Kohlhagen, parity, bounds, convexity, smile sign, error paths. |
 | `validation/test_v03_heston_vs_gk.cpp` | V-03: Heston to Garman-Kohlhagen as vol of vol goes to 0, checked at the theoretical order of convergence. |
@@ -169,6 +173,9 @@ validation tests are what a model-validation team would ask for. Reasoning:
 | `configs/scenarios/` | `smile_scenarios.csv`: synthetic, illustrative smile quotes, shared by the example and the V-10 test. |
 | `docs/results/` | Figures and data of the smile scenarios. |
 | `examples/consumer/` | A tiny external project that links the installed library. |
+| `scripts/mutation_check.py`, `scripts/mutants/*.json` | Plants each recorded change in a scratch copy of the repository and reports whether the tests notice (nightly in CI). |
+| `scripts/run_fuzzers.sh` | Runs the libFuzzer targets for a fixed time on their corpus and regressions. |
+| `.github/workflows/nightly.yml` | Long fuzzing and the mutation check, once a night and on demand. |
 | `scripts/check.sh` | Runs format, builds, tests, sanitizers, clang-tidy and Python checks locally. |
 | `.github/workflows/ci.yml` | The same checks in GitHub Actions, plus the compiler matrix, coverage and Docker. |
 | `docs/` | Model documentation, test catalogue, architecture, ADRs, this guide. |

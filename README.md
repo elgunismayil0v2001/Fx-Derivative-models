@@ -4,7 +4,7 @@ A C++20 library that prices FX options and measures FX portfolio market and coun
 together with an **independent validation** of those models: exact benchmarks, numerical tests,
 model comparison, and a written validation report.
 
-> **Status: week 12 of a 14-week plan (library version 0.11.0).** The engineering foundation is in place, the
+> **Status: week 13 of a 14-week plan (library version 0.12.0).** The engineering foundation is in place, the
 > Garman-Kohlhagen benchmark is checked by V-01 and V-02, the Heston semi-analytic pricer by V-03,
 > V-04 and an independent Python table, and the multithreaded Monte Carlo engine (Euler full
 > truncation and Andersen's QE scheme, antithetic and control variates) by V-05 to V-08 and
@@ -15,7 +15,7 @@ model comparison, and a written validation report.
 > Week 9 adds barrier, one-touch and double no-touch options (closed forms and Brownian-bridge Monte Carlo),
 > Vanna-Volga, and a comparison of Garman-Kohlhagen, Vanna-Volga and Heston whose spread is the quantified
 > model risk (V-12 to V-15). Week 10 adds market risk: GARCH and GJR-GARCH estimation, five VaR/ES methods,
-> backtests and a look-ahead check, on simulated data and a spot risk factor only (V-16, V-17, V-18, V-21). Week 11 adds counterparty credit risk: exposure simulation, netting, EE, PFE and unilateral CVA with a nested-simulation cross-check (V-19, V-20). Week 12 consolidates the validation report into a release-candidate document with an executive summary, the open findings, the mutation-testing history and a traceability matrix that a test keeps in step with the catalogue.
+> backtests and a look-ahead check, on simulated data and a spot risk factor only (V-16, V-17, V-18, V-21). Week 11 adds counterparty credit risk: exposure simulation, netting, EE, PFE and unilateral CVA with a nested-simulation cross-check (V-19, V-20). Week 12 consolidates the validation report into a release-candidate document with an executive summary, the open findings, the mutation-testing history and a traceability matrix that a test keeps in step with the catalogue. Week 13 is hardening: seven fuzz targets that check model invariants (a replay test in every build, libFuzzer targets and a nightly job in CI), three numerical weaknesses they found and that are fixed (F-22 to F-24), and a mutation-check script with recorded mutants.
 
 ## What exists today
 
@@ -27,7 +27,7 @@ model comparison, and a written validation report.
 | Heston semi-analytic European pricer (stable characteristic function, Lewis integral) | working; V-03, V-04 and reference table (589 rows) passing |
 | Monte Carlo engine: counter-based Philox random numbers, exact GBM, Heston Euler with full truncation, Heston QE, antithetic and control variates, results independent of the thread count | working; V-05 to V-08 and two path tables (120 and 160 rows) passing |
 | `fxval-price` command-line program: validated, versioned JSON configuration; JSON and CSV reports with run metadata (version, git commit, config SHA-256, seed, time); documented exit codes | working; see `docs/cli.md` |
-| Unit, validation, regression, allocation and end-to-end tests, independent Python references, catalogue consistency test | 385 tests in `ctest`, 75 Python tests |
+| Unit, validation, regression, allocation and end-to-end tests, independent Python references, catalogue consistency test | 492 tests in `ctest` |
 | Scaling benchmark (`bench/`, off by default) | measured on one machine, see model documentation 5.10 |
 | CI (format, four compilers, sanitizers, clang-tidy, coverage, install check, Python, Docker) | `.github/workflows/ci.yml` |
 | Data download scripts (NBP, ECB, FRED) with provenance files | parsers tested offline |
@@ -36,6 +36,7 @@ model comparison, and a written validation report.
 | Barriers, one-touch, double no-touch, Vanna-Volga and a model comparison | working; V-12 to V-15 and BARRIER-REF (700 rows) passing |
 | Market risk: EWMA, GARCH(1,1) and GJR-GARCH estimation, historical, normal, Cornish-Fisher, delta-gamma, full-revaluation and filtered-historical VaR/ES, Kupiec, Christoffersen and traffic-light backtests, look-ahead check | working; V-16, V-17, V-18, V-21 and RISK-REF passing; simulated data, spot risk factor only |
 | Counterparty credit risk: exposure simulation of FX forwards and options, netting, EE, PFE, unilateral CVA with a flat hazard rate, nested-simulation cross-check | working; V-19, V-20 and CREDIT-REF passing; spot only, no collateral, no wrong-way risk |
+| Fuzzing and robustness: seven invariant-checking targets (vanilla, barrier, delta, risk, credit, SHA-256, configuration), a deterministic replay in every build, libFuzzer entry points, `scripts/mutation_check.py` | working; see `docs/fuzzing.md`; the libFuzzer and nightly CI jobs have not been run (L-33) |
 
 ## Build and test
 
@@ -63,7 +64,7 @@ ctest --preset release
 ## Use as a library
 
 ```cmake
-find_package(fxval 0.11 CONFIG REQUIRED)
+find_package(fxval 0.12 CONFIG REQUIRED)
 target_link_libraries(my_target PRIVATE fxval::fxval)
 ```
 

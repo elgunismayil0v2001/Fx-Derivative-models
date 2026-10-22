@@ -120,6 +120,43 @@ if(FXVAL_BUILD_APPS)
             ${CMAKE_CURRENT_SOURCE_DIR}/integration/run_cli.cmake)
 endif()
 
+# ---------------------------------------------------------------------------
+# Fuzz targets: a deterministic replay test in every build, libFuzzer programs on request
+# ---------------------------------------------------------------------------
+add_executable(fxval_fuzz_replay_tests fuzz/test_fuzz_replay.cpp)
+target_link_libraries(fxval_fuzz_replay_tests PRIVATE fxval::fxval GTest::gtest_main)
+target_include_directories(fxval_fuzz_replay_tests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/fuzz)
+target_compile_definitions(fxval_fuzz_replay_tests PRIVATE "FXVAL_FUZZ_DIR=\"${CMAKE_CURRENT_SOURCE_DIR}/fuzz\"")
+if(FXVAL_BUILD_APPS)
+  target_link_libraries(fxval_fuzz_replay_tests PRIVATE fxval_app nlohmann_json::nlohmann_json)
+  target_include_directories(fxval_fuzz_replay_tests PRIVATE ${PROJECT_SOURCE_DIR}/apps/lib)
+  target_compile_definitions(fxval_fuzz_replay_tests PRIVATE FXVAL_FUZZ_HAVE_CONFIG)
+endif()
+fxval_set_warnings(fxval_fuzz_replay_tests)
+gtest_discover_tests(fxval_fuzz_replay_tests DISCOVERY_TIMEOUT 60)
+
+option(FXVAL_BUILD_FUZZERS "Build the libFuzzer programs in tests/fuzz (needs clang with the fuzzer runtime)" OFF)
+if(FXVAL_BUILD_FUZZERS)
+  if(NOT CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+    message(FATAL_ERROR "FXVAL_BUILD_FUZZERS needs clang (libFuzzer)")
+  endif()
+  set(_fuzzers vanilla barrier delta risk credit sha256)
+  if(FXVAL_BUILD_APPS)
+    list(APPEND _fuzzers price_config)
+  endif()
+  foreach(name IN LISTS _fuzzers)
+    add_executable(fxval_fuzz_${name} fuzz/fuzz_${name}.cpp)
+    target_link_libraries(fxval_fuzz_${name} PRIVATE fxval::fxval)
+    target_include_directories(fxval_fuzz_${name} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/fuzz)
+    target_compile_options(fxval_fuzz_${name} PRIVATE -fsanitize=fuzzer,address,undefined -fno-omit-frame-pointer)
+    target_link_options(fxval_fuzz_${name} PRIVATE -fsanitize=fuzzer,address,undefined)
+    if(name STREQUAL "price_config")
+      target_link_libraries(fxval_fuzz_${name} PRIVATE fxval_app nlohmann_json::nlohmann_json)
+      target_include_directories(fxval_fuzz_${name} PRIVATE ${PROJECT_SOURCE_DIR}/apps/lib)
+    endif()
+  endforeach()
+endif()
+
 if(FXVAL_BUILD_EXAMPLES)
   add_test(
     NAME smile_example_end_to_end

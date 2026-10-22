@@ -11,6 +11,8 @@ namespace {
 
 using numerics::normal_cdf;
 
+constexpr double min_total_volatility = 1e-10;
+
 struct Inputs {
   double s;      // spot
   double rd;     // domestic rate
@@ -25,6 +27,13 @@ struct Inputs {
   if (!(t > 0.0) || !(sigma > 0.0)) {
     return Error{ErrorCode::invalid_argument,
                  "barrier closed forms need a positive expiry and a positive volatility"};
+  }
+  // The closed forms raise (B/S) to the power 2 mu / sigma^2. Below this total volatility that
+  // exponent overflows or sigma^2 underflows, and the blocks return finite but meaningless values
+  // (found by the fuzz replay, F-22).
+  if (sigma * std::sqrt(t) < min_total_volatility) {
+    return Error{ErrorCode::invalid_argument,
+                 "barrier closed forms need volatility * sqrt(expiry) of at least 1e-10"};
   }
   return Inputs{market.spot.value(), market.domestic.value(), market.foreign.value(), t, sigma};
 }

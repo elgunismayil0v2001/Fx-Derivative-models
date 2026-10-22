@@ -122,4 +122,31 @@ TEST(BarrierClosedForm, NonPositiveBarrierLevelIsRejected) {
   EXPECT_FALSE(fxval::pricing::BarrierLevel::from_value(-1.0).has_value());
 }
 
+// F-22: with a total volatility so small that 2 mu / sigma^2 overflows, the closed-form blocks used
+// to return finite but meaningless prices (found by the fuzz replay). They are now refused.
+TEST(BarrierClosedForm, RefusesVolatilityTooSmallForTheClosedForm) {
+  const auto m = make_fx_market(1.10, kRd, kRf, kT);
+  const auto ko = make_barrier_vanilla(
+      OptionType::put, 1.10, 2.0, BarrierDirection::up, BarrierEffect::knock_out);
+  for (const double sigma : {1e-12, 1e-100, 1e-277}) {
+    const auto r = fxval::pricing::barrier_vanilla_price(m, vol(sigma), ko);
+    ASSERT_FALSE(r.has_value()) << sigma;
+    EXPECT_EQ(r.error().code, fxval::ErrorCode::invalid_argument);
+  }
+  // Just above the floor the price is accepted and still obeys in-out parity.
+  auto ki = ko;
+  ki.effect = BarrierEffect::knock_in;
+  const double sigma = 0.05;
+  const double sum = barrier_price(m, sigma, ko) + barrier_price(m, sigma, ki);
+  const double plain = must(fxval::pricing::garman_kohlhagen_price(
+      fxval::pricing::VanillaFx{m.spot,
+                                must(fxval::Strike::from_value(1.10)),
+                                m.domestic,
+                                m.foreign,
+                                m.expiry,
+                                vol(sigma)},
+      OptionType::put));
+  EXPECT_NEAR(sum, plain, 1e-9);
+}
+
 }  // namespace

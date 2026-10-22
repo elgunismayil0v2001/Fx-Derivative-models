@@ -95,3 +95,25 @@ def test_the_version_is_the_same_everywhere():
         f"# Validation report: FX derivative pricing and risk library, version {major_minor}"
     )
     assert f"## [{cmake}]" in (ROOT / "CHANGELOG.md").read_text()
+
+
+def test_mutant_manifests_still_match_the_sources():
+    # A mutant whose pattern no longer occurs exactly once silently tests nothing.
+    manifests = sorted((ROOT / "scripts" / "mutants").glob("*.json"))
+    assert len(manifests) >= 3
+    for path in manifests:
+        data = json.loads(path.read_text(encoding="utf-8"))
+        assert data["mutants"], path.name
+        for i, m in enumerate(data["mutants"]):
+            text = (ROOT / m["file"]).read_text(encoding="utf-8")
+            assert text.count(m["old"]) == 1, f"{path.name} #{i} ({m['label']}) is stale"
+            assert m["old"] != m["new"], f"{path.name} #{i} changes nothing"
+
+
+def test_every_fuzz_target_has_an_entry_point_a_corpus_and_a_mention_in_the_docs():
+    doc = (ROOT / "docs" / "fuzzing.md").read_text(encoding="utf-8")
+    targets = ["vanilla", "barrier", "delta", "risk", "credit", "sha256", "price_config"]
+    for name in targets:
+        assert (ROOT / "tests" / "fuzz" / f"fuzz_{name}.cpp").is_file(), name
+        assert any((ROOT / "tests" / "fuzz" / "corpus" / name).glob("*")), f"no corpus for {name}"
+        assert f"`{name}`" in doc, f"{name} is not described in docs/fuzzing.md"

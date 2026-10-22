@@ -46,6 +46,11 @@ flat hazard rate, checked against Black-76, an exact CVA identity and nested sim
 The validation report as a single release-candidate document: executive summary, open findings, models and approach
 brought up to date, mutation-testing history, and a traceability matrix checked by a test.
 
+## v0.12 (end of week 13)
+
+Hardening: invariant-checking fuzz targets (deterministic replay in every build, libFuzzer and nightly jobs in CI), the
+numerical weaknesses they found, and the hand mutation checks turned into a script with recorded mutants.
+
 ## v1.0
 
 Smile construction from delta quotes, Heston calibration with parameter recovery, Vanna-Volga and

@@ -1,0 +1,61 @@
+{
+ "name": "week13-hardening",
+ "description": "Removes each guard added in week 13; the unit tests and fuzz regressions must notice.",
+ "ctest_exclude": "V15",
+ "mutants": [
+  {
+   "file": "src/exposure.cpp",
+   "old": "|| t > limits::max_years)",
+   "new": "|| false)",
+   "label": "date horizon cap removed"
+  },
+  {
+   "file": "src/exposure.cpp",
+   "old": "if (!std::isfinite(s) || s <= 0.0) {",
+   "new": "if (false) {",
+   "label": "simulated spot range check removed"
+  },
+  {
+   "file": "src/exposure.cpp",
+   "old": "if (total && !all_finite(total.value().data())) {",
+   "new": "if (false) {",
+   "label": "netting-set finite check removed"
+  },
+  {
+   "file": "src/exposure.cpp",
+   "old": "if (!all_finite(values.data())) {\n    return Error{ErrorCode::invalid_argument, \"a simulated value is not finite\"};\n  }\n  const std::size_t n",
+   "new": "if (false) {\n    return Error{ErrorCode::invalid_argument, \"a simulated value is not finite\"};\n  }\n  const std::size_t n",
+   "label": "exposure_profile finite check removed"
+  },
+  {
+   "file": "src/cva.cpp",
+   "old": "  if (!std::all_of(\n          values.data().begin()",
+   "new": "  if (false && !std::all_of(\n          values.data().begin()",
+   "label": "cva_estimate finite check removed"
+  },
+  {
+   "file": "src/var.cpp",
+   "old": "if (!std::isfinite(out.es)) {\n    return Error{ErrorCode::numerical_failure,\n                 \"the tail sum",
+   "new": "if (false) {\n    return Error{ErrorCode::numerical_failure,\n                 \"the tail sum",
+   "label": "historical ES overflow check removed"
+  },
+  {
+   "file": "src/var.cpp",
+   "old": "if (!std::isfinite(out.var) || !std::isfinite(out.es)) {",
+   "new": "if (false) {",
+   "label": "normal VaR overflow check removed"
+  },
+  {
+   "file": "src/var.cpp",
+   "old": "if (!std::isfinite(var)) {",
+   "new": "if (false) {",
+   "label": "Cornish-Fisher overflow check removed"
+  },
+  {
+   "file": "src/barrier_closed_form.cpp",
+   "old": "constexpr double min_total_volatility = 1e-10;",
+   "new": "constexpr double min_total_volatility = 1e-300;",
+   "label": "volatility floor made ineffective"
+  }
+ ]
+}

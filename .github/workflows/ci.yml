@@ -130,6 +130,32 @@ jobs:
           ./build/consumer/consumer
           "$HOME/fxval-install/bin/fxval-price" --config configs/examples/gk_vanillas.json --quiet > /dev/null
 
+  fuzz:
+    # libFuzzer needs clang and its runtime. The deterministic replay of the same targets already
+    # runs inside ctest in every job above; this job adds coverage-guided search on top of it.
+    runs-on: ubuntu-24.04
+    env:
+      FUZZ_SECONDS: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install toolchain
+        run: sudo apt-get update && sudo apt-get install -y cmake ninja-build clang-18 libclang-rt-18-dev
+      - name: Build the fuzz targets (whole library instrumented)
+        run: |
+          cmake -S . -B build/fuzz -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo \
+            -DCMAKE_CXX_COMPILER=clang++-18 -DFXVAL_BUILD_FUZZERS=ON \
+            -DCMAKE_CXX_FLAGS="-fsanitize=fuzzer-no-link,address,undefined -fno-omit-frame-pointer"
+          cmake --build build/fuzz --target fxval_fuzz_vanilla fxval_fuzz_barrier fxval_fuzz_delta \
+            fxval_fuzz_risk fxval_fuzz_credit fxval_fuzz_sha256 fxval_fuzz_price_config
+      - name: Run each target on its corpus and regressions
+        run: scripts/run_fuzzers.sh build/fuzz/tests "$FUZZ_SECONDS"
+      - name: Keep any crashing input
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: fuzz-crashes
+          path: build/fuzz/fuzz-artifacts/
+
   docker:
     runs-on: ubuntu-24.04
     steps:

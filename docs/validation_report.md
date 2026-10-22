@@ -1,10 +1,10 @@
-# Validation report: FX derivative pricing and risk library, version 0.11
+# Validation report: FX derivative pricing and risk library, version 0.12
 
 * **Subject:** `fxval`, a C++20 library with a Python test and reference layer: Garman-Kohlhagen, Heston
   (semi-analytic and Monte Carlo with Euler and QE schemes), FX smile construction and Heston calibration,
   barrier and touch options with Vanna-Volga, market risk (GARCH volatility, VaR and ES, backtests) and
   counterparty credit risk (exposure, netting, CVA).
-* **Version tested:** library 0.11.0 (no change to the numerical code since 0.10.0). The commit is in the
+* **Version tested:** library 0.12.0 (0.11.0 changed no numerical code; 0.12.0 adds guards for three numerical weaknesses, F-22 to F-24). The commit is in the
   metadata of every output file (section 8).
 * **Status:** release candidate for v1.0. The scope is complete and frozen (`ROADMAP.md`); what is left is
   hardening and an outside read. The report was written by the person who built the models (L-03), so it is a
@@ -17,17 +17,17 @@
 ## Executive summary
 
 * **What was tested:** 21 validation tests (V-01 to V-21), nine independent reference tables
-  (GK-REF, HESTON-REF, MC-PATH-REF, QE-PATH-REF, SMILE-REF, CAL-REF, BARRIER-REF, RISK-REF, CREDIT-REF), 478 tests in
-  `ctest` in total, and 147 deliberately planted code changes (hand mutation checks over nine rounds).
+  (GK-REF, HESTON-REF, MC-PATH-REF, QE-PATH-REF, SMILE-REF, CAL-REF, BARRIER-REF, RISK-REF, CREDIT-REF), 492 tests in
+  `ctest` in total, and 156 deliberately planted code changes (mutation checks over ten rounds, the last two scripted).
 * **What it shows:** the analytic pricers agree with independent implementations to 1e-12 or better (Garman-Kohlhagen
   6.6e-14 over 616 cases; Heston 1.6e-12 over 589); the Monte Carlo prices are statistically consistent with them and
   independent of the thread count; calibration recovers known Heston parameters from exact quotes (worst error 3.7e-9);
   the barrier closed forms agree with independent integration to 6.7e-16; the GARCH fit reaches the independent
   optimum (log-likelihood within 1.1e-8); the VaR methods and backtest statistics agree with independent Python to
   4e-11 and 4e-15; forward exposure agrees with Black-76 within sampling error; CVA matches its closed-form identities.
-* **What it found:** 21 findings (7 medium, 10 low, 4 informational), listed in section 6. Fifteen are fixed, mitigated,
+* **What it found:** 24 findings (8 medium, 12 low, 4 informational), listed in section 6. Eighteen are fixed, mitigated,
   accepted as properties of the method or only informational; six are **open** (below).
-* **What it cannot say:** all market data are synthetic (L-11); there is no second reviewer (L-03); five of the 147 planted
+* **What it cannot say:** all market data are synthetic (L-11); there is no second reviewer (L-03); five of the 156 planted
   changes still survive (section 4 and the catalogue); the CI workflows, Docker and vcpkg builds were not run from here (L-05).
 
 **Open items, most important first**
@@ -118,7 +118,7 @@ Specifications, derivations and numerical methods are in `docs/model_documentati
 3. **Criteria and seeds fixed before the results were seen,** and the places where an exploratory run
    had been seen are stated in the test file (V-06).
 4. **Hand mutation checks.** Deliberate bugs were planted one at a time and the relevant tests run (tables in
-   `docs/test_catalogue.md`). 147 changes over nine rounds:
+   `docs/test_catalogue.md`). 156 changes over ten rounds (weeks 10, 11 and 13 are scripted in `scripts/mutants/`; the script was run on all three in week 13: 19 of 20 killed for week 10 with the known survivor F-20, 20 of 20 for week 11, 9 of 9 for week 13):
 
    | Week | Code changed | Changes | Survivors |
    |---|---|---|---|
@@ -131,14 +131,18 @@ Specifications, derivations and numerical methods are in `docs/model_documentati
    | 9 | Barriers, Vanna-Volga | 15 | 1 (Heston bridge variance, L-17) |
    | 10 | GARCH, VaR, backtests, optimiser | 20 | 1 (Nelder-Mead stop rule, F-20) |
    | 11 | Exposure and CVA | 20 | 0 |
+   | 13 | Guards added by hardening: date horizon, spot range, finite checks in exposure, CVA and VaR, volatility floor of the barrier forms | 9 | 0 (two were first missed and led to tighter tests) |
 
-   Across the rounds, at least nine changes (one in week 5, four in week 8, two in week 9, one each in weeks 10 and 11) were first missed and led to a new or tighter test; that is the main
+   Across the rounds, at least eleven changes (one in week 5, four in week 8, two in week 9, one each in weeks 10 and 11, two in week 13) were first missed and led to a new or tighter test; that is the main
    result of the checks. Several changes are caught only by one test (the independent path tables, RISK-REF,
    CREDIT-REF, V-11 (C), V-20), which shows how much weight each carries. A surviving change is either equivalent in
    practice or in a regime that has no exact value to compare with; each is explained where it is recorded.
-5. **Not automated:** the mutation checks are run by a script kept outside the repository and recorded by
-   hand. They should become a CI job if the project grows.
-6. **Documentation is tested too.** `python/tests/test_docs_consistency.py` checks that the finding and limitation numbers are
+5. **Automated since 0.12.** `scripts/mutation_check.py` replays recorded mutants (`scripts/mutants/`: the 20 changes
+   of week 10, the 20 of week 11 and 9 guard removals of week 13) in a scratch copy of the repository and reports killed, surviving or
+   stale ones; a nightly CI job runs it (not yet run there, L-05). Weeks 3 to 9 were run by hand and are not in the manifests.
+6. **Fuzzing.** Seven targets check model invariants on arbitrary input (`docs/fuzzing.md`); the replay is part of `ctest` and of the
+   sanitizer runs. It found F-22 to F-24 and is the only check that feeds the models with denormals, 1e300 and NaN.
+7. **Documentation is tested too.** `python/tests/test_docs_consistency.py` checks that the finding and limitation numbers are
    contiguous and that every one cited exists, that the traceability matrix (section 10) equals the one built from the catalogue,
    that every validation test cites a source file that exists, and that the version is the same everywhere it is written.
 
@@ -178,8 +182,9 @@ Specifications, derivations and numerical methods are in `docs/model_documentati
 | V-19 | Forward exposure against Black-76; CVA of a long option against its exact value | EE within 4 standard errors (60 cases) and mean z^2 in 0.5 to 1.6; PFE equal to the exact order statistic and the share below the closed-form PFE within 4 binomial standard errors; netting before the floor exact to 1e-6; CVA of a long option within 4 standard errors (6 cases); control must be rejected in at least 9 of 15 | worst EE |z| 2.81, mean z^2 0.98; PFE worst |z| 2.29 (120 checks); CVA worst |z| 2.29; control rejected 14 of 15. Header notes why 4 and not 3 standard errors |
 | V-20 | CVA by closed-form revaluation against nested simulation | case 1 within 4 paired standard errors; case 2 never below -4 standard errors, above +4 at M = 25 and less than half of that at M = 400, within 3% of the CVA at M = 400 | case 1: z 0.19; case 2: +2.5e-6 (z 6.4), +5.0e-7 (z 2.5), +7.1e-8 (z 0.7) on a CVA of 3.79e-4. Header discloses that case 2 was changed from a short call to a short straddle before acceptance |
 | ALLOC | No allocation in the path loop | 0 allocations per path; engine allocations independent of path count | passes for GBM, Euler, QE, antithetic and control variate; a model that allocates is detected (control) |
+| FUZZ-REPLAY | Seven invariant-checking targets on seeds, regressions, mutated and random inputs (`docs/fuzzing.md`) | no violated invariant; at least 10% of pricing inputs (5% of credit inputs) get past validation | default run (about 25,000 inputs per target, a second in release): passes. Deep runs on one machine, release build: 25 million inputs each for vanilla, barrier, delta and risk, 4 million for credit, 6 million for SHA-256, all pass after the fixes; 500,000 inputs for the configuration parser under ASan and UBSan pass. About 59% of vanilla, 54% of barrier, 56% of delta and 53% of credit inputs reach the numerical code. Found F-22 to F-24 |
 
-Test counts at version 0.10: 478 in `ctest` (week-11 additions: 22 tests: 15 unit tests in `test_exposure_and_cva.cpp`, CREDIT-REF (1), V-19 (4) and V-20 (2)); Python tests as in 0.9 plus the credit generator's (5). Version 0.9 had 456 in `ctest` (week-10 additions: 42 tests: 4 Nelder-Mead, 8 volatility-model, 5 VaR, 6 backtest and 7 portfolio unit tests, RISK-REF (2), V-16 (4), V-17 (2), V-18 (2), V-21 (2)); Python tests as in 0.8 plus the risk generator's (6). Version 0.8 had 414 in `ctest` (unit, validation, command-line-layer, allocation and two end-to-end tests of
+Test counts at version 0.12: 492 in `ctest` (week-13 additions: 14 tests: the 7 replay tests of FUZZ-REPLAY and 7 unit tests that pin F-22 to F-24); Python tests as in 0.11. Version 0.10 had 478 in `ctest` (week-11 additions: 22 tests: 15 unit tests in `test_exposure_and_cva.cpp`, CREDIT-REF (1), V-19 (4) and V-20 (2)); Python tests as in 0.9 plus the credit generator's (5). Version 0.9 had 456 in `ctest` (week-10 additions: 42 tests: 4 Nelder-Mead, 8 volatility-model, 5 VaR, 6 backtest and 7 portfolio unit tests, RISK-REF (2), V-16 (4), V-17 (2), V-18 (2), V-21 (2)); Python tests as in 0.8 plus the risk generator's (6). Version 0.8 had 414 in `ctest` (unit, validation, command-line-layer, allocation and two end-to-end tests of
 real executables; the week-9 additions are 19 unit tests, BARRIER-REF (1 test over 700 rows), V-12 (4), V-13 (2), V-14 (2) and V-15 (1)); Python tests as in 0.7 plus the barrier generator's. Notes on the numbers:
 
 * V-06: QE's differences from the exact price are at the level of the sampling noise (standard errors of
@@ -219,6 +224,10 @@ project's own tests, during development of the code they concern (the same perso
 | F-20 | low | A mutant of the Nelder-Mead stop rule (the simplex-size test replaced by `true`) is not detected by any test. The restart loop and the function-value test still stop the search at the same optima on every case in the suite, so the effect, if any, is on iteration counts. | hand mutation check (week 10) | Open. Documented, not investigated further. |
 | F-21 | low | Nested simulation biases CVA upward when the netted value changes sign: the floor of a noisy inner estimate has a positive expectation. For two units of a long forward and a short ATM straddle (CVA 3.79e-4) the bias is +2.5e-6 at 25 inner paths, +5.0e-7 at 100 and +7.1e-8 at 400. A first version of the test case (a short far-out-of-the-money call) hid it, because the inner estimate of a nearly worthless option has almost no noise where the sign changes. | V-20 | Property of the method, shown and measured. The closed-form revaluation is the default; nested values are a cross-check (L-30). |
 
+| F-22 | medium | The barrier closed forms returned a finite but wrong price (about minus the strike) for a volatility so small that 2 mu / sigma^2 overflows or sigma^2 underflows (volatility times square root of expiry between 1e-183 and 1e-281 in the failing inputs, with strikes of 1e79 to 1e158). In-out parity failed by the size of the strike. | FUZZ-REPLAY | Fixed. Volatility times square root of expiry below 1e-10 is refused; a result that is not finite is a `numerical_failure`, as before. Unit test and three regression inputs. An additional check that the price lies inside its no-arbitrage bounds was tried and removed: after the floor, no input in the deep runs reached it, and the mutation check showed it was never what decided a test. |
+| F-23 | low | `historical_var_es`, `normal_var_es` and `cornish_fisher_var` reported success with an infinite expected shortfall or VaR when the scale of the P&L overflowed (a tail sum of two values near 1.8e308; a mean and standard deviation near 1e308). | FUZZ-REPLAY | Fixed. A non-finite result is a `numerical_failure`. Unit tests and three regression inputs. |
+| F-24 | low | The exposure simulation accepted any finite exposure date. A date of 1e300 overflowed the simulated spot, and `inf - inf` produced NaN values that were returned as a success. | FUZZ-REPLAY | Fixed. Dates are limited to 100 years (the library's horizon limit), a spot path outside the representable range is an error, and the netting-set values, `exposure_profile` and `cva_estimate` refuse non-finite values. Unit tests and a regression input. |
+
 ## 7. Limitations and open points
 
 * **L-01 (QE evidence):** QE was measured at four Feller-violating parameter sets, three strikes and
@@ -232,13 +241,14 @@ project's own tests, during development of the code they concern (the same perso
   would be done by a second person who could also disagree with the specification itself.
 * **L-04 (scope of the models):** deterministic rates, constant day-count convention (ACT/365 fixed),
   European payoffs on the terminal spot only, no Heston Greeks; the smile and the calibration use synthetic quotes (L-09 to L-12, L-15).
-* **L-05 (not yet run):** the GitHub Actions workflows, the Docker build, the vcpkg build and the
+* **L-05 (not yet run):** the GitHub Actions workflows (including the `fuzz` job and `nightly.yml` added in 0.12), the Docker build, the vcpkg build and the
   g++-14 and clang-17 builds have not been run from the environment that produced this report. The tests were run with g++ 13 and
   clang 18 in release, debug and AddressSanitizer plus UBSan builds. ThreadSanitizer was run up to week 9; for the week-10 and
-  week-11 code (single-threaded) it was not.
+  week-11 and week-13 code (single-threaded) it was not.
 * **L-06 (timings):** throughput numbers come from one 2-core machine and are not asserted by any test.
-* **L-07 (fuzzing):** the configuration parser is tested with thousands of randomly damaged documents in
-  every build, but libFuzzer targets are not yet in place (planned for weeks 13 and 14).
+* **L-07 (fuzzing):** since 0.12 seven targets check model invariants (`docs/fuzzing.md`). The deterministic replay runs in every build, under
+  AddressSanitizer and UBSan as well; libFuzzer entry points exist but see L-33. The invariants were chosen by the author; a fault that
+  none of them sees is not found, and a clean run is not a proof.
 * **L-08 (shared random numbers):** all options in a run use the same seed, so they share random
   numbers. This is deliberate and documented; it makes price differences smoother and standard errors
   of differences smaller than independent runs would give.
@@ -304,11 +314,17 @@ project's own tests, during development of the code they concern (the same perso
   tests use exact identities and the same grid on both sides.
 * **L-32 (scope of the numbers):** unilateral CVA only (no DVA, FVA or capital). PFE is computed under the simulation measure and under a
   user-given real-world drift; neither is calibrated and PFE is not backtested. Forward and option trades on one pair only.
+* **L-33 (libFuzzer not run):** the libFuzzer entry points and the `fuzz` and nightly CI jobs were written in an environment without the
+  libFuzzer runtime. The entry points were compiled and run on all seeds and regressions with a stub driver; no coverage-guided search
+  was run by the author. The deep replay runs (up to 1000 times the default iterations, 25 million inputs per pricing target) were run once, on one machine.
+* **L-34 (limits introduced by hardening):** barrier closed forms now refuse volatility times square root of expiry below 1e-10, exposure dates
+  beyond 100 years, and results that overflow. These are conservative numerical limits, not model statements; no test in the suite was
+  affected, but a user with a legitimate use beyond them gets an error.
 
 ## 8. Reproducing these results
 
 ```sh
-cmake --preset release && cmake --build --preset release && ctest --preset release   # 478 tests
+cmake --preset release && cmake --build --preset release && ctest --preset release   # 492 tests
 python -m pytest -q                                                                    # needs numpy, scipy, jsonschema
 build/release/examples/smile/fxval-example-smile configs/scenarios/smile_scenarios.csv docs/results/smile_data
 python python/plot_smiles.py docs/results/smile_data docs/results                      # needs matplotlib
@@ -341,6 +357,11 @@ must not be used for a short-gamma position (V-18).
 forms and independent Python, for forwards and European options on one pair with a flat hazard rate and no collateral. They are
 not fit for a counterparty valuation: no wrong-way risk, no collateral, no calibrated credit curve (L-28 to L-32). F-21 is a
 property of nested simulation; use the closed-form revaluation where one exists.
+
+**Hardening (0.12).** Seven invariant-checking fuzz targets run in every build and found three numerical weaknesses at the edges of
+the input space (F-22 to F-24), all fixed. This makes the library refuse, rather than return a wrong or non-finite number, for
+extreme inputs; it does not widen the ranges in which the models are validated. Coverage-guided fuzzing and the new CI jobs are
+unrun (L-33), and the guards add limits (L-34).
 
 ## 10. Traceability matrix
 

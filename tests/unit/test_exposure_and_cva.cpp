@@ -4,6 +4,7 @@
 #include <gtest/gtest.h>
 
 #include <cmath>
+#include <limits>
 
 #include "support/credit_test_support.hpp"
 
@@ -256,6 +257,52 @@ TEST(ExposureTest, ATradeIsWorthNothingOnItsOwnExpiryDate) {
     EXPECT_DOUBLE_EQ(x, 0.0);
   }
   EXPECT_GT(ov.row(0)[0], 0.0);
+}
+
+// F-24: distant exposure dates used to overflow the simulated spot, and the resulting NaN values
+// were returned as a success (found by the fuzz replay).
+TEST(ExposureTest, RefusesDatesBeyondTheHorizonLimit) {
+  const auto m = credit_market();
+  const auto r = credit::simulate_spot_paths(m, settings({1.0, 1e300}));
+  ASSERT_FALSE(r.has_value());
+  EXPECT_EQ(r.error().code, ErrorCode::invalid_argument);
+  EXPECT_FALSE(credit::simulate_spot_paths(m, settings({50.0, 100.5})).has_value());
+  EXPECT_TRUE(credit::simulate_spot_paths(m, settings({50.0, 100.0}, 10)).has_value());
+}
+
+TEST(ExposureTest, RefusesTradeSizesThatOverflowTheValues) {
+  const auto m = credit_market();
+  const auto set =
+      credit::NettingSet{{forward_trade(1e308, 1.0, 1.0), forward_trade(-1e308, 5.0, 1.0)}, {}};
+  const auto r = credit::simulate_netting_set_values(m, set, settings({0.5, 1.0}, 10));
+  ASSERT_FALSE(r.has_value());
+  EXPECT_EQ(r.error().code, ErrorCode::numerical_failure);
+}
+
+TEST(ExposureTest, ProfileAndCvaRefuseNonFiniteValues) {
+  const double nan = std::numeric_limits<double>::quiet_NaN();
+  // dates must start at 0 for the CVA weights; the NaN is the only thing wrong with this matrix
+  const credit::ValueMatrix bad({0.0, 0.5, 1.0}, 2, {1.0, 2.0, nan, 3.0, 0.5, 1.0});
+  const auto profile = credit::exposure_profile(bad, 0.95);
+  ASSERT_FALSE(profile.has_value());
+  EXPECT_EQ(profile.error().code, ErrorCode::invalid_argument);
+  const auto cva = credit::cva_estimate(bad, {0.1, 0.4, 0.02});
+  ASSERT_FALSE(cva.has_value());
+  EXPECT_EQ(cva.error().code, ErrorCode::invalid_argument);
+  // The same matrix with a finite value is accepted, so the refusal is about the value.
+  const credit::ValueMatrix good({0.0, 0.5, 1.0}, 2, {1.0, 2.0, 0.25, 3.0, 0.5, 1.0});
+  EXPECT_TRUE(credit::cva_estimate(good, {0.1, 0.4, 0.02}).has_value());
+}
+
+TEST(ExposureTest, RefusesASpotPathThatLeavesTheRepresentableRange) {
+  // A real-world drift of 1e6 per year overflows exp() within one date; a drift of -1e6 underflows
+  // to zero.
+  for (const double drift : {1.0e6, -1.0e6}) {
+    const auto m = credit_market(drift);
+    const auto r = credit::simulate_spot_paths(m, settings({1.0}, 10));
+    ASSERT_FALSE(r.has_value()) << drift;
+    EXPECT_EQ(r.error().code, ErrorCode::numerical_failure);
+  }
 }
 
 }  // namespace

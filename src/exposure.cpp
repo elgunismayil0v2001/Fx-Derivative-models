@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <cmath>
 
+#include "fxval/core/limits.hpp"
 #include "fxval/mc/normal_stream.hpp"
 
 namespace fxval::credit {
@@ -20,9 +21,9 @@ constexpr std::size_t kMaxDates = 10'000;
   }
   double previous = 0.0;
   for (const double t : s.dates) {
-    if (!(t > previous) || !std::isfinite(t)) {
+    if (!(t > previous) || !std::isfinite(t) || t > limits::max_years) {
       return Error{ErrorCode::invalid_argument,
-                   "exposure dates must be finite, positive and strictly increasing"};
+                   "exposure dates must be positive, strictly increasing and at most 100 years"};
     }
     previous = t;
   }
@@ -63,6 +64,10 @@ private:
                                            : std::max(strike - spot, 0.0);
 }
 
+[[nodiscard]] bool all_finite(const std::vector<double>& xs) noexcept {
+  return std::all_of(xs.begin(), xs.end(), [](double x) { return std::isfinite(x); });
+}
+
 }  // namespace
 
 ValueMatrix::ValueMatrix(std::vector<double> dates, std::size_t paths, std::vector<double> values)
@@ -99,6 +104,10 @@ Result<ValueMatrix> simulate_spot_paths(const ExposureMarket& market,
     for (std::size_t i = 1; i < rows; ++i) {
       const double dt = dates[i] - dates[i - 1];
       s *= std::exp((mu - 0.5 * sigma * sigma) * dt + sigma * std::sqrt(dt) * rng.next());
+      if (!std::isfinite(s) || s <= 0.0) {
+        return Error{ErrorCode::numerical_failure,
+                     "a simulated spot path left the representable range"};
+      }
       values[i * settings.paths + p] = s;
     }
   }
@@ -218,7 +227,12 @@ Result<ValueMatrix> simulate_netting_set_values(const ExposureMarket& market,
     }
     parts.push_back(std::move(v).value());
   }
-  return sum_values(parts);
+  auto total = sum_values(parts);
+  if (total && !all_finite(total.value().data())) {
+    return Error{ErrorCode::numerical_failure,
+                 "the simulated netting set values are not finite (trade sizes too large?)"};
+  }
+  return total;
 }
 
 Result<ExposureProfile> exposure_profile(const ValueMatrix& values, double level) {
@@ -227,6 +241,9 @@ Result<ExposureProfile> exposure_profile(const ValueMatrix& values, double level
   }
   if (values.paths() < 2) {
     return Error{ErrorCode::invalid_argument, "at least two paths are needed"};
+  }
+  if (!all_finite(values.data())) {
+    return Error{ErrorCode::invalid_argument, "a simulated value is not finite"};
   }
   const std::size_t n = values.paths();
   ExposureProfile profile;

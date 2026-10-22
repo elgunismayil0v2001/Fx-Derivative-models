@@ -6,6 +6,33 @@ All notable changes are recorded here. The format follows
 
 ## [Unreleased]
 
+## [0.12.0] - 2026-10-22
+
+### Added (week 13: hardening)
+
+- Seven fuzz targets that check model invariants on arbitrary input (`tests/fuzz/`): vanilla pricing and implied
+  volatility, barrier prices, delta to strike, VaR/ES and backtests, exposure and CVA, SHA-256, and the
+  configuration parser. `fxval_fuzz_replay_tests` runs seeds, saved regressions, seeded mutations and random
+  inputs in every build (`FXVAL_FUZZ_SCALE` multiplies the iterations); libFuzzer entry points are built with
+  `-DFXVAL_BUILD_FUZZERS=ON` under clang.
+- `scripts/run_fuzzers.sh`, a `fuzz` CI job and a nightly workflow (long fuzzing, mutation check).
+- `scripts/mutation_check.py` and the recorded mutants in `scripts/mutants/` (weeks 10, 11 and 13).
+- `docs/fuzzing.md`.
+
+### Fixed
+
+- F-22: `barrier_vanilla_price` returned finite but wrong values when volatility times square root of expiry was
+  tiny; such inputs are now refused (below 1e-10).
+- F-23: `historical_var_es`, `normal_var_es` and `cornish_fisher_var` returned an infinite value as a success when the
+  scale of the input overflowed; they now return `numerical_failure`.
+- F-24: exposure simulation returned NaN values as a success for exposure dates far beyond the horizon. Dates are
+  limited to 100 years, a spot path that leaves the representable range is an error, and the netting-set values,
+  `exposure_profile` and `cva_estimate` refuse non-finite values.
+
+### Documentation
+
+- Validation report: findings F-22 to F-24, limitations L-33 and L-34, L-05 and L-07 updated, hardening results.
+
 ## [0.11.0] - 2026-10-22
 
 ### Changed (week 12: validation report)

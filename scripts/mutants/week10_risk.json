@@ -1,0 +1,127 @@
+{
+ "name": "week10-market-risk",
+ "description": "Planted changes in the risk and time-series layers (week 10).",
+ "ctest_exclude": "V15",
+ "mutants": [
+  {
+   "file": "src/nelder_mead.cpp",
+   "old": "size <= options.x_tol",
+   "new": "true",
+   "label": "convergence without the geometry test"
+  },
+  {
+   "file": "src/volatility_models.cpp",
+   "old": "(model == GarchModel::gjr && r < 0.0)",
+   "new": "(model == GarchModel::gjr && r > 0.0)",
+   "label": "GJR indicator reversed"
+  },
+  {
+   "file": "src/volatility_models.cpp",
+   "old": "p.alpha + p.gamma : p.alpha",
+   "new": "p.alpha + 0.5 * p.gamma : p.alpha",
+   "label": "GJR shock coefficient gamma/2"
+  },
+  {
+   "file": "include/fxval/timeseries/volatility_models.hpp",
+   "old": "return alpha + beta + 0.5 * gamma;",
+   "new": "return alpha + beta + gamma;",
+   "label": "persistence without the 1/2 on gamma"
+  },
+  {
+   "file": "src/volatility_models.cpp",
+   "old": "v.push_back(lambda * v.back() + (1.0 - lambda) * r * r);",
+   "new": "v.push_back((1.0 - lambda) * v.back() + lambda * r * r);",
+   "label": "EWMA weights swapped"
+  },
+  {
+   "file": "src/volatility_models.cpp",
+   "old": "ll += -0.5 * (log_two_pi + std::log(v) + r * r / v);",
+   "new": "ll += -0.5 * (log_two_pi * 0.0 + std::log(v) + r * r / v);",
+   "label": "likelihood without ln 2 pi"
+  },
+  {
+   "file": "src/volatility_models.cpp",
+   "old": "const double ms = sum / static_cast<double>(returns.size());",
+   "new": "const double ms = sum / static_cast<double>(returns.size() - 1);",
+   "label": "initial variance divisor n-1"
+  },
+  {
+   "file": "src/volatility_models.cpp",
+   "old": "step[i] = 2e-4 * std::max(get(p, i), 1e-8);",
+   "new": "step[i] = 2e-2 * std::max(get(p, i), 1e-8);",
+   "label": "Hessian step 100 times larger"
+  },
+  {
+   "file": "src/var.cpp",
+   "old": "std::ceil(raw - 1e-9)",
+   "new": "std::floor(raw)",
+   "label": "historical k: floor instead of ceil"
+  },
+  {
+   "file": "src/var.cpp",
+   "old": "const VarEs out{-kth, -tail_sum / static_cast<double>(k)};",
+   "new": "const VarEs out{-kth, -tail_sum / static_cast<double>(k + 1)};",
+   "label": "ES divisor k+1"
+  },
+  {
+   "file": "src/var.cpp",
+   "old": "-mean + sd * numerics::normal_pdf(z.value()) / q",
+   "new": "-mean + sd * numerics::normal_pdf(z.value()) / (level + 0.0 * q)",
+   "label": "normal ES divides by level"
+  },
+  {
+   "file": "src/var.cpp",
+   "old": "(2.0 * z * z * z - 5.0 * z) * s * s / 36.0;",
+   "new": "(2.0 * z * z * z + 5.0 * z) * s * s / 36.0;",
+   "label": "Cornish-Fisher s^2 term sign"
+  },
+  {
+   "file": "src/portfolio_risk.cpp",
+   "old": "60.0 * c1 * c1 * c2 * c2",
+   "new": "6.0 * c1 * c1 * c2 * c2",
+   "label": "fourth moment coefficient"
+  },
+  {
+   "file": "src/portfolio_risk.cpp",
+   "old": "const double c2 = 0.5 * sens.value().gamma",
+   "new": "const double c2 = 1.0 * sens.value().gamma",
+   "label": "delta-gamma: gamma/2 lost"
+  },
+  {
+   "file": "src/portfolio_risk.cpp",
+   "old": "pnl.push_back(p.value());\n  }\n  return historical_var_es(pnl, level);\n}\n\nResult<VarEs> filtered",
+   "new": "pnl.push_back(p.value());\n  }\n  return historical_var_es(pnl, 1.0 - level);\n}\n\nResult<VarEs> filtered",
+   "label": "historical revaluation uses the wrong tail"
+  },
+  {
+   "file": "src/backtest.cpp",
+   "old": "std::erfc(std::sqrt(0.5 * statistic))",
+   "new": "std::erfc(std::sqrt(statistic))",
+   "label": "chi-square(1) p-value argument"
+  },
+  {
+   "file": "src/backtest.cpp",
+   "old": "std::exp(-0.5 * statistic)",
+   "new": "std::exp(-statistic)",
+   "label": "chi-square(2) p-value"
+  },
+  {
+   "file": "src/backtest.cpp",
+   "old": "if (s.binomial_cdf < 0.95) {",
+   "new": "if (s.binomial_cdf < 0.90) {",
+   "label": "traffic light green threshold"
+  },
+  {
+   "file": "src/backtest.cpp",
+   "old": "returns.subspan(t - window, window)",
+   "new": "returns.subspan(t - window + 1, window)",
+   "label": "LOOK-AHEAD: window includes the forecast day"
+  },
+  {
+   "file": "src/backtest.cpp",
+   "old": "xlogy(n01, pi01) + xlogy(n10, 1.0 - pi11)",
+   "new": "xlogy(n01, pi01) + xlogy(n10, pi11)",
+   "label": "independence: pi11 term"
+  }
+ ]
+}

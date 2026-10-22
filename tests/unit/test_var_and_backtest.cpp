@@ -4,6 +4,7 @@
 #include <gtest/gtest.h>
 
 #include <cmath>
+#include <limits>
 
 #include "fxval/risk/backtest.hpp"
 #include "fxval/risk/portfolio.hpp"
@@ -227,6 +228,29 @@ TEST(PortfolioRiskTest, HistoricalRevaluationUsesTheLossTail) {
   EXPECT_NEAR(r.var, second, 1e-9);
   EXPECT_NEAR(r.es, 0.5 * (worst + second), 1e-9);
   EXPECT_GT(r.var, 0.0);
+}
+
+// F-23: a tail sum that overflows used to be reported as a successful infinite expected shortfall.
+TEST(VarTest, HistoricalRefusesATailSumThatOverflows) {
+  const double big = std::numeric_limits<double>::max();
+  const std::vector<double> pnl{-big, -big, 1.0, 2.0};
+  const auto r = risk::historical_var_es(pnl, 0.5);  // tail holds the two worst scenarios
+  ASSERT_FALSE(r.has_value());
+  EXPECT_EQ(r.error().code, ErrorCode::numerical_failure);
+  // Rescaled, the same scenarios are fine.
+  const std::vector<double> scaled{-1.0, -1.0, 1e-300, 2e-300};
+  EXPECT_TRUE(risk::historical_var_es(scaled, 0.5).has_value());
+}
+
+TEST(VarTest, ParametricMethodsRefuseOverflow) {
+  const double big = std::numeric_limits<double>::max();
+  const auto normal = risk::normal_var_es(-big, big, 0.99);
+  ASSERT_FALSE(normal.has_value());
+  EXPECT_EQ(normal.error().code, ErrorCode::numerical_failure);
+  const auto cf = risk::cornish_fisher_var(0.0, big, 1e10, 1e10, 0.99);
+  ASSERT_FALSE(cf.has_value());
+  EXPECT_EQ(cf.error().code, ErrorCode::numerical_failure);
+  EXPECT_TRUE(risk::normal_var_es(0.0, 1.0, 0.99).has_value());
 }
 
 }  // namespace
