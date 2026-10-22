@@ -1,26 +1,45 @@
-# Validation report: FX option pricing models, version 0.10
+# Validation report: FX derivative pricing and risk library, version 0.11
 
-* **Models in scope:** Garman-Kohlhagen (benchmark), Heston semi-analytic pricer, Monte Carlo engine
-  with Euler (full truncation) and Andersen QE schemes, antithetic and control variates.
-* **Added in 0.6:** FX smile construction from delta quotes (one delta convention, quadratic smile,
-  surface in total variance) with butterfly and calendar arbitrage checks.
-* **Added in 0.7:** Heston calibration to delta quotes (bounded multi-start Levenberg-Marquardt on
-  implied-volatility errors) with parameter-recovery, identification and noise tests (V-11).
-* **Added in 0.8:** barrier, one-touch and double no-touch options (closed forms and Brownian-bridge Monte
-  Carlo), Vanna-Volga (three variants) and a comparison of Garman-Kohlhagen, Vanna-Volga and Heston with the
-  spread reported as model risk (V-12 to V-15, BARRIER-REF).
-* **Added in 0.9:** market risk: EWMA and GARCH(1,1)/GJR-GARCH maximum-likelihood estimation, historical, normal,
-  Cornish-Fisher, delta-gamma, full-revaluation and filtered-historical VaR and ES for a spot-and-options portfolio,
-  and backtests (Kupiec, Christoffersen, Basel traffic light) with a look-ahead check (V-16, V-17, V-18, V-21,
-  RISK-REF).
-* **Added in 0.10:** counterparty credit risk: exposure simulation for FX forwards and options, netting, EE, PFE, EPE,
-  unilateral CVA with a flat hazard rate, and a nested-simulation cross-check (V-19, V-20, CREDIT-REF).
-* **Out of scope for this version:** wrong-way risk, collateral, bilateral adjustments (weeks 12 to 13 and later).
-* **Version tested:** library 0.10.0. The commit is in the metadata of every output file
-  (section 8).
-* **Status:** draft for release v0.5. Every number below comes from a test in this repository
-  and can be reproduced with the commands in section 8. Numbers measured on one machine are
-  marked as such.
+* **Subject:** `fxval`, a C++20 library with a Python test and reference layer: Garman-Kohlhagen, Heston
+  (semi-analytic and Monte Carlo with Euler and QE schemes), FX smile construction and Heston calibration,
+  barrier and touch options with Vanna-Volga, market risk (GARCH volatility, VaR and ES, backtests) and
+  counterparty credit risk (exposure, netting, CVA).
+* **Version tested:** library 0.11.0 (no change to the numerical code since 0.10.0). The commit is in the
+  metadata of every output file (section 8).
+* **Status:** release candidate for v1.0. The scope is complete and frozen (`ROADMAP.md`); what is left is
+  hardening and an outside read. The report was written by the person who built the models (L-03), so it is a
+  self-validation with independent code, not an independent validation.
+* **How to read it:** section 1 is the summary and the open items; sections 2 to 4 say what was validated and how;
+  section 5 has every result; sections 6 and 7 list the findings (F-xx) and limitations (L-xx); section 8 reproduces the
+  numbers; section 10 traces each validation test (V-01 to V-21) to its source file and the findings it produced.
+  Every number comes from a test in this repository; numbers measured on one machine are marked as such.
+
+## Executive summary
+
+* **What was tested:** 21 validation tests (V-01 to V-21), nine independent reference tables
+  (GK-REF, HESTON-REF, MC-PATH-REF, QE-PATH-REF, SMILE-REF, CAL-REF, BARRIER-REF, RISK-REF, CREDIT-REF), 478 tests in
+  `ctest` in total, and 147 deliberately planted code changes (hand mutation checks over nine rounds).
+* **What it shows:** the analytic pricers agree with independent implementations to 1e-12 or better (Garman-Kohlhagen
+  6.6e-14 over 616 cases; Heston 1.6e-12 over 589); the Monte Carlo prices are statistically consistent with them and
+  independent of the thread count; calibration recovers known Heston parameters from exact quotes (worst error 3.7e-9);
+  the barrier closed forms agree with independent integration to 6.7e-16; the GARCH fit reaches the independent
+  optimum (log-likelihood within 1.1e-8); the VaR methods and backtest statistics agree with independent Python to
+  4e-11 and 4e-15; forward exposure agrees with Black-76 within sampling error; CVA matches its closed-form identities.
+* **What it found:** 21 findings (7 medium, 10 low, 4 informational), listed in section 6. Fifteen are fixed, mitigated,
+  accepted as properties of the method or only informational; six are **open** (below).
+* **What it cannot say:** all market data are synthetic (L-11); there is no second reviewer (L-03); five of the 147 planted
+  changes still survive (section 4 and the catalogue); the CI workflows, Docker and vcpkg builds were not run from here (L-05).
+
+**Open items, most important first**
+
+| ID | Sev. | Open item | Evidence |
+|---|---|---|---|
+| F-17 | medium | Delta-gamma VaR by Cornish-Fisher can be negative or far off for a long-gamma position (V-18); delta-normal VaR understates short-option risk by 50% to 92% | V-18 |
+| F-15 | medium | Vanna-Volga can return negative prices for extreme skew; the library does not clamp them | V-15, ADR 0010 |
+| F-09 | medium | The interpolated surface has calendar arbitrage in the wings for two of four realistic scenarios | V-10 |
+| F-08 | low | The quadratic smile has butterfly arbitrage near the money for an extreme risk reversal | V-10 |
+| F-13 | low | Linearised calibration standard errors are too small in the noise study | V-11 (C) |
+| F-20 | low | A mutant of the Nelder-Mead stop rule is not detected by any test | mutation check, week 10 |
 
 ## 1. Summary
 
@@ -51,11 +70,13 @@ open points are in sections 6 and 7.
 
 ## 2. Purpose, intended use and materiality
 
-The code is a portfolio project that mimics the work of a model validation function: it builds the
-models and then tests them as an independent reviewer would. It prices European FX vanillas.
-There is no exposure, no desk and no production use, so materiality is nil; the conclusions are
-about the quality of the method and the code. A real model would need the same evidence plus
-governance (ownership, approval, monitoring) that does not exist here.
+The code is a portfolio project that mimics the work of a model validation function: it builds the models and then
+tests them as an independent reviewer would. It covers pricing and risk of FX options on one currency pair, and the
+counterparty exposure of FX forwards and options. There is no desk, no market data feed and no production use, so
+materiality is nil; the conclusions are about the quality of the method and the code. A real model would need the same
+evidence plus governance (ownership, approval, monitoring, a second reviewer) that does not exist here. The intended use is
+therefore: a benchmark and reference implementation, a worked example of model validation, and a base for the v1.1
+extensions listed in `ROADMAP.md`.
 
 ## 3. Models
 
@@ -71,6 +92,15 @@ Specifications, derivations and numerical methods are in `docs/model_documentati
   counter-based random starts; Feller is not imposed.
 * **Monte Carlo:** counter-based Philox4x32-10 random numbers (path number = stream number), fixed
   blocks merged in block order, Euler with full truncation or the QE scheme with martingale correction.
+* **Smile and surface:** quotes (ATM, risk reversal, butterfly) to strikes under one stated delta convention, a quadratic
+  smile per expiry and a surface in total variance, with butterfly and calendar arbitrage reports (model documentation 6).
+* **Barriers and Vanna-Volga:** Reiner-Rubinstein closed forms, one-touch and double no-touch, a Brownian-bridge Monte Carlo,
+  three Vanna-Volga variants, and a Garman-Kohlhagen / Vanna-Volga / Heston comparison reported as model risk (7, 8).
+* **Market risk:** zero-mean EWMA, GARCH(1,1) and GJR-GARCH(1,1) by Gaussian quasi-maximum likelihood (Nelder-Mead on a softmax
+  constraint map); historical, normal, Cornish-Fisher, delta-gamma, full-revaluation and filtered-historical VaR and ES; Kupiec,
+  Christoffersen and Basel traffic-light backtests with a structural look-ahead guard (9).
+* **Counterparty credit risk:** exact GBM exposure paths, netting before the floor, EE, PFE and EPE, unilateral CVA with a flat hazard
+  rate and independence between default and exposure, and nested simulation as a cross-check (10).
 
 ## 4. Validation approach
 
@@ -87,18 +117,30 @@ Specifications, derivations and numerical methods are in `docs/model_documentati
    a control variate with a 1% wrong mean is rejected at 40 standard errors in V-08.
 3. **Criteria and seeds fixed before the results were seen,** and the places where an exploratory run
    had been seen are stated in the test file (V-06).
-4. **Hand mutation checks.** Deliberate bugs were planted one at a time and the suite run: 5 changes
-   to the Monte Carlo code in week 4, 15 to the QE scheme and variance reduction in week 5, 16 to the
-   command-line layer in week 6, 25 to the smile code in week 7, 28 to the calibration code in week 8 and 15 to the barrier and Vanna-Volga code in week 9 (tables in `docs/test_catalogue.md`).
-   All are caught by something except one week-7 change that is equivalent in practice (a rounding-level
-   threshold, section 7, L-13) and two week-8 changes that alter speed or an unused bracket and not any result, and, in week 9, the Heston bridge variance (L-17: no exact value to compare with).
-   In week 9 two changes survived the first run and led to new unit tests.
-   In week 8, four changes were first missed and led to new or tighter tests, and two are seen only by the
-   V-11 noise study. Three
-   Monte Carlo changes (a drift term in Euler, the missing martingale correction and a sign in `K1` in QE)
-   are caught only by the independent path tables, which is a measure of how much weight those tables carry.
+4. **Hand mutation checks.** Deliberate bugs were planted one at a time and the relevant tests run (tables in
+   `docs/test_catalogue.md`). 147 changes over nine rounds:
+
+   | Week | Code changed | Changes | Survivors |
+   |---|---|---|---|
+   | 3 | Heston characteristic function, quadrature | 3 | 0 (one is missed by V-03 and V-04 and caught by HESTON-REF) |
+   | 4 | Monte Carlo engine | 5 | 0 |
+   | 5 | QE scheme, antithetic, variance reduction | 15 | 0 (one found nothing at first; a unit test was added) |
+   | 6 | Configuration, runner, report, CLI, metadata, SHA-256 | 16 | 0 |
+   | 7 | Quantile, delta conversion, smile, surface, arbitrage checks | 25 | 1 (equivalent in practice, L-13) |
+   | 8 | Root finder, implied volatility, least squares, Heston smile maps, calibration | 28 | 2 (speed and an unused bracket) |
+   | 9 | Barriers, Vanna-Volga | 15 | 1 (Heston bridge variance, L-17) |
+   | 10 | GARCH, VaR, backtests, optimiser | 20 | 1 (Nelder-Mead stop rule, F-20) |
+   | 11 | Exposure and CVA | 20 | 0 |
+
+   Across the rounds, at least nine changes (one in week 5, four in week 8, two in week 9, one each in weeks 10 and 11) were first missed and led to a new or tighter test; that is the main
+   result of the checks. Several changes are caught only by one test (the independent path tables, RISK-REF,
+   CREDIT-REF, V-11 (C), V-20), which shows how much weight each carries. A surviving change is either equivalent in
+   practice or in a regime that has no exact value to compare with; each is explained where it is recorded.
 5. **Not automated:** the mutation checks are run by a script kept outside the repository and recorded by
    hand. They should become a CI job if the project grows.
+6. **Documentation is tested too.** `python/tests/test_docs_consistency.py` checks that the finding and limitation numbers are
+   contiguous and that every one cited exists, that the traceability matrix (section 10) equals the one built from the catalogue,
+   that every validation test cites a source file that exists, and that the version is the same everywhere it is written.
 
 ## 5. Results
 
@@ -191,11 +233,12 @@ project's own tests, during development of the code they concern (the same perso
 * **L-04 (scope of the models):** deterministic rates, constant day-count convention (ACT/365 fixed),
   European payoffs on the terminal spot only, no Heston Greeks; the smile and the calibration use synthetic quotes (L-09 to L-12, L-15).
 * **L-05 (not yet run):** the GitHub Actions workflows, the Docker build, the vcpkg build and the
-  g++-14 and clang-17 builds have not been run. The tests were run with g++ 13 and clang 18 in release,
-  debug, AddressSanitizer plus UBSan and ThreadSanitizer builds.
+  g++-14 and clang-17 builds have not been run from the environment that produced this report. The tests were run with g++ 13 and
+  clang 18 in release, debug and AddressSanitizer plus UBSan builds. ThreadSanitizer was run up to week 9; for the week-10 and
+  week-11 code (single-threaded) it was not.
 * **L-06 (timings):** throughput numbers come from one 2-core machine and are not asserted by any test.
 * **L-07 (fuzzing):** the configuration parser is tested with thousands of randomly damaged documents in
-  every build, but libFuzzer targets are not yet in place (planned for weeks 11 to 14).
+  every build, but libFuzzer targets are not yet in place (planned for weeks 13 and 14).
 * **L-08 (shared random numbers):** all options in a run use the same seed, so they share random
   numbers. This is deliberate and documented; it makes price differences smoother and standard errors
   of differences smaller than independent runs would give.
@@ -298,3 +341,35 @@ must not be used for a short-gamma position (V-18).
 forms and independent Python, for forwards and European options on one pair with a flat hazard rate and no collateral. They are
 not fit for a counterparty valuation: no wrong-way risk, no collateral, no calibrated credit curve (L-28 to L-32). F-21 is a
 property of nested simulation; use the closed-form revaluation where one exists.
+
+## 10. Traceability matrix
+
+Built from `docs/test_catalogue.md` and the findings table by `python/build_traceability.py` and checked against it by
+`python/tests/test_docs_consistency.py`. Findings F-02, F-03, F-06, F-07, F-11 and F-20 were found by unit tests, probes and
+mutation checks rather than by a V-test, so they do not appear in the last column.
+
+<!-- traceability:start -->
+| ID | Test | Source file | Week | Status | Findings produced |
+|---|---|---|---|---|---|
+| V-01 | Put-call parity (Garman-Kohlhagen) | `tests/validation/test_v01_put_call_parity.cpp` | 2 | passing | none |
+| V-02 | GK Greeks vs finite differences | `tests/validation/test_v02_greeks_fd.cpp` | 2 | passing | F-04 |
+| V-03 | Heston semi-analytic vs GK as vol-of-vol goes to 0 | `tests/validation/test_v03_heston_vs_gk.cpp` | 3 | passing | none |
+| V-04 | Heston semi-analytic robustness over long maturities and extreme parameters | `tests/validation/test_v04_heston_robustness.cpp` | 3 | passing | F-01 |
+| V-05 | Heston Monte Carlo (each scheme) vs semi-analytic | `tests/validation/test_v05_heston_mc_vs_analytic.cpp` | 4 | passing | F-05 |
+| V-06 | Scheme behaviour when the Feller condition fails | `tests/validation/test_v06_feller_study.cpp` | 5 | passing | F-05 |
+| V-07 | Monte Carlo reproducibility | `tests/validation/test_v07_mc_reproducibility.cpp` | 4 | passing | none |
+| V-08 | Variance reduction | `tests/validation/test_v08_variance_reduction.cpp` | 5 | passing | none |
+| V-09 | Delta-quote to strike conversion round trip | `tests/validation/test_v09_delta_roundtrip.cpp` | 7 | passing | none |
+| V-10 | Smile arbitrage checks | `tests/validation/test_v10_smile_arbitrage.cpp` | 7 | passing | F-08, F-09 |
+| V-11 | Heston calibration parameter recovery | `tests/validation/test_v11_heston_calibration.cpp` | 8 | passing | F-12, F-13 |
+| V-12 | Barrier: GK closed form vs Monte Carlo with Brownian bridge | `tests/validation/test_v12_barrier_mc.cpp` | 9 | passing | F-14 |
+| V-13 | Barrier: in-out parity | `tests/validation/test_v13_in_out_parity.cpp` | 9 | passing | none |
+| V-14 | Vanna-Volga reproduces the three pivot market prices | `tests/validation/test_v14_vanna_volga_pivots.cpp` | 9 | passing | none |
+| V-15 | Barrier model comparison (GK vs Vanna-Volga vs Heston) | `tests/validation/test_v15_model_comparison.cpp` | 9 | passing | F-15, F-16 |
+| V-16 | GARCH estimation vs independent code (not `arch`) | `tests/validation/test_v16_garch_estimation.cpp` | 10 | passing | F-18 |
+| V-17 | VaR backtests (each method) | `tests/validation/test_v17_var_backtests.cpp` | 10 | passing | F-19 |
+| V-18 | Delta-normal vs full revaluation for options | `tests/validation/test_v18_delta_normal_vs_revaluation.cpp` | 10 | passing | F-17, F-17 |
+| V-19 | Single-forward expected exposure vs Black-76 | `tests/validation/test_v19_forward_exposure.cpp` | 11 | passing | none |
+| V-20 | CVA: Monte Carlo exposure vs nested simulation on a small case | `tests/validation/test_v20_cva_nested.cpp` | 11 | passing | F-21 |
+| V-21 | Look-ahead and leakage check in backtests | `tests/validation/test_v21_lookahead.cpp` | 10 | passing | none |
+<!-- traceability:end -->

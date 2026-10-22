@@ -152,12 +152,13 @@ validation tests are what a model-validation team would ask for. Reasoning:
 | `gen_garch_reference.py` | Writes the 12 simulated return series and the independent SLSQP fits and Hessian standard errors for V-16. |
 | `gen_risk_reference.py` | Writes the 40 hit sequences and 186 VaR rows of RISK-REF. |
 | `compare_with_arch.py` | Optional comparison with the `arch` package; exits quietly when it is missing. Never run in this project. |
+| `build_traceability.py` | Builds the traceability matrix of the validation report (section 10) from the test catalogue and the findings table. |
 | `gen_credit_reference.py` | Writes the 80-row credit table: forward EE and PFE (Black-76), option prices and exact CVA, CVA by intervals. |
 | `gen_barrier_reference.py` | Writes the 700-row barrier table by numerical integration (killed densities by images, first-passage integral, sum of images). |
 | `gen_calibration_reference.py` | Writes the two calibration tables with textbook Heston prices, `brentq` implied volatilities and nested `brentq` delta strikes. |
 | `plot_smiles.py` | Draws `docs/results/smile_*.png` from the CSV files written by `fxval-example-smile` (needs matplotlib). |
 | `gen_gk_reference.py` | Writes the reference table with SciPy, in a different algebraic form from the C++ code, fixed seed. |
-| `tests/test_data_download.py`, `tests/test_gen_gk_reference.py`, `tests/test_gen_heston_reference.py`, `tests/test_gen_mc_reference.py`, `tests/test_gen_qe_reference.py`, `tests/test_gen_smile_reference.py`, `tests/test_gen_calibration_reference.py`, `tests/test_gen_barrier_reference.py`, `tests/test_gen_risk_reference.py`, `tests/test_gen_credit_reference.py` | Offline tests of the parsers and of the generators (the Monte Carlo one needs no third-party package). |
+| `tests/test_data_download.py`, `tests/test_gen_gk_reference.py`, `tests/test_gen_heston_reference.py`, `tests/test_gen_mc_reference.py`, `tests/test_gen_qe_reference.py`, `tests/test_gen_smile_reference.py`, `tests/test_gen_calibration_reference.py`, `tests/test_gen_barrier_reference.py`, `tests/test_gen_risk_reference.py`, `tests/test_gen_credit_reference.py`, `tests/test_docs_consistency.py` (documentation: contiguous finding and limitation numbers, matrix, cited files, version) | Offline tests of the parsers and of the generators (the Monte Carlo one needs no third-party package). |
 
 ## Other
 

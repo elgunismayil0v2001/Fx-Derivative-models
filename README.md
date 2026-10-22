@@ -4,7 +4,7 @@ A C++20 library that prices FX options and measures FX portfolio market and coun
 together with an **independent validation** of those models: exact benchmarks, numerical tests,
 model comparison, and a written validation report.
 
-> **Status: week 11 of a 14-week plan (library version 0.10.0).** The engineering foundation is in place, the
+> **Status: week 12 of a 14-week plan (library version 0.11.0).** The engineering foundation is in place, the
 > Garman-Kohlhagen benchmark is checked by V-01 and V-02, the Heston semi-analytic pricer by V-03,
 > V-04 and an independent Python table, and the multithreaded Monte Carlo engine (Euler full
 > truncation and Andersen's QE scheme, antithetic and control variates) by V-05 to V-08 and
@@ -15,7 +15,7 @@ model comparison, and a written validation report.
 > Week 9 adds barrier, one-touch and double no-touch options (closed forms and Brownian-bridge Monte Carlo),
 > Vanna-Volga, and a comparison of Garman-Kohlhagen, Vanna-Volga and Heston whose spread is the quantified
 > model risk (V-12 to V-15). Week 10 adds market risk: GARCH and GJR-GARCH estimation, five VaR/ES methods,
-> backtests and a look-ahead check, on simulated data and a spot risk factor only (V-16, V-17, V-18, V-21). Week 11 adds counterparty credit risk: exposure simulation, netting, EE, PFE and unilateral CVA with a nested-simulation cross-check (V-19, V-20).
+> backtests and a look-ahead check, on simulated data and a spot risk factor only (V-16, V-17, V-18, V-21). Week 11 adds counterparty credit risk: exposure simulation, netting, EE, PFE and unilateral CVA with a nested-simulation cross-check (V-19, V-20). Week 12 consolidates the validation report into a release-candidate document with an executive summary, the open findings, the mutation-testing history and a traceability matrix that a test keeps in step with the catalogue.
 
 ## What exists today
 
@@ -63,7 +63,7 @@ ctest --preset release
 ## Use as a library
 
 ```cmake
-find_package(fxval 0.10 CONFIG REQUIRED)
+find_package(fxval 0.11 CONFIG REQUIRED)
 target_link_libraries(my_target PRIVATE fxval::fxval)
 ```
 

@@ -41,6 +41,11 @@ revaluation. Tests V-16, V-17, V-18, V-21, RISK-REF.
 Counterparty credit risk: exposure simulation for FX forwards and options, netting, EE, PFE, unilateral CVA with a
 flat hazard rate, checked against Black-76, an exact CVA identity and nested simulation. Tests V-19, V-20, CREDIT-REF.
 
+## v0.11 (end of week 12)
+
+The validation report as a single release-candidate document: executive summary, open findings, models and approach
+brought up to date, mutation-testing history, and a traceability matrix checked by a test.
+
 ## v1.0
 
 Smile construction from delta quotes, Heston calibration with parameter recovery, Vanna-Volga and

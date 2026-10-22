@@ -6,6 +6,20 @@ All notable changes are recorded here. The format follows
 
 ## [Unreleased]
 
+## [0.11.0] - 2026-10-22
+
+### Changed (week 12: validation report)
+
+- `docs/validation_report.md` rewritten as one document: executive summary with the open findings, current scope
+  and models, the mutation-testing history (147 planted changes over nine rounds, five survivors), and a
+  traceability matrix (section 10). No change to the numerical code.
+
+### Added
+
+- `python/build_traceability.py` builds the matrix from the catalogue and the findings table;
+  `python/tests/test_docs_consistency.py` checks that the matrix, the finding and limitation numbers, the cited
+  source files and the version number agree across the repository.
+
 ## [0.10.0] - 2026-10-22
 
 ### Added (week 11: counterparty credit risk)
