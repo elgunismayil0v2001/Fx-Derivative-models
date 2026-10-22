@@ -94,8 +94,12 @@ jobs:
       - uses: actions/checkout@v4
       - name: Install toolchain
         run: sudo apt-get update && sudo apt-get install -y cmake ninja-build clang-tidy g++
-      - name: Configure debug (compile_commands.json)
-        run: cmake --preset debug
+      - name: Configure debug (compile_commands.json) and generate build_info.hpp
+        # apps/lib includes build_info.hpp, which is written at build time; without this step
+        # clang-tidy stops with "'build_info.hpp' file not found".
+        run: |
+          cmake --preset debug
+          cmake --build build/debug --target fxval_build_info
       - name: clang-tidy on library sources
         run: clang-tidy -p build/debug --quiet src/*.cpp apps/lib/*.cpp apps/price/main.cpp
 
