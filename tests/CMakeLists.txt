@@ -133,12 +133,6 @@ if(FXVAL_BUILD_APPS)
   target_compile_definitions(fxval_fuzz_replay_tests PRIVATE FXVAL_FUZZ_HAVE_CONFIG)
 endif()
 fxval_set_warnings(fxval_fuzz_replay_tests)
-if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-  # GCC 14 reports allocator-related false positives (-Wstringop-overflow family) in the heavily
-  # inlined byte-vector mutations of this test. Keep the warnings visible but do not fail the build
-  # on them; this is test code, not the library.
-  target_compile_options(fxval_fuzz_replay_tests PRIVATE -Wno-error)
-endif()
 gtest_discover_tests(fxval_fuzz_replay_tests DISCOVERY_TIMEOUT 60)
 
 option(FXVAL_BUILD_FUZZERS "Build the libFuzzer programs in tests/fuzz (needs clang with the fuzzer runtime)" OFF)

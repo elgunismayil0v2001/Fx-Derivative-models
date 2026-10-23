@@ -245,9 +245,8 @@ project's own tests, during development of the code they concern (the same perso
   install-consume, Docker (which builds and runs the tests), the `fuzz` job (clang-18, 30 seconds per target, no crash), `test` on g++-13,
   clang-17 and clang-18, and both sanitizer jobs, AddressSanitizer plus UBSan and ThreadSanitizer, on all of the code. Failed, for reasons
   in the CI setup and not in the models: clang-tidy (a generated header was not built), coverage (gcovr stopped on a negative hit count, GCC bug 68080),
-  python (a byte-for-byte comparison of a reference table written with another NumPy build; all 99 tests passed) and `test` on g++-14 (`-Werror` on a
-  GCC 14 warning in the fuzz replay test; I did not see the warning text, so the fix is a rewrite of the suspect code plus making warnings non-fatal for
-  that one test target). The 1.0.0 changes fix all four, and **none of the fixes has been run in CI yet**: the first run after release 1.0.0 is
+  python (a byte-for-byte comparison of a reference table written with another NumPy build; all 99 tests passed) and `test` on g++-14 (`-Werror=mismatched-new-delete` in the allocation-counting test, a false positive of GCC 14 on a replaced `operator new` and `operator delete`
+  that do match). The 1.0.0 changes fix all four, and **none of the fixes has been run in CI yet**: the first run after release 1.0.0 is
   their test. Not run at all: the vcpkg build and `nightly.yml` (long fuzzing and the mutation check; its first scheduled run is pending). The author's own tests
   ran with g++ 13 and clang 18 in release, debug and AddressSanitizer plus UBSan builds; line coverage on `src/` is checked in CI (85%), where the tool could not report it yet; a local `gcov` run of the
   1.0.0 coverage build (491 tests, V-15 excluded for time) gives 90.9% (2,616 of 2,878 lines; `contracts.cpp` 0%, `barrier_comparison.cpp` 0% without V-15).

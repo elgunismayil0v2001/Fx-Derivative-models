@@ -87,6 +87,14 @@ void* operator new(std::size_t size, const std::nothrow_t&) noexcept {
 void* operator new[](std::size_t size, const std::nothrow_t&) noexcept {
   return counted_allocate(size, alignof(std::max_align_t));
 }
+// The operator new above allocates with malloc, so freeing with free is a matched pair. GCC 14
+// cannot see that once std::allocator is inlined into the engine and reports
+// -Wmismatched-new-delete (a false positive; it failed the g++-14 CI job). Silence it for these
+// definitions only.
+#if defined(__GNUC__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wmismatched-new-delete"
+#endif
 void operator delete(void* pointer) noexcept {
   std::free(pointer);
 }
@@ -111,6 +119,9 @@ void operator delete(void* pointer, std::size_t, std::align_val_t) noexcept {
 void operator delete[](void* pointer, std::size_t, std::align_val_t) noexcept {
   std::free(pointer);
 }
+#if defined(__GNUC__)
+#pragma GCC diagnostic pop
+#endif
 
 namespace {
 

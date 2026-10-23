@@ -22,8 +22,9 @@ Run 24 of `ci.yml` passed format, install-consume, docker, fuzz, test on g++-13,
   build now uses `-fprofile-update=atomic`, and gcovr is told to warn once per file instead of stopping.
 - `python`: all 99 tests passed; `cmp` of the regenerated Garman-Kohlhagen reference table failed on last-digit differences between NumPy builds
   (2.5.4 in CI, 2.5.3 where the table was written). `python/compare_csv.py` compares numbers to 1e-10 relative or 1e-15 absolute and everything else exactly (CI and `scripts/check.sh`).
-- `test (g++-14)`: `-Werror` failed in `tests/fuzz/test_fuzz_replay.cpp` on a GCC 14 warning in inlined `std::allocator` code. The vector code in
-  the test was rewritten as plain byte loops, and warnings of that one test target are no longer errors under GCC. The exact warning text was not seen.
+- `test (g++-14)`: `-Werror=mismatched-new-delete` in `tests/app/test_allocation_free.cpp`, which replaces the global `operator new` (malloc) and
+  `operator delete` (free) to count allocations. GCC 14 cannot see that the pair matches once `std::allocator` is inlined (a false positive). The
+  `operator delete` definitions are now wrapped in a `#pragma GCC diagnostic` that silences that one warning there.
 - A 403 from `packages.microsoft.com` during `apt-get update` failed a job; the Microsoft apt source is now removed first in every job that installs packages.
 
 ### Changed
