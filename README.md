@@ -36,7 +36,7 @@ model comparison, and a written validation report.
 | Barriers, one-touch, double no-touch, Vanna-Volga and a model comparison | working; V-12 to V-15 and BARRIER-REF (700 rows) passing |
 | Market risk: EWMA, GARCH(1,1) and GJR-GARCH estimation, historical, normal, Cornish-Fisher, delta-gamma, full-revaluation and filtered-historical VaR/ES, Kupiec, Christoffersen and traffic-light backtests, look-ahead check | working; V-16, V-17, V-18, V-21 and RISK-REF passing; simulated data, spot risk factor only |
 | Counterparty credit risk: exposure simulation of FX forwards and options, netting, EE, PFE, unilateral CVA with a flat hazard rate, nested-simulation cross-check | working; V-19, V-20 and CREDIT-REF passing; spot only, no collateral, no wrong-way risk |
-| Fuzzing and robustness: seven invariant-checking targets (vanilla, barrier, delta, risk, credit, SHA-256, configuration), a deterministic replay in every build, libFuzzer entry points, `scripts/mutation_check.py` | working; see `docs/fuzzing.md`; the `fuzz` CI job passed one 30-second smoke run; the nightly job has not run yet (L-33) |
+| Fuzzing and robustness: seven invariant-checking targets (vanilla, barrier, delta, risk, credit, SHA-256, configuration), a deterministic replay in every build, libFuzzer entry points, `scripts/mutation_check.py` | working; see `docs/fuzzing.md`; the `fuzz` CI job found a tolerance defect in a check on a 30-second run (fixed, pinned by a regression); the nightly job has not run yet (L-33) |
 
 ## Build and test
 

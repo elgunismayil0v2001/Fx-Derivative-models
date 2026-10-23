@@ -320,7 +320,7 @@ project's own tests, during development of the code they concern (the same perso
 * **L-32 (scope of the numbers):** unilateral CVA only (no DVA, FVA or capital). PFE is computed under the simulation measure and under a
   user-given real-world drift; neither is calibrated and PFE is not backtested. Forward and option trades on one pair only.
 * **L-33 (libFuzzer: short runs only):** the libFuzzer entry points were written without the libFuzzer runtime and could not be run by the author. Their first real
-  run was the `fuzz` job of CI run 24: it built with clang-18 and ran 30 seconds per target without a crash (I saw the job status, not its log). That is a smoke run. Long
+  run was the `fuzz` job of CI run 24: it built with clang-18 and ran 30 seconds per target without a crash (I saw the job status, not its log). A later 30-second run did find a failure: the `vanilla` parity check had no absolute tolerance floor and failed on subnormal inputs by one rounding step (a defect in the check, fixed and pinned by a regression input; see CHANGELOG 1.0.0). Short runs still find things, so the nightly runs matter. Long
   coverage-guided runs are in `nightly.yml`, which has not run yet. The deep replay runs (up to 1000 times the default iterations, 25 million inputs per pricing target)
   were run once, on one machine.
 * **L-34 (limits introduced by hardening):** barrier closed forms now refuse volatility times square root of expiry below 1e-10, exposure dates

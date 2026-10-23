@@ -83,6 +83,11 @@ inline std::string fail(const std::string& what, double a = 0.0, double b = 0.0)
   return out.str();
 }
 
+// Absolute floor for every relative tolerance. With wild inputs, spot and strike can be subnormal,
+// so scale * 1e-8 falls below one representable step (4.9e-324) and two results that differ by one
+// rounding step would look like a violation. CI found this: put-call parity at 6e-319.
+inline constexpr double tiny = 1e-300;
+
 inline bool close(double a, double b, double tol) {
   return std::abs(a - b) <= tol;
 }
@@ -107,7 +112,7 @@ inline std::string check_vanilla(const std::uint8_t* data, std::size_t size) {
   const double fwd_leg = spot.value().value() * std::exp(-rf.value().value() * t);
   const double strike_leg = strike.value().value() * std::exp(-rd.value().value() * t);
   const double scale = fwd_leg + strike_leg;
-  const double tol = 1e-9 * scale + 1e-300;
+  const double tol = 1e-9 * scale + tiny;
   std::optional<double> prices[2];
   for (int k = 0; k < 2; ++k) {
     const auto type = k == 0 ? pricing::OptionType::call : pricing::OptionType::put;
@@ -153,13 +158,13 @@ inline std::string check_vanilla(const std::uint8_t* data, std::size_t size) {
       if (!again) {
         return fail("implied volatility reported success but cannot reprice", v);
       }
-      if (!close(again.value(), v, 1e-7 * scale)) {
+      if (!close(again.value(), v, 1e-7 * scale + tiny)) {
         return fail("implied volatility does not reprice the option", again.value(), v);
       }
     }
   }
   if (prices[0] && prices[1] &&
-      !close(*prices[0] - *prices[1], fwd_leg - strike_leg, 1e-8 * scale)) {
+      !close(*prices[0] - *prices[1], fwd_leg - strike_leg, 1e-8 * scale + tiny)) {
     return fail("put-call parity violated", *prices[0] - *prices[1], fwd_leg - strike_leg);
   }
   return {};
@@ -202,12 +207,12 @@ inline std::string check_barrier(const std::uint8_t* data, std::size_t size) {
           spot.value(), strike.value(), rd.value(), rf.value(), expiry.value(), vol.value()},
       type);
   for (const auto* r : {&ko, &ki}) {
-    if (*r && (!std::isfinite(r->value()) || r->value() < -1e-9 * scale ||
-               r->value() > scale * (1.0 + 1e-9))) {
+    if (*r && (!std::isfinite(r->value()) || r->value() < -1e-9 * scale - tiny ||
+               r->value() > scale * (1.0 + 1e-9) + tiny)) {
       return fail("barrier vanilla price is not finite or outside [0, scale]", r->value(), scale);
     }
   }
-  if (ko && ki && plain && !close(ko.value() + ki.value(), plain.value(), 1e-6 * scale)) {
+  if (ko && ki && plain && !close(ko.value() + ki.value(), plain.value(), 1e-6 * scale + tiny)) {
     return fail("in-out parity violated", ko.value() + ki.value(), plain.value());
   }
   const auto p = pricing::touch_probability(market, vol.value(), barrier.value(), direction);

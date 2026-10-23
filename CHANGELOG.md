@@ -14,7 +14,7 @@ validation report (V-01 to V-21 and the reference tables). No model or numerical
 
 ### Fixed (week 14: first real CI run, commit 67ecbc7)
 
-Run 24 of `ci.yml` passed format, install-consume, docker, fuzz, test on g++-13, clang-17 and clang-18, and both sanitizer jobs, and failed four jobs:
+Run 24 of `ci.yml` passed format, install-consume, docker, test on g++-13, clang-17 and clang-18, and both sanitizer jobs, and failed four jobs. The `fuzz` job passed in that run and failed in the next one (last bullet):
 
 - `clang-tidy`: `apps/lib` includes the generated `build_info.hpp`, which the job never built. The job now builds the
   `fxval_build_info` target first.
@@ -26,6 +26,11 @@ Run 24 of `ci.yml` passed format, install-consume, docker, fuzz, test on g++-13,
   `operator delete` (free) to count allocations. GCC 14 cannot see that the pair matches once `std::allocator` is inlined (a false positive). The
   `operator delete` definitions are now wrapped in a `#pragma GCC diagnostic` that silences that one warning there.
 - A 403 from `packages.microsoft.com` during `apt-get update` failed a job; the Microsoft apt source is now removed first in every job that installs packages.
+- `fuzz`: libFuzzer found an input where the `vanilla` target reported `put-call parity violated (-6.46e-319, -6.46e-319)`. Not a pricing bug: with wild
+  inputs the spot is subnormal, so `1e-8 * scale` is smaller than one representable step (4.9e-324) and two results one rounding step apart failed the check.
+  The tolerances in `tests/fuzz/fuzz_targets.hpp` now have an absolute floor (`tiny = 1e-300`, as the bounds check already had) in the implied-volatility
+  reprice, vanilla parity and the two barrier checks. The failing class is pinned by `tests/fuzz/regressions/vanilla/tol_subnormal_parity.bin` (I did not have the CI
+  crash file, so this is an equivalent input found by my own search). 30 million random and subnormal-biased inputs found no further failure.
 
 ### Changed
 
