@@ -15,7 +15,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Install toolchain
-        run: sudo apt-get update && sudo apt-get install -y cmake ninja-build clang-18 libclang-rt-18-dev
+        run: sudo rm -f /etc/apt/sources.list.d/microsoft*.list /etc/apt/sources.list.d/microsoft*.sources && sudo apt-get update && sudo apt-get install -y cmake ninja-build clang-18 libclang-rt-18-dev
       - name: Build the fuzz targets
         run: |
           cmake -S . -B build/fuzz -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo \
@@ -40,7 +40,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Install toolchain
-        run: sudo apt-get update && sudo apt-get install -y cmake ninja-build g++
+        run: sudo rm -f /etc/apt/sources.list.d/microsoft*.list /etc/apt/sources.list.d/microsoft*.sources && sudo apt-get update && sudo apt-get install -y cmake ninja-build g++
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"

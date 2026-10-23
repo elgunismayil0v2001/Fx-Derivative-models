@@ -6,6 +6,30 @@ All notable changes are recorded here. The format follows
 
 ## [Unreleased]
 
+## [1.0.0] - 2026-10-23
+
+First release. Scope as frozen in `ROADMAP.md`: smile construction from delta quotes, Heston calibration, barrier and
+Vanna-Volga model comparison, market risk, counterparty credit risk, command-line program with validated configuration, and the
+validation report (V-01 to V-21 and the reference tables). No model or numerical code changed in this release.
+
+### Fixed (week 14: first real CI run, commit 67ecbc7)
+
+Run 24 of `ci.yml` passed format, install-consume, docker, fuzz, test on g++-13, clang-17 and clang-18, and both sanitizer jobs, and failed four jobs:
+
+- `clang-tidy`: `apps/lib` includes the generated `build_info.hpp`, which the job never built. The job now builds the
+  `fxval_build_info` target first.
+- `coverage`: gcovr stopped with exit code 64 on "negative hit value" (GCC bug 68080, counter races in the multithreaded tests). The coverage
+  build now uses `-fprofile-update=atomic`, and gcovr is told to warn once per file instead of stopping.
+- `python`: all 99 tests passed; `cmp` of the regenerated Garman-Kohlhagen reference table failed on last-digit differences between NumPy builds
+  (2.5.4 in CI, 2.5.3 where the table was written). `python/compare_csv.py` compares numbers to 1e-10 relative or 1e-15 absolute and everything else exactly (CI and `scripts/check.sh`).
+- `test (g++-14)`: `-Werror` failed in `tests/fuzz/test_fuzz_replay.cpp` on a GCC 14 warning in inlined `std::allocator` code. The vector code in
+  the test was rewritten as plain byte loops, and warnings of that one test target are no longer errors under GCC. The exact warning text was not seen.
+- A 403 from `packages.microsoft.com` during `apt-get update` failed a job; the Microsoft apt source is now removed first in every job that installs packages.
+
+### Changed
+
+- Version 1.0.0 (CMake, vcpkg, README, report). Report: L-05 and L-33 updated with the CI results, status of the release.
+
 ## [0.12.0] - 2026-10-22
 
 ### Added (week 13: hardening)

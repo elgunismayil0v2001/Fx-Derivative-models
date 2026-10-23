@@ -44,7 +44,7 @@ ruff check python
 ruff format --check python
 regen="$(mktemp)"
 python3 python/gen_gk_reference.py "$regen"
-cmp "$regen" tests/validation/data/gk_reference.csv
+python3 python/compare_csv.py "$regen" tests/validation/data/gk_reference.csv
 rm -f "$regen"
 pytest -q
 

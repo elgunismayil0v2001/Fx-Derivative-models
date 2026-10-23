@@ -51,7 +51,7 @@ brought up to date, mutation-testing history, and a traceability matrix checked 
 Hardening: invariant-checking fuzz targets (deterministic replay in every build, libFuzzer and nightly jobs in CI), the
 numerical weaknesses they found, and the hand mutation checks turned into a script with recorded mutants.
 
-## v1.0
+## v1.0 (released, end of week 14)
 
 Smile construction from delta quotes, Heston calibration with parameter recovery, Vanna-Volga and
 barrier model comparison, VaR/ES with backtests, exposure and CVA, command-line apps with

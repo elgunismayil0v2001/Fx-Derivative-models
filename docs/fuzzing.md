@@ -76,8 +76,8 @@ for exposure dates far beyond the supported horizon). See section 6 of the valid
 
 * The libFuzzer runtime was not available in the authoring environment. The seven entry points were
   compiled with g++ against a small stub driver and run on every seed and regression (no abort), which shows
-  that they build, link and accept the corpus; no coverage-guided search was run by the author. The `fuzz` and `nightly`
-  jobs have not been run either. The first CI run is their first real run (L-33).
+  that they build, link and accept the corpus; no coverage-guided search was run by the author. The `fuzz` CI job ran once (30 seconds per
+  target, no crash); the long runs of `nightly.yml` have not run yet (L-33).
 * The invariants are chosen by the author. A model that is wrong in a way no listed invariant sees will pass.
 * Passing a deep run is not a proof. It means that the chosen inputs did not find a violation.
 

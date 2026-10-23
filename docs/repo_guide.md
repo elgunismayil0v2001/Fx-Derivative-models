@@ -161,6 +161,7 @@ validation tests are what a model-validation team would ask for. Reasoning:
 | `gen_barrier_reference.py` | Writes the 700-row barrier table by numerical integration (killed densities by images, first-passage integral, sum of images). |
 | `gen_calibration_reference.py` | Writes the two calibration tables with textbook Heston prices, `brentq` implied volatilities and nested `brentq` delta strikes. |
 | `plot_smiles.py` | Draws `docs/results/smile_*.png` from the CSV files written by `fxval-example-smile` (needs matplotlib). |
+| `compare_csv.py` | Compares two CSV tables, numbers to a tolerance and everything else exactly. CI and `scripts/check.sh` use it instead of `cmp` for the Garman-Kohlhagen table (tests: `tests/test_compare_csv.py`). |
 | `gen_gk_reference.py` | Writes the reference table with SciPy, in a different algebraic form from the C++ code, fixed seed. |
 | `tests/test_data_download.py`, `tests/test_gen_gk_reference.py`, `tests/test_gen_heston_reference.py`, `tests/test_gen_mc_reference.py`, `tests/test_gen_qe_reference.py`, `tests/test_gen_smile_reference.py`, `tests/test_gen_calibration_reference.py`, `tests/test_gen_barrier_reference.py`, `tests/test_gen_risk_reference.py`, `tests/test_gen_credit_reference.py`, `tests/test_docs_consistency.py` (documentation: contiguous finding and limitation numbers, matrix, cited files, version) | Offline tests of the parsers and of the generators (the Monte Carlo one needs no third-party package). |
 

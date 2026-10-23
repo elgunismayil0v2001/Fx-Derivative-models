@@ -17,10 +17,13 @@
 #if defined(__GNUC__) && !defined(__clang__)
 #pragma GCC diagnostic ignored "-Wstringop-overflow"
 #pragma GCC diagnostic ignored "-Warray-bounds"
+#pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
+#pragma GCC diagnostic ignored "-Wstringop-overread"
 #endif
 
 #include <gtest/gtest.h>
 
+#include <array>
 #include <cmath>
 #include <cstdint>
 #include <cstdlib>
@@ -81,7 +84,13 @@ void put_double(Input& in, std::size_t at, double x) {
   if (in.size() < at + 8) {
     in.resize(at + 8, 0);
   }
-  std::memcpy(in.data() + at, &x, sizeof x);
+  // Byte by byte instead of one memcpy: GCC 14 reports a false stringop-overflow for the memcpy
+  // after the resize above (the vector cannot be empty here, but the compiler cannot see that).
+  std::array<std::uint8_t, sizeof x> raw{};
+  std::memcpy(raw.data(), &x, sizeof x);
+  for (std::size_t i = 0; i < raw.size(); ++i) {
+    in[at + i] = raw[i];
+  }
 }
 
 Input mutate(const std::vector<Input>& seeds, std::mt19937_64& rng) {
@@ -126,7 +135,9 @@ Input mutate(const std::vector<Input>& seeds, std::mt19937_64& rng) {
       const Input& other = seeds[rng() % seeds.size()];
       if (!other.empty()) {
         const std::size_t from = rng() % other.size();
-        in.insert(in.end(), other.begin() + static_cast<std::ptrdiff_t>(from), other.end());
+        for (std::size_t i = from; i < other.size(); ++i) {
+          in.push_back(other[i]);
+        }
       }
       break;
     }

@@ -15,7 +15,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Install clang-format
-        run: sudo apt-get update && sudo apt-get install -y clang-format
+        run: sudo rm -f /etc/apt/sources.list.d/microsoft*.list /etc/apt/sources.list.d/microsoft*.sources && sudo apt-get update && sudo apt-get install -y clang-format
       - name: C++ format
         run: git ls-files '*.cpp' '*.hpp' | xargs clang-format --dry-run --Werror
       - uses: actions/setup-python@v5
@@ -39,7 +39,7 @@ jobs:
           pip install pytest numpy scipy jsonschema
           pytest -q
           python python/gen_gk_reference.py "$RUNNER_TEMP/gk.csv"
-          cmp "$RUNNER_TEMP/gk.csv" tests/validation/data/gk_reference.csv
+          python python/compare_csv.py "$RUNNER_TEMP/gk.csv" tests/validation/data/gk_reference.csv
 
   test:
     runs-on: ubuntu-24.04
@@ -65,7 +65,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Install toolchain
-        run: sudo apt-get update && sudo apt-get install -y cmake ninja-build ${{ matrix.packages }}
+        run: sudo rm -f /etc/apt/sources.list.d/microsoft*.list /etc/apt/sources.list.d/microsoft*.sources && sudo apt-get update && sudo apt-get install -y cmake ninja-build ${{ matrix.packages }}
       - name: Configure, build, test (release)
         run: |
           cmake --preset release
@@ -81,7 +81,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Install toolchain
-        run: sudo apt-get update && sudo apt-get install -y cmake ninja-build g++
+        run: sudo rm -f /etc/apt/sources.list.d/microsoft*.list /etc/apt/sources.list.d/microsoft*.sources && sudo apt-get update && sudo apt-get install -y cmake ninja-build g++
       - name: ${{ matrix.preset }}
         run: |
           cmake --preset ${{ matrix.preset }}
@@ -93,7 +93,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Install toolchain
-        run: sudo apt-get update && sudo apt-get install -y cmake ninja-build clang-tidy g++
+        run: sudo rm -f /etc/apt/sources.list.d/microsoft*.list /etc/apt/sources.list.d/microsoft*.sources && sudo apt-get update && sudo apt-get install -y cmake ninja-build clang-tidy g++
       - name: Configure debug (compile_commands.json) and generate build_info.hpp
         # apps/lib includes build_info.hpp, which is written at build time; without this step
         # clang-tidy stops with "'build_info.hpp' file not found".
@@ -108,7 +108,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Install toolchain
-        run: sudo apt-get update && sudo apt-get install -y cmake ninja-build g++ gcovr
+        run: sudo rm -f /etc/apt/sources.list.d/microsoft*.list /etc/apt/sources.list.d/microsoft*.sources && sudo apt-get update && sudo apt-get install -y cmake ninja-build g++ gcovr
       - name: Coverage build and tests
         run: |
           cmake --preset coverage
@@ -116,14 +116,15 @@ jobs:
           ctest --preset coverage --output-on-failure
       - name: Enforce line coverage on src/
         run: |
-          gcovr --filter 'src/' --fail-under-line 85 --print-summary
+          gcovr --filter 'src/' --fail-under-line 85 --print-summary \
+            --gcov-ignore-parse-errors=negative_hits.warn_once_per_file
 
   install-consume:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
       - name: Install toolchain
-        run: sudo apt-get update && sudo apt-get install -y cmake ninja-build g++
+        run: sudo rm -f /etc/apt/sources.list.d/microsoft*.list /etc/apt/sources.list.d/microsoft*.sources && sudo apt-get update && sudo apt-get install -y cmake ninja-build g++
       - name: Install fxval and build examples/consumer
         run: |
           cmake --preset release
@@ -143,7 +144,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Install toolchain
-        run: sudo apt-get update && sudo apt-get install -y cmake ninja-build clang-18 libclang-rt-18-dev
+        run: sudo rm -f /etc/apt/sources.list.d/microsoft*.list /etc/apt/sources.list.d/microsoft*.sources && sudo apt-get update && sudo apt-get install -y cmake ninja-build clang-18 libclang-rt-18-dev
       - name: Build the fuzz targets (whole library instrumented)
         run: |
           cmake -S . -B build/fuzz -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo \

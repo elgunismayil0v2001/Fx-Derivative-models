@@ -1,13 +1,13 @@
-# Validation report: FX derivative pricing and risk library, version 0.12
+# Validation report: FX derivative pricing and risk library, version 1.0
 
 * **Subject:** `fxval`, a C++20 library with a Python test and reference layer: Garman-Kohlhagen, Heston
   (semi-analytic and Monte Carlo with Euler and QE schemes), FX smile construction and Heston calibration,
   barrier and touch options with Vanna-Volga, market risk (GARCH volatility, VaR and ES, backtests) and
   counterparty credit risk (exposure, netting, CVA).
-* **Version tested:** library 0.12.0 (0.11.0 changed no numerical code; 0.12.0 adds guards for three numerical weaknesses, F-22 to F-24). The commit is in the
+* **Version tested:** library 1.0.0 (0.12.0 added guards for three numerical weaknesses, F-22 to F-24; 1.0.0 changed no numerical code, only the CI setup and the version). The commit is in the
   metadata of every output file (section 8).
-* **Status:** release candidate for v1.0. The scope is complete and frozen (`ROADMAP.md`); what is left is
-  hardening and an outside read. The report was written by the person who built the models (L-03), so it is a
+* **Status:** release 1.0.0. The scope is complete and frozen (`ROADMAP.md`); what is left is
+  an outside read and a CI run of the 1.0.0 fixes (L-05). The report was written by the person who built the models (L-03), so it is a
   self-validation with independent code, not an independent validation.
 * **How to read it:** section 1 is the summary and the open items; sections 2 to 4 say what was validated and how;
   section 5 has every result; sections 6 and 7 list the findings (F-xx) and limitations (L-xx); section 8 reproduces the
@@ -28,7 +28,7 @@
 * **What it found:** 24 findings (8 medium, 12 low, 4 informational), listed in section 6. Eighteen are fixed, mitigated,
   accepted as properties of the method or only informational; six are **open** (below).
 * **What it cannot say:** all market data are synthetic (L-11); there is no second reviewer (L-03); five of the 156 planted
-  changes still survive (section 4 and the catalogue); the CI workflows, Docker and vcpkg builds were not run from here (L-05).
+  changes still survive (section 4 and the catalogue); the CI fixes of 1.0.0 and the vcpkg build have not been run (L-05).
 
 **Open items, most important first**
 
@@ -241,10 +241,16 @@ project's own tests, during development of the code they concern (the same perso
   would be done by a second person who could also disagree with the specification itself.
 * **L-04 (scope of the models):** deterministic rates, constant day-count convention (ACT/365 fixed),
   European payoffs on the terminal spot only, no Heston Greeks; the smile and the calibration use synthetic quotes (L-09 to L-12, L-15).
-* **L-05 (not yet run):** the GitHub Actions workflows (including the `fuzz` job and `nightly.yml` added in 0.12), the Docker build, the vcpkg build and the
-  g++-14 and clang-17 builds have not been run from the environment that produced this report. The tests were run with g++ 13 and
-  clang 18 in release, debug and AddressSanitizer plus UBSan builds. ThreadSanitizer was run up to week 9; for the week-10 and
-  week-11 and week-13 code (single-threaded) it was not.
+* **L-05 (CI, vcpkg and compilers):** GitHub Actions ran for the first time on commit 67ecbc7 (week 13, run 24). Passed: format,
+  install-consume, Docker (which builds and runs the tests), the `fuzz` job (clang-18, 30 seconds per target, no crash), `test` on g++-13,
+  clang-17 and clang-18, and both sanitizer jobs, AddressSanitizer plus UBSan and ThreadSanitizer, on all of the code. Failed, for reasons
+  in the CI setup and not in the models: clang-tidy (a generated header was not built), coverage (gcovr stopped on a negative hit count, GCC bug 68080),
+  python (a byte-for-byte comparison of a reference table written with another NumPy build; all 99 tests passed) and `test` on g++-14 (`-Werror` on a
+  GCC 14 warning in the fuzz replay test; I did not see the warning text, so the fix is a rewrite of the suspect code plus making warnings non-fatal for
+  that one test target). The 1.0.0 changes fix all four, and **none of the fixes has been run in CI yet**: the first run after release 1.0.0 is
+  their test. Not run at all: the vcpkg build and `nightly.yml` (long fuzzing and the mutation check; its first scheduled run is pending). The author's own tests
+  ran with g++ 13 and clang 18 in release, debug and AddressSanitizer plus UBSan builds; line coverage on `src/` is checked in CI (85%), where the tool could not report it yet; a local `gcov` run of the
+  1.0.0 coverage build (491 tests, V-15 excluded for time) gives 90.9% (2,616 of 2,878 lines; `contracts.cpp` 0%, `barrier_comparison.cpp` 0% without V-15).
 * **L-06 (timings):** throughput numbers come from one 2-core machine and are not asserted by any test.
 * **L-07 (fuzzing):** since 0.12 seven targets check model invariants (`docs/fuzzing.md`). The deterministic replay runs in every build, under
   AddressSanitizer and UBSan as well; libFuzzer entry points exist but see L-33. The invariants were chosen by the author; a fault that
@@ -314,9 +320,10 @@ project's own tests, during development of the code they concern (the same perso
   tests use exact identities and the same grid on both sides.
 * **L-32 (scope of the numbers):** unilateral CVA only (no DVA, FVA or capital). PFE is computed under the simulation measure and under a
   user-given real-world drift; neither is calibrated and PFE is not backtested. Forward and option trades on one pair only.
-* **L-33 (libFuzzer not run):** the libFuzzer entry points and the `fuzz` and nightly CI jobs were written in an environment without the
-  libFuzzer runtime. The entry points were compiled and run on all seeds and regressions with a stub driver; no coverage-guided search
-  was run by the author. The deep replay runs (up to 1000 times the default iterations, 25 million inputs per pricing target) were run once, on one machine.
+* **L-33 (libFuzzer: short runs only):** the libFuzzer entry points were written without the libFuzzer runtime and could not be run by the author. Their first real
+  run was the `fuzz` job of CI run 24: it built with clang-18 and ran 30 seconds per target without a crash (I saw the job status, not its log). That is a smoke run. Long
+  coverage-guided runs are in `nightly.yml`, which has not run yet. The deep replay runs (up to 1000 times the default iterations, 25 million inputs per pricing target)
+  were run once, on one machine.
 * **L-34 (limits introduced by hardening):** barrier closed forms now refuse volatility times square root of expiry below 1e-10, exposure dates
   beyond 100 years, and results that overflow. These are conservative numerical limits, not model statements; no test in the suite was
   affected, but a user with a legitimate use beyond them gets an error.
@@ -361,7 +368,7 @@ property of nested simulation; use the closed-form revaluation where one exists.
 **Hardening (0.12).** Seven invariant-checking fuzz targets run in every build and found three numerical weaknesses at the edges of
 the input space (F-22 to F-24), all fixed. This makes the library refuse, rather than return a wrong or non-finite number, for
 extreme inputs; it does not widen the ranges in which the models are validated. Coverage-guided fuzzing and the new CI jobs are
-unrun (L-33), and the guards add limits (L-34).
+only smoke-tested in CI (L-33), and the guards add limits (L-34).
 
 ## 10. Traceability matrix
 

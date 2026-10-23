@@ -20,6 +20,8 @@ if(FXVAL_COVERAGE)
     message(FATAL_ERROR "Coverage needs GCC or Clang.")
   endif()
   message(STATUS "fxval: coverage instrumentation enabled")
-  add_compile_options(--coverage -O0 -g)
+  # -fprofile-update=atomic: the multithreaded tests otherwise race on the counters and gcov can
+  # report negative hit counts (GCC bug 68080), which makes gcovr stop.
+  add_compile_options(--coverage -fprofile-update=atomic -O0 -g)
   add_link_options(--coverage)
 endif()
