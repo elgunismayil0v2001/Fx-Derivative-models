@@ -5,7 +5,7 @@
 #include "fxval/pricing/garman_kohlhagen.hpp"
 
 // Garman-Kohlhagen implied volatility: the volatility that makes the GK price equal a given price.
-// This is how a model price (Heston, in week 8) is expressed in the unit FX markets quote.
+// This is how a model price (for example Heston) is expressed in the unit FX markets quote.
 
 namespace fxval::pricing {
 

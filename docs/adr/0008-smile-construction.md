@@ -7,7 +7,7 @@
 
 FX options are quoted by delta, not by strike: an at-the-money volatility, a risk reversal and a
 butterfly for wing options of a stated delta, at each of a few tenors. Pricing a barrier option
-(week 9) or calibrating Heston to a smile (week 8) first needs a volatility at an arbitrary strike.
+or calibrating Heston to a smile first needs a volatility at an arbitrary strike.
 The plan asks for one explicit delta convention, a smooth simple interpolation, interpolation in total
 variance across expiries, and arbitrage checks that report violations.
 
@@ -53,5 +53,5 @@ variance across expiries, and arbitrage checks that report violations.
   term structures (finding F-09) and a butterfly violation near the money for an extreme risk reversal
   (F-08). A caller that needs a surface free of both must use a different interpolation (an SVI surface fit
   is a candidate for v1.1) or restrict itself to the range where the checks pass.
-* Heston calibration (week 8) is planned to fit the three pivot volatilities per tenor, not the
+* Heston calibration fits the three pivot volatilities per tenor, not the
   interpolated curve, so this limitation would not propagate into the calibrated model.

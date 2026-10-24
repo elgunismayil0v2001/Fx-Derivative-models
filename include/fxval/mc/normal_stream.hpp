@@ -23,7 +23,7 @@ namespace fxval::mc {
 //       z1 = sqrt(-2 ln u1) cos(2 pi u2),   z2 = sqrt(-2 ln u1) sin(2 pi u2).
 //   * An ANTITHETIC stream (constructor flag) returns the same numbers with the sign flipped:
 //     z -> -z. Because the normals are symmetric, (z, -z) are two equally valid draws that are
-//     perfectly negatively correlated, which is what antithetic variates need (week 5).
+//     perfectly negatively correlated, which is what antithetic variates need.
 //   * Box-Muller is used instead of an inverse-CDF routine because it needs no approximation
 //     formula that would have to be validated separately. The largest possible |z| is about 8.6
 //     (u1 >= 2^-53); real normals exceed that with probability below 1e-17.

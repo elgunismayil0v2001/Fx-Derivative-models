@@ -10,10 +10,10 @@
 // chapter 4): bisection safeguarded inverse quadratic interpolation and secant steps.
 //
 // Why Brent and not Newton: it needs only a sign change, never leaves the bracket and always
-// converges, at worst as fast as bisection. The implied-volatility and strike searches of week 8
-// are called thousands of times inside a calibration, and a root finder that can diverge would
-// turn one bad parameter set into a failed fit. Header-only because the function is a template
-// argument. Tested on its own in tests/unit/test_brent.cpp.
+// converges, at worst as fast as bisection. The implied-volatility and strike searches of the
+// calibration code are called thousands of times inside a calibration, and a root finder that can
+// diverge would turn one bad parameter set into a failed fit. Header-only because the function is a
+// template argument. Tested on its own in tests/unit/test_brent.cpp.
 
 namespace fxval::numerics {
 

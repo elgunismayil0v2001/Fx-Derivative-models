@@ -6,7 +6,7 @@
 //  A. ENGINE CHECK. GBM is simulated exactly, so any disagreement with Garman-Kohlhagen is an
 //     engine, random-number or discounting defect. 8 markets x call and put, each within 3 SE.
 //  B. HESTON EULER, WELL-BEHAVED PARAMETERS (Feller holds). 64 time steps, 3 strikes, calls,
-//     each within 3 SE of the Lewis price from week 3.
+//     each within 3 SE of the Lewis price.
 //  C. BIAS VS STEP SIZE. Parameters that violate Feller badly (2 kappa theta / xi^2 = 0.04, the
 //     kind of set where Euler is known to struggle; Lord, Koekkoek and van Dijk 2010). The bias
 //     (MC minus exact, in price units) is measured for 8..128 steps and written to the test log

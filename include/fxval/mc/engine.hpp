@@ -20,7 +20,7 @@
 //
 // Design (docs/adr/0005-monte-carlo-engine.md):
 //  * The engine knows nothing about FX or Heston. A model is anything that satisfies PathModel,
-//    so a new discretisation scheme (QE in week 5, a Brownian-bridge barrier scheme in week 9)
+//    so a new discretisation scheme (QE, a Brownian-bridge barrier scheme)
 //    is a new class and does not change this file (open for extension, closed for modification).
 //  * Dispatch is static (templates and a concept), so the per-path call is inlined. There are no
 //    virtual calls in the inner loop.

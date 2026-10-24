@@ -5,7 +5,7 @@
 
 ## Context
 
-Week 9 prices barrier and touch options three ways (Garman-Kohlhagen flat volatility, Vanna-Volga, Heston) and
+The library prices barrier and touch options three ways (Garman-Kohlhagen flat volatility, Vanna-Volga, Heston) and
 reports the spread as model risk (V-12 to V-15). Choices: where the contract types live, which Vanna-Volga
 variant is "the" Vanna-Volga, how discrete monitoring is handled, and what is validated against what.
 
@@ -27,8 +27,8 @@ variant is "the" Vanna-Volga, how discrete monitoring is handled, and what is va
   option so that its bias can be measured (V-12 control).
 * **One Vanna-Volga variant is the default, the others are available:** `survival` (adjustment weighted by the
   probability that the contract still lives) is reported as Vanna-Volga; `unweighted` and
-  `vanilla_less_knock_in` are kept and shown in V-15. Reason: `survival` is defined for every contract of the
-  week, and the prices of the variants differ by an amount comparable to the model spread (model documentation
+  `vanilla_less_knock_in` are kept and shown in V-15. Reason: `survival` is defined for every contract the
+  library prices, and the prices of the variants differ by an amount comparable to the model spread (model documentation
   7.2), so hiding the choice would hide model risk. It is a convention, not a validated fact.
 * **The Greeks of the pivots and of the contract come from one finite-difference routine**, so a pivot is
   reproduced exactly (V-14) whatever the difference error. The spot step is capped at a quarter of the distance to

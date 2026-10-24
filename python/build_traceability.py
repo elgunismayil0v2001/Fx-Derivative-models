@@ -2,8 +2,8 @@
 
 Usage: python python/build_traceability.py          (prints the Markdown table)
 
-The matrix lists every validation test V-01 .. V-21 with its source file, the week it was built, its
-status and the findings of the validation report that it produced. The catalogue
+The matrix lists every validation test V-01 .. V-21 with its source file, the release it
+was added in, its status and the findings of the validation report that it produced. The catalogue
 (docs/test_catalogue.md) and the findings table (docs/validation_report.md, section 6) are the only
 inputs, so the matrix cannot drift from them: python/tests/test_docs_consistency.py compares the
 table printed here with the one committed in the report.
@@ -32,7 +32,7 @@ def catalogue_rows(text: str) -> list[dict[str, str]]:
             {
                 "id": cells[0],
                 "test": cells[1],
-                "week": cells[3],
+                "release": cells[3],
                 "status": cells[4].split()[0],
                 "path": path.group(1) if path else "",
             }
@@ -56,14 +56,14 @@ def findings_by_test(text: str) -> dict[str, list[str]]:
 def matrix(catalogue: str, report: str) -> str:
     found = findings_by_test(report)
     out = [
-        "| ID | Test | Source file | Week | Status | Findings produced |",
+        "| ID | Test | Source file | Release | Status | Findings produced |",
         "|---|---|---|---|---|---|",
     ]
     for r in catalogue_rows(catalogue):
         path = f"`{r['path']}`" if r["path"] else "(none)"
         produced = ", ".join(found.get(r["id"], [])) or "none"
         out.append(
-            f"| {r['id']} | {r['test']} | {path} | {r['week']} | {r['status']} | {produced} |"
+            f"| {r['id']} | {r['test']} | {path} | {r['release']} | {r['status']} | {produced} |"
         )
     return "\n".join(out)
 

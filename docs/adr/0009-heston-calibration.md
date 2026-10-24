@@ -5,7 +5,7 @@
 
 ## Context
 
-Week 8 calibrates Heston `(v_0, kappa, theta, xi, rho)` to smile quotes (ATM, 25-delta risk reversal and
+The calibration module fits Heston `(v_0, kappa, theta, xi, rho)` to smile quotes (ATM, 25-delta risk reversal and
 butterfly at several expiries) and tests that known parameters are recovered (V-11). Choices had to be
 made on the unit of the error, how strikes enter, how bounds are handled, the optimiser, starts, and what
 the result must admit about identification.

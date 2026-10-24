@@ -1,6 +1,6 @@
 """The documentation is part of the evidence, so it is tested for internal consistency.
 
-These checks catch the drift that builds up when a report is edited week after week: a finding cited
+These checks catch the drift that builds up when a report is edited again and again: a finding cited
 but never defined, a traceability matrix that no longer matches the catalogue, a version number
 changed in one place only.
 """

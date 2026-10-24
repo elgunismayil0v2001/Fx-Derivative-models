@@ -9,7 +9,7 @@
 #include "fxval/mc/engine.hpp"
 #include "fxval/mc/normal_stream.hpp"
 
-// Variance reduction for the Monte Carlo engine (week 5).
+// Variance reduction for the Monte Carlo engine.
 //
 // Both techniques are built on run_samples(), so they inherit the reproducibility of the engine:
 // the result does not depend on the number of threads (test V-07 style checks are repeated for

@@ -5,7 +5,7 @@
 
 ## Context
 
-Week 10 adds conditional volatility estimation, VaR and ES, and backtests (V-16, V-17, V-18, V-21). Choices:
+The market-risk layer adds conditional volatility estimation, VaR and ES, and backtests (V-16, V-17, V-18, V-21). Choices:
 which optimiser and how parameters are constrained, how VaR methods for option portfolios are defined, how
 look-ahead is excluded, and what the evidence can and cannot show.
 

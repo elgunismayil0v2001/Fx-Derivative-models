@@ -5,7 +5,7 @@
 
 ## Context
 
-Week 4 left Euler with full truncation as the only Heston scheme. It is simple and badly biased
+Before the QE scheme, Euler with full truncation was the only Heston scheme. It is simple and badly biased
 when the Feller condition fails (V-05: 7.8 standard errors left at 128 steps). FX Heston fits
 often violate Feller, so a production-style simulator needs a scheme that is accurate with few
 steps (CVA exposure and VaR scenarios use 10 to 50 steps). Separately, the standard error of a
@@ -30,7 +30,7 @@ the first tools expected.
   required (`invalid_argument` otherwise); for `xi = 0` the exact GBM model applies.
 * **The engine gained one function, `run_samples`**, the old `run_monte_carlo` body with the path
   index as the only input. `run_monte_carlo` now calls it. This is a refactor with no change of
-  behaviour (all week 4 tests, including the bitwise V-07 checks, pass unchanged). Antithetic and
+  behaviour (all earlier Monte Carlo tests, including the bitwise V-07 checks, pass unchanged). Antithetic and
   control variate estimators are built on `run_samples`, so they inherit the block and merge-order
   design and reproducibility for any thread count.
 * **Antithetic variates by a sign flip in the stream** (`NormalStream(seed, stream, true)` returns

@@ -1,4 +1,4 @@
-"""Generate an independent reference table for the barrier closed forms (week 9).
+"""Generate an independent reference table for the barrier closed forms.
 
 The C++ code uses the Reiner-Rubinstein formulas (blocks A, B, C, D), the first-passage probability
 formula for touch options, and a sine-series for the double no-touch. This script does NOT use any

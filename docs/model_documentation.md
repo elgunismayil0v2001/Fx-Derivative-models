@@ -1,21 +1,21 @@
 # Model documentation
 
-Status: **draft, week 8.** Sections marked *planned* are placeholders that name the week in
-which they are written. Garman-Kohlhagen is implemented and checked by V-01 and V-02. The Heston
-semi-analytic pricer is implemented and checked by V-03, V-04 and an independent Python table.
+Status: **release 1.0.** Every section below describes implemented and tested code; the tests and the evidence are named in each
+section, and the validation report (`docs/validation_report.md`) collects them. The mathematics of the example application
+(`examples/portfolio`) is in `docs/portfolio_mathematics.md`.
 
 | Section | Status |
 |---|---|
-| 1. Purpose and scope | draft |
-| 2. Notation and conventions | draft |
+| 1. Purpose and scope | complete |
+| 2. Notation and conventions | complete |
 | 3. Garman-Kohlhagen (benchmark) | implemented; V-01 and V-02 passing |
-| 4. Heston | semi-analytic pricer (V-03, V-04, reference table, week 3); calibration to smile quotes (V-11, CAL-REF, week 8, sections 4.6 to 4.11) |
-| 5. Monte Carlo schemes | planned, weeks 4-5 |
-| 6. FX smile from delta quotes | implemented; V-09, V-10, SMILE-REF passing (week 7) |
-| 7. Vanna-Volga | implemented, week 9 |
-| 8. Barrier options | implemented, week 9 |
-| 9. Market risk (VaR, ES, backtests) | implemented, week 10; V-16, V-17, V-18, V-21, RISK-REF |
-| 10. Counterparty credit risk (EE, PFE, CVA) | implemented, week 11; V-19, V-20, CREDIT-REF |
+| 4. Heston | semi-analytic pricer (V-03, V-04, reference table); calibration to smile quotes (V-11, CAL-REF, sections 4.6 to 4.11) |
+| 5. Monte Carlo schemes | implemented; V-05 to V-08, MC-PATH-REF, QE-PATH-REF |
+| 6. FX smile from delta quotes | implemented; V-09, V-10, SMILE-REF passing |
+| 7. Vanna-Volga | implemented; V-12 to V-15 |
+| 8. Barrier options | implemented; V-12 to V-15, BARRIER-REF |
+| 9. Market risk (VaR, ES, backtests) | implemented; V-16, V-17, V-18, V-21, RISK-REF |
+| 10. Counterparty credit risk (EE, PFE, CVA) | implemented; V-19, V-20, CREDIT-REF |
 | 11. Limitations | running list |
 | 12. References | running list |
 
@@ -212,7 +212,7 @@ In-the-money option: out-of-the-money value plus `df |F - K|` (parity).
 * The `not_converged` path is not exercised by a test: no input is known that triggers it.
 * Not covered yet: Heston Greeks (by finite differences of the price) and exotic payoffs (barriers: sections 7 and 8). Implied volatility output and calibration are in sections 4.6 to 4.11.
 
-### 4.6 Heston in market units (week 8)
+### 4.6 Heston in market units
 
 Code: `include/fxval/pricing/implied_volatility.hpp`, `include/fxval/numerics/brent.hpp`,
 `include/fxval/calibration/heston_smile.hpp`. Decisions: `docs/adr/0009-heston-calibration.md`.
@@ -312,7 +312,7 @@ estimates (limitation L-14): V-11 (C) compares them with the actual spread of re
 * Unit tests, including an exact property that no fitting code knows about: swapping the two currencies maps a
   Heston model to the Heston model with `rho' = -rho`, `kappa' = kappa - rho xi`, `theta' = kappa theta / kappa'`
   (same `v_0`, `xi`), and the calibration recovers parameters related by that map from the swapped market.
-* 28 hand mutations of the week-8 code: 26 caught, 2 survive (they change speed, or a bracket that is never needed,
+* 28 hand mutations of the calibration code: 26 caught, 2 survive (they change speed, or a bracket that is never needed,
   not any result); two are seen only by V-11 (C) (test catalogue).
 
 ### 4.11 Limitations of the calibration
@@ -326,8 +326,8 @@ used.
 
 ## 5. Monte Carlo
 
-Status: the engine, exact GBM and the Heston Euler scheme with full truncation (week 4); the QE
-scheme, antithetic and control variates, the Feller study and the scaling benchmark (week 5).
+Status: the engine, exact GBM and the Heston Euler scheme with full truncation; the QE
+scheme, antithetic and control variates, the Feller study and the scaling benchmark.
 
 ### 5.1 Estimator and standard error
 
@@ -380,7 +380,7 @@ bit of the result, so the same seed gives bitwise identical output for 1 or N th
 Changing the *block size* changes the order of the arithmetic and therefore the last digits (not
 the distribution); this is documented behaviour and is checked to `1e-12` relative.
 
-### 5.5 Evidence (week 4)
+### 5.5 Evidence (engine and Euler scheme)
 
 * **V-05** (`test_v05_heston_mc_vs_analytic.cpp`), seed 20261014, fixed before looking at results:
   GBM engine vs Garman-Kohlhagen, 16 comparisons (8 markets, call and put, 200,000 paths): worst
@@ -398,7 +398,7 @@ the distribution); this is documented behaviour and is checked to `1e-12` relati
   Philox, Box-Muller and the path. Worst differences on the development machine: 0 (bitwise);
   the tolerance (1e-13 for normals, 1e-9 for paths) allows for other libm versions.
 
-### 5.6 Heston QE scheme (week 5)
+### 5.6 Heston QE scheme
 
 Andersen (2008), `include/fxval/mc/heston_qe.hpp`, decision record ADR 0006. The variance is a
 square-root process; instead of a truncated Euler step, QE samples `v_{n+1}` from a distribution
@@ -432,7 +432,7 @@ exactly: `E[S_T]` equals the forward for any number of steps. `M` exists only if
 `A < beta`; when it does not (steps of several years with large positive `rho`) the uncorrected
 `K0 = -rho kappa theta dt / xi` is used. `xi > 0` is required.
 
-### 5.7 Variance reduction (week 5)
+### 5.7 Variance reduction
 
 `include/fxval/mc/variance_reduction.hpp`; all estimators are built on `run_samples`, so they are
 reproducible for any thread count (unit tests repeat the V-07 check for them).
@@ -447,7 +447,7 @@ reproducible for any thread count (unit tests repeat the V-07 check for them).
   a valid control (V-08 d). **A GK price is not a valid control for Heston paths.** A wrong `mu` is
   invisible in the standard error; only a comparison with an exact price shows it.
 
-### 5.8 Evidence (week 5)
+### 5.8 Evidence (QE scheme and variance reduction)
 
 All runs: seed 20261016 (fixed before the results), Release build, 2 threads, results recomputed
 by `ctest`; Debug and sanitizer builds use fewer paths.
@@ -494,7 +494,7 @@ by `ctest`; Debug and sanitizer builds use fewer paths.
   exploratory 400-seed run at the money gave 0.99 for plain and 1.01 for the control). Under exact GBM
   with a Garman-Kohlhagen price (strike 1.05) as the control for the strike-1.10 call the ratio is 79
   (`c` = 0.90), z = -1.4.
-* **Hand mutation check, week 5** (not automated): 15 deliberate changes, all caught in the end; 2 of
+* **Hand mutation check, QE scheme and variance reduction** (not automated): 15 deliberate changes, all caught in the end; 2 of
   them only by the independent path table, and 1 (an inexact `1 - U` in the far tail) only after a unit
   test was added because the first run found it uncaught. Table in `docs/test_catalogue.md`.
 
@@ -508,8 +508,8 @@ by `ctest`; Debug and sanitizer builds use fewer paths.
 * The only control for Heston is the terminal spot. A control with higher correlation to the payoff
   (for example the Garman-Kohlhagen payoff with the model's implied volatility) would have to have
   its mean computed under Heston, which needs the semi-analytic pricer.
-* The engine passes the terminal spot to the payoff. Path-dependent payoffs (barriers, week 9) need a
-  richer interface, and the `PathModel` concept will be extended then.
+* The engine passes the terminal spot to the payoff. Path-dependent payoffs (barriers) cannot be
+  expressed that way; they are priced by the barrier Monte Carlo of section 8.3, where each step of the path is reported to an observer.
 * Throughput and scaling numbers come from `bench/` and are specific to the machine they were
   measured on (section 5.10).
 
@@ -544,7 +544,7 @@ money; the pilot run for the control coefficient, 20,000 paths, is not timed):
 The gains agree with the variance ratios of V-08 at the money (2.0, 4.2, 2.5), which shows the
 estimators cost no more than the plain one per path simulation.
 
-## 6. FX smile from delta quotes (week 7)
+## 6. FX smile from delta quotes
 
 The code is in `include/fxval/smile/` and `include/fxval/numerics/normal.hpp`; the decisions are in
 `docs/adr/0008-smile-construction.md`. All quotes used in tests and figures are **synthetic and
@@ -669,7 +669,7 @@ three pivots are fitted, so a ten-delta quote cannot be used together with a 25-
 interpolation in time at fixed forward log-moneyness is not the same as at fixed delta or at fixed
 strike, and the surface takes its query in `k`, so the caller supplies the forward.
 
-## 7. Vanna-Volga (week 9)
+## 7. Vanna-Volga
 
 ### 7.1 Idea
 
@@ -759,7 +759,7 @@ flat control and that the spread is positive somewhere).
 * The flat volatility is the ATM volatility of the slice, a convention: another choice (for example the
   volatility at the barrier) gives other prices.
 
-## 8. Barrier options (week 9)
+## 8. Barrier options
 
 ### 8.1 Contracts and closed forms (`pricing/barrier_closed_form.hpp`)
 
@@ -822,7 +822,7 @@ engine (V-07). Path `p` draws from `NormalStream(seed, p)`.
 * Heston bridge approximation (L-17); Monte Carlo error bars are statistical only.
 * Closed forms assume constant rates and volatility.
 
-## 9. Market risk (week 10)
+## 9. Market risk
 
 ### 9.1 Scope
 
@@ -929,7 +929,7 @@ exceptions (L-24). ES is not backtested (L-27).
 L-21 to L-27 in the validation report: zero mean; boundary optima; indicative standard errors; chi-square
 approximation with few exceptions; Cornish-Fisher range; spot-only risk factor; no ES backtest.
 
-## 10. Counterparty credit risk (week 11)
+## 10. Counterparty credit risk
 
 ### 10.1 Scope
 

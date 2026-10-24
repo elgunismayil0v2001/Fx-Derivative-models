@@ -1,4 +1,4 @@
-"""Generate an independent reference for the C++ Heston QE paths (week 5).
+"""Generate an independent reference for the C++ Heston QE paths.
 
 The C++ class `HestonQuadraticExponential` (include/fxval/mc/heston_qe.hpp) implements Andersen's
 Quadratic-Exponential scheme (Journal of Computational Finance 11(3), 2008) with the central

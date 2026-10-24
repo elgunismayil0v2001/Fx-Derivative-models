@@ -1,7 +1,7 @@
 # ADR 0001: Error policy
 
 * Status: accepted
-* Date: reconstructed in week 4 (the repository did not contain this file)
+* Date: reconstructed later (the repository did not contain this file when the project started)
 
 ## Context
 

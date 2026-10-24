@@ -1,6 +1,6 @@
 # Repository guide
 
-What every folder and file is for. Status: week 6.
+What every folder and file is for. Status: release 1.0.
 
 ## The two kinds of test, in one paragraph
 
@@ -43,7 +43,7 @@ validation tests are what a model-validation team would ask for. Reasoning:
 | `mc/engine.hpp` | `mc_engine.cpp` | `McConfig`, `McEstimate`, the `PathModel` concept, `run_samples` (any sample function of the path index) and `run_monte_carlo`: threads, fixed blocks, merge in block order (V-07). `mc_engine.cpp` holds configuration validation. |
 | `mc/gbm.hpp` | `mc_models.cpp` | `GbmModel`: exact GBM simulation (engine check). |
 | `mc/heston_euler.hpp` | `mc_models.cpp` | `HestonEulerFullTruncation`: Euler scheme with full truncation; `simulate_terminal_state` for cross-checks. |
-| `mc/heston_qe.hpp` | `mc_models.cpp` | `HestonQuadraticExponential`: Andersen QE scheme with martingale correction (week 5); `next_variance` exposes the variance step for tests. |
+| `mc/heston_qe.hpp` | `mc_models.cpp` | `HestonQuadraticExponential`: Andersen QE scheme with martingale correction; `next_variance` exposes the variance step for tests. |
 | `mc/variance_reduction.hpp` | none (header-only) | `run_antithetic`, `run_variance_reduced`, `estimate_control_coefficient`, `NoControl`: antithetic and control variates on top of `run_samples`. |
 | `mc/vanilla.hpp` | `mc_vanilla.cpp` | `gbm_mc_price`, `heston_euler_mc_price`, `heston_qe_mc_price` (and `McReduction` options): discounted vanilla price with standard error. |
 | `numerics/normal.hpp` | `normal.cpp` | `normal_pdf`, `normal_cdf`, `normal_quantile` (Acklam plus a Halley step). |
@@ -82,7 +82,7 @@ validation tests are what a model-validation team would ask for. Reasoning:
 | `unit/test_garman_kohlhagen_errors.cpp` | Textbook values, currency-inversion symmetry, degenerate inputs, every error path. |
 | `validation/test_v01_put_call_parity.cpp` | V-01 on a grid of 8000 markets; records the worst error. |
 | `validation/test_v02_greeks_fd.cpp` | V-02: all Greeks against finite differences of the price on 120 points; records the worst error per Greek and where. |
-| `unit/test_nelder_mead.cpp`, `unit/test_volatility_models.cpp`, `unit/test_var_and_backtest.cpp` | Hand-computed values, limits, orderings and error paths of the week-10 code. |
+| `unit/test_nelder_mead.cpp`, `unit/test_volatility_models.cpp`, `unit/test_var_and_backtest.cpp` | Hand-computed values, limits, orderings and error paths of the market-risk code. |
 | `validation/test_v16_garch_estimation.cpp`, `test_risk_reference.cpp`, `test_v17_var_backtests.cpp`, `test_v18_delta_normal_vs_revaluation.cpp`, `test_v21_lookahead.cpp` | V-16, RISK-REF, V-17, V-18, V-21. `support/risk_test_support.hpp` has the shared forecasters and simulators. |
 | `unit/test_exposure_and_cva.cpp` | Exposure paths, netting, profile and CVA by hand, structural properties and error paths. |
 | `validation/test_credit_reference.cpp`, `test_v19_forward_exposure.cpp`, `test_v20_cva_nested.cpp` | CREDIT-REF, V-19, V-20. `support/credit_test_support.hpp` has the market and trade builders. |
@@ -117,7 +117,7 @@ validation tests are what a model-validation team would ask for. Reasoning:
 | `validation/test_smile_reference.cpp` | C++ smile against the independent Python table (256 rows). |
 | `validation/data/smile_reference.csv` | The smile reference table, written by `python/gen_smile_reference.py`. |
 | `support/barrier_test_support.hpp` | Typed `FxMarket`, barrier levels and contracts from plain numbers. |
-| `unit/test_barrier_closed_form.cpp`, `test_vanna_volga.cpp`, `test_barrier_mc.cpp` | The week-9 code: limits, parity, errors, weights, variants, reproducibility. |
+| `unit/test_barrier_closed_form.cpp`, `test_vanna_volga.cpp`, `test_barrier_mc.cpp` | The barrier and Vanna-Volga code: limits, parity, errors, weights, variants, reproducibility. |
 | `validation/test_barrier_reference.cpp` | BARRIER-REF: 700 prices against independent Python integration. |
 | `validation/test_v12_barrier_mc.cpp`, `test_v13_in_out_parity.cpp`, `test_v14_vanna_volga_pivots.cpp`, `test_v15_model_comparison.cpp` | V-12 to V-15. Criteria in the file headers. |
 | `validation/data/garch_series.csv`, `garch_reference.csv` | The V-16 series and reference fits, written by `python/gen_garch_reference.py`. |
@@ -125,7 +125,7 @@ validation tests are what a model-validation team would ask for. Reasoning:
 | `validation/data/credit_reference.csv` | The CREDIT-REF and V-19 table, written by `python/gen_credit_reference.py`. |
 | `validation/data/barrier_reference.csv` | The barrier reference table, written by `python/gen_barrier_reference.py`. |
 | `support/calibration_test_support.hpp` | `make_calibration_market()`, `heston_slices()` (quotes a Heston model implies) and a small CSV reader for the calibration tables. |
-| `unit/test_brent.cpp`, `test_implied_volatility.cpp`, `test_least_squares.cpp`, `test_heston_smile.cpp`, `test_heston_calibration.cpp` | The week-8 code: root finder, implied volatility round trips and error paths, Levenberg-Marquardt on problems with known answers and its standard errors, the Heston model in market units, calibration (recovery, determinism, bounds, one expiry, currency-swap invariance). |
+| `unit/test_brent.cpp`, `test_implied_volatility.cpp`, `test_least_squares.cpp`, `test_heston_smile.cpp`, `test_heston_calibration.cpp` | The calibration code: root finder, implied volatility round trips and error paths, Levenberg-Marquardt on problems with known answers and its standard errors, the Heston model in market units, calibration (recovery, determinism, bounds, one expiry, currency-swap invariance). |
 | `validation/test_calibration_reference.cpp` | CAL-REF: Heston implied volatility (160 rows) and delta quotes (120 rows) against independent Python. |
 | `validation/test_v11_heston_calibration.cpp` | V-11: parameter recovery on 24 sets, one-expiry identification control, noise study. Criteria in the file header. |
 | `validation/data/heston_iv_reference.csv`, `calibration_reference.csv` | The calibration reference tables, written by `python/gen_calibration_reference.py`. |

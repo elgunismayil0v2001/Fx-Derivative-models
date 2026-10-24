@@ -2,7 +2,7 @@
 # clang-analyzer-core.uninitialized.Assign is off: it is a false positive on libstdc++
 # std::variant. Copying an Error out of one Result<T> into another (error propagation) is
 # reported as reading an uninitialised field; reproduced on a 6-line example with no project
-# code. See CHANGELOG, week 4.
+# code. See CHANGELOG, 0.5.0.
 Checks: >
   -*,
   clang-diagnostic-*,

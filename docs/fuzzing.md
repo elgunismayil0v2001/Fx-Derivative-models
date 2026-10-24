@@ -83,12 +83,12 @@ for exposure dates far beyond the supported horizon). See section 6 of the valid
 
 ## Mutation check
 
-`scripts/mutation_check.py` automates the hand mutation checks of weeks 3 to 11 for the code of weeks 10, 11 and 13: it
+`scripts/mutation_check.py` replays recorded mutants for the market-risk, credit and hardening code (the earlier hand mutation checks are described in `docs/test_catalogue.md`): it
 copies the repository, plants one recorded change at a time (`scripts/mutants/*.json`), builds, runs `ctest` and
 reports each change as killed, surviving or not compiling. A pattern that no longer matches exactly once is reported as stale. It
 runs nightly in CI (`nightly.yml`), and by hand:
 
 ```sh
-python3 scripts/mutation_check.py scripts/mutants/week11_credit.json --jobs 4
+python3 scripts/mutation_check.py scripts/mutants/credit.json --jobs 4
 python3 scripts/mutation_check.py scripts/mutants/*.json --only 0 1 2
 ```

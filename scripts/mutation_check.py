@@ -6,9 +6,9 @@ script copies the repository to a scratch directory, applies the change, builds,
 records whether any test failed ("killed"), none did ("SURVIVES", a gap in the tests) or the
 change did not compile. The working tree is never modified.
 
-  python3 scripts/mutation_check.py scripts/mutants/week11_credit.json
+  python3 scripts/mutation_check.py scripts/mutants/credit.json
   python3 scripts/mutation_check.py scripts/mutants/*.json --preset release --jobs 4
-  python3 scripts/mutation_check.py scripts/mutants/week11_credit.json --only 0 3 7
+  python3 scripts/mutation_check.py scripts/mutants/credit.json --only 0 3 7
 
 Exit status: 0 if every mutant was killed, 1 if any survived, 2 on a bad manifest or
 a pattern that no longer matches exactly once (the manifest is then out of date).

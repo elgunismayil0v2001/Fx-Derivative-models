@@ -1,6 +1,6 @@
 {
- "name": "week10-market-risk",
- "description": "Planted changes in the risk and time-series layers (week 10).",
+ "name": "market-risk",
+ "description": "Planted changes in the risk and time-series layers.",
  "ctest_exclude": "V15",
  "mutants": [
   {

@@ -1,4 +1,4 @@
-"""Generate independent reference tables for the Heston calibration code (week 8).
+"""Generate independent reference tables for the Heston calibration code.
 
 Two tables are written, both from Heston prices computed the TEXTBOOK way (the two Gil-Pelaez
 probabilities P1 and P2 of Heston 1993, via python/gen_heston_reference.py and scipy QUADPACK),

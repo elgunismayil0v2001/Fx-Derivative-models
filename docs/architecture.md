@@ -122,22 +122,21 @@ Each layer may depend only on layers above it in this list. Nothing depends on `
 
 ```
 core          errors, typed units, day count, limits, contracts    (implemented)
-numerics      adaptive quadrature (week 3), normal quantile (week 7),
-              Brent root finder, Levenberg-Marquardt (week 8)      (implemented)
-pricing       Garman-Kohlhagen (Greeks), implied volatility (week 8); barrier, touch and double no-touch closed forms and the contract types (week 9); Black-76 later
-models        semi-analytic Heston (implemented, week 3)           (week 3)
-mc            engine, random streams, GBM, Heston Euler FT and QE, variance reduction, barrier Monte Carlo with Brownian bridge  (implemented, weeks 4-5, 9)
-              QE scheme, variance reduction (planned)              (week 5)
-smile         delta quotes, interpolation, arbitrage checks        (implemented, week 7)
-calibration   Heston smile maps, Heston calibrator                 (implemented, week 8)
-exotics       Vanna-Volga, GK / Vanna-Volga / Heston comparison    (implemented, week 9)
-instruments   FX forward, FX option, portfolio                     (weeks 9-11)
-timeseries    EWMA, GARCH, GJR-GARCH                               (implemented, week 10)
-risk          VaR, ES, portfolio methods, backtests                (implemented, week 10)
-credit        exposure, netting, EE, PFE, CVA                      (implemented, week 11)
-apps          fxval-price (implemented, week 6); more programs     (week 6 onward)
+numerics      adaptive quadrature, normal quantile, Brent root finder,
+              Levenberg-Marquardt, Nelder-Mead                     (implemented)
+pricing       Garman-Kohlhagen (Greeks), implied volatility; barrier, touch and double no-touch closed forms and the contract types; Black-76 later
+models        semi-analytic Heston                                  (implemented)
+mc            engine, random streams, GBM, Heston Euler FT and QE, variance reduction, barrier Monte Carlo with Brownian bridge  (implemented)
+smile         delta quotes, interpolation, arbitrage checks        (implemented)
+calibration   Heston smile maps, Heston calibrator                 (implemented)
+exotics       Vanna-Volga, GK / Vanna-Volga / Heston comparison    (implemented)
+instruments   FX forward, FX option, portfolio                     (types live in pricing, risk and credit)
+timeseries    EWMA, GARCH, GJR-GARCH                               (implemented)
+risk          VaR, ES, portfolio methods, backtests                (implemented)
+credit        exposure, netting, EE, PFE, CVA                      (implemented)
+apps          fxval-price (implemented); more programs can be added
               not part of the public API; the only code that uses a JSON parser
-examples      smile scenarios (week 7), fxval-portfolio (release 1.0): use only the public API;
+examples      smile scenarios, fxval-portfolio: use only the public API;
               fxval-portfolio writes its JSON by hand and needs no JSON parser
 ```
 

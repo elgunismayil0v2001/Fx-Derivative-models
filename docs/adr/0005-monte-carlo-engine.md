@@ -5,8 +5,8 @@
 
 ## Context
 
-Monte Carlo is used for Heston prices (weeks 4-5), barrier options (week 9), VaR scenarios
-(week 10) and exposure for CVA (week 11). The engine must be correct, fast, extensible without
+Monte Carlo is used for Heston prices, barrier options, VaR scenarios
+and exposure for CVA. The engine must be correct, fast, extensible without
 being edited, and reproducible: the same seed must give the same answer on a laptop with 4 cores
 and a server with 64 (test V-07).
 
@@ -47,6 +47,6 @@ and a server with 64 (test V-07).
 * V-07 can demand bitwise equality, and the test includes a control showing a naive design fails it.
 * Changing the block size changes the last digits (different summation order), not the
   distribution. This is documented and tested (agreement to 1e-12).
-* The payoff sees only the terminal spot. Path-dependent products (week 9) extend the concept.
+* The payoff sees only the terminal spot. Path-dependent products extend the concept (the barrier Monte Carlo reports each step to an observer).
 * Normals are truncated at about 8.6 standard deviations (inherent in 53-bit uniforms with
   Box-Muller); irrelevant for the tails used in this project, but stated.

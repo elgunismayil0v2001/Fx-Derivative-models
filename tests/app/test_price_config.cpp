@@ -525,7 +525,7 @@ TEST(PriceConfigAcceptTest, ShippedExamplesParse) {
 }
 
 // ---- Robustness: damaged documents ------------------------------------------------------------
-// A stand-in for fuzzing that runs in every build (libFuzzer targets are planned for weeks 11-14).
+// A stand-in for fuzzing that runs in every build (the libFuzzer targets are in tests/fuzz/).
 // Take valid documents, damage them at random (change, delete, insert, truncate, swap characters)
 // and require: no exception escapes, every rejection has a message, and every ACCEPTED document
 // still satisfies the invariants the pricer relies on.

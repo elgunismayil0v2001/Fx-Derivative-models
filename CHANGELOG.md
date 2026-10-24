@@ -25,7 +25,7 @@ First release. Scope as frozen in `ROADMAP.md`: smile construction from delta qu
 Vanna-Volga model comparison, market risk, counterparty credit risk, command-line program with validated configuration, and the
 validation report (V-01 to V-21 and the reference tables). No model or numerical code changed in this release.
 
-### Fixed (week 14: first real CI run, commit 67ecbc7)
+### Fixed (first real CI run, commit 67ecbc7)
 
 Run 24 of `ci.yml` passed format, install-consume, docker, test on g++-13, clang-17 and clang-18, and both sanitizer jobs, and failed four jobs. The `fuzz` job passed in that run and failed in the next one (last bullet):
 
@@ -51,7 +51,7 @@ Run 24 of `ci.yml` passed format, install-consume, docker, test on g++-13, clang
 
 ## [0.12.0] - 2026-10-22
 
-### Added (week 13: hardening)
+### Added (hardening)
 
 - Seven fuzz targets that check model invariants on arbitrary input (`tests/fuzz/`): vanilla pricing and implied
   volatility, barrier prices, delta to strike, VaR/ES and backtests, exposure and CVA, SHA-256, and the
@@ -59,7 +59,7 @@ Run 24 of `ci.yml` passed format, install-consume, docker, test on g++-13, clang
   inputs in every build (`FXVAL_FUZZ_SCALE` multiplies the iterations); libFuzzer entry points are built with
   `-DFXVAL_BUILD_FUZZERS=ON` under clang.
 - `scripts/run_fuzzers.sh`, a `fuzz` CI job and a nightly workflow (long fuzzing, mutation check).
-- `scripts/mutation_check.py` and the recorded mutants in `scripts/mutants/` (weeks 10, 11 and 13).
+- `scripts/mutation_check.py` and the recorded mutants in `scripts/mutants/` (market risk, credit and hardening).
 - `docs/fuzzing.md`.
 
 ### Fixed
@@ -78,7 +78,7 @@ Run 24 of `ci.yml` passed format, install-consume, docker, test on g++-13, clang
 
 ## [0.11.0] - 2026-10-22
 
-### Changed (week 12: validation report)
+### Changed (validation report)
 
 - `docs/validation_report.md` rewritten as one document: executive summary with the open findings, current scope
   and models, the mutation-testing history (147 planted changes over nine rounds, five survivors), and a
@@ -92,7 +92,7 @@ Run 24 of `ci.yml` passed format, install-consume, docker, test on g++-13, clang
 
 ## [0.10.0] - 2026-10-22
 
-### Added (week 11: counterparty credit risk)
+### Added (counterparty credit risk)
 
 - `credit/exposure.hpp`: exact GBM exposure simulation on a date grid (one stream per path), forward and
   option values, netting, exposure profile (EE with standard error, PFE, EPE), optional nested revaluation.
@@ -101,11 +101,11 @@ Run 24 of `ci.yml` passed format, install-consume, docker, test on g++-13, clang
 - Validation: CREDIT-REF (14 + 6 + 6 rows, independent Python), V-19, V-20; `python/gen_credit_reference.py` and its
   pytest file; 22 new tests.
 - Documentation: model documentation section 10, validation report (finding F-21, limitations L-28 to L-32), test
-  catalogue (week-11 mutation table).
+  catalogue (credit mutation table).
 
 ## [0.9.0] - 2026-10-21
 
-### Added (week 10: market risk)
+### Added (market risk)
 
 - `numerics/nelder_mead.hpp`: Nelder-Mead simplex with restarts.
 - `timeseries/volatility_models.hpp`: EWMA, GARCH(1,1) and GJR-GARCH(1,1) Gaussian quasi-maximum-likelihood
@@ -118,11 +118,11 @@ Run 24 of `ci.yml` passed format, install-consume, docker, test on g++-13, clang
   `python/gen_garch_reference.py`, `python/gen_risk_reference.py` and a pytest file for the latter; optional
   `python/compare_with_arch.py` (never run: `arch` could not be installed); 42 new tests.
 - Documentation: model documentation section 9, validation report (findings F-17 to F-20, limitations L-21 to
-  L-27), test catalogue (week-10 mutation table).
+  L-27), test catalogue (market-risk mutation table).
 
 ## [0.8.0] - 2026-10-21
 
-### Added (week 9: barriers, Vanna-Volga, model comparison)
+### Added (barriers, Vanna-Volga, model comparison)
 
 - `pricing/barrier_closed_form.hpp`: contract types and closed forms for single-barrier vanillas
   (Reiner-Rubinstein, knock-in and knock-out from separate tables), one-touch, no-touch and double no-touch.
@@ -143,7 +143,7 @@ Run 24 of `ci.yml` passed format, install-consume, docker, test on g++-13, clang
 
 ## [0.7.0] - 2026-10-20
 
-### Added (week 8: Heston calibration to smile quotes)
+### Added (Heston calibration to smile quotes)
 
 - `numerics/brent.hpp` (bracketed root finding), `numerics/least_squares.hpp` (Levenberg-Marquardt with
   Marquardt scaling and Nielsen damping, central-difference Jacobian, standard errors that are infinite when the
@@ -166,7 +166,7 @@ Run 24 of `ci.yml` passed format, install-consume, docker, test on g++-13, clang
 
 ## [0.6.0] - 2026-10-18
 
-### Added (week 7: FX smile from delta quotes, arbitrage checks)
+### Added (FX smile from delta quotes, arbitrage checks)
 
 - `numerics/normal.hpp`: normal density, distribution function and quantile (Acklam plus one Halley
   step).
@@ -185,13 +185,13 @@ Run 24 of `ci.yml` passed format, install-consume, docker, test on g++-13, clang
 
 ### Fixed
 
-- `docs/test_catalogue.md`: the week-6 mutation table had cells where a phrase was repeated by mistake;
+- `docs/test_catalogue.md`: the command-line mutation table had cells where a phrase was repeated by mistake;
   rewritten.
 - Removed `run.json` (output of a local run) from version control and ignored it.
 
 ## [0.5.0] - 2026-10-17
 
-### Added (week 6: command-line program, run metadata, first validation report)
+### Added (command-line program, run metadata, first validation report)
 
 - `fxval-price` (`apps/`): prices European options with Garman-Kohlhagen, Heston semi-analytic, GBM or
   Heston Monte Carlo from a JSON configuration; JSON and CSV reports; exit codes 0 to 5; standard
@@ -209,12 +209,12 @@ Run 24 of `ci.yml` passed format, install-consume, docker, test on g++-13, clang
   schemes, variance reduction), with a findings register and a limitations list.
 - Option `FXVAL_BUILD_APPS` (default ON); `vcpkg.json` lists `nlohmann-json`; version 0.5.0.
 
-### Changed (week 6)
+### Changed
 
 - The library `fxval` is unchanged except for the new `sha256` source; it still has no third-party
   dependency. The Docker runtime image now has `fxval-price` as its entry point.
 
-### Added (week 5: QE scheme, variance reduction, Feller study)
+### Added (QE scheme, variance reduction, Feller study)
 
 - `mc::HestonQuadraticExponential`: Andersen's QE scheme with central discretisation and martingale
   correction, `heston_qe_mc_price`; `NormalStream` can be antithetic (sign flip).
@@ -228,13 +228,13 @@ Run 24 of `ci.yml` passed format, install-consume, docker, test on g++-13, clang
   scheme cost, work-normalised variance. Not part of `ctest`.
 - ADR 0006.
 
-### Changed (week 5)
+### Changed
 
 - `mc/engine.hpp`: the body of `run_monte_carlo` moved into the new `run_samples` (path index in,
-  sample out); `run_monte_carlo` calls it. No behaviour change: all week 4 tests pass unchanged,
+  sample out); `run_monte_carlo` calls it. No behaviour change: all earlier Monte Carlo tests pass unchanged,
   including the bitwise checks of V-07.
 
-### Added (week 4: Monte Carlo engine)
+### Added (Monte Carlo engine)
 
 - `fxval::mc`: Philox4x32-10 counter-based generator, `NormalStream` (Box-Muller, stream number =
   path number), `RunningStats` (Welford with exact merge), the `PathModel` concept and

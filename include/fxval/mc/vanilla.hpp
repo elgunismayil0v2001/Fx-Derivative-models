@@ -16,7 +16,7 @@ struct McPrice {
   std::size_t paths;
 };
 
-// Variance reduction options for the vanilla wrappers (week 5, docs/model_documentation.md 5.7).
+// Variance reduction options for the vanilla wrappers (docs/model_documentation.md 5.7).
 //   antithetic       average every path with its mirror image; McConfig.paths then counts PAIRS
 //   forward_control  control variate g(S_T) = S_T with the exact mean S_0 e^{(r_d - r_f) T}; the
 //                    coefficient is estimated in a separate pilot run of `pilot_paths` paths

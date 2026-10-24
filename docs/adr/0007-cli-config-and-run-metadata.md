@@ -5,7 +5,7 @@
 
 ## Context
 
-Until week 5 the library could only be used from C++ code. A validation team, or anyone reviewing
+At first the library could only be used from C++ code. A validation team, or anyone reviewing
 the project, also needs to run a model from a file and get a result they can audit: which build,
 which input and which seed produced this number? The plan (section 6A D) asks for a command-line
 program, a validated and versioned configuration, run metadata on every output and documented
@@ -70,5 +70,5 @@ exit codes.
 
 ## Not done in this ADR
 
-Fuzzing the parser with libFuzzer (planned for weeks 11 to 14; a randomized damage test runs in
-every build meanwhile), Greeks for Heston, and calibration, VaR and CVA programs.
+Fuzzing the parser with libFuzzer (done: the `price_config` target, see `docs/fuzzing.md`; a randomized damage test also runs in
+every build), Greeks for Heston, and calibration, VaR and CVA programs.

@@ -6,7 +6,7 @@
 ## Context
 
 The library needs a semi-analytic Heston price that is accurate, fast enough to sit inside a
-calibration loop (week 8), and safe: it must never return a plausible but wrong number. Three
+calibration loop, and safe: it must never return a plausible but wrong number. Three
 choices matter: the characteristic-function formulation, the way the price is obtained from it,
 and the integration routine.
 

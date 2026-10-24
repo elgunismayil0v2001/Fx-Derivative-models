@@ -1,6 +1,6 @@
 {
- "name": "week11-credit",
- "description": "Planted changes in exposure simulation, netting, EE/PFE and CVA (week 11).",
+ "name": "credit",
+ "description": "Planted changes in exposure simulation, netting, EE/PFE and CVA.",
  "ctest_regex": "Exposure|Cva|V19|V20|CREDIT_REF",
  "mutants": [
   {

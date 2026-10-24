@@ -1,6 +1,6 @@
 {
- "name": "week13-hardening",
- "description": "Removes each guard added in week 13; the unit tests and fuzz regressions must notice.",
+ "name": "hardening",
+ "description": "Removes each guard added by the hardening work; the unit tests and fuzz regressions must notice.",
  "ctest_exclude": "V15",
  "mutants": [
   {

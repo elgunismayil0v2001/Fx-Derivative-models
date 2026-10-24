@@ -4,18 +4,12 @@ A C++20 library that prices FX options and measures FX portfolio market and coun
 together with an **independent validation** of those models: exact benchmarks, numerical tests,
 model comparison, and a written validation report.
 
-> **Status: week 14 of a 14-week plan, release 1.0.0 (library version 1.0.0).** The engineering foundation is in place, the
-> Garman-Kohlhagen benchmark is checked by V-01 and V-02, the Heston semi-analytic pricer by V-03,
-> V-04 and an independent Python table, and the multithreaded Monte Carlo engine (Euler full
-> truncation and Andersen's QE scheme, antithetic and control variates) by V-05 to V-08 and
-> independent path tables, and by a command-line program `fxval-price` whose reports record the
-> build, the input hash and the seed. A first validation report is in `docs/validation_report.md`.
-> Week 7 adds FX smile construction from delta quotes and arbitrage checks (V-09, V-10). Week 8 adds Heston
-> calibration to smile quotes with a parameter-recovery, identification and noise test (V-11).
-> Week 9 adds barrier, one-touch and double no-touch options (closed forms and Brownian-bridge Monte Carlo),
-> Vanna-Volga, and a comparison of Garman-Kohlhagen, Vanna-Volga and Heston whose spread is the quantified
-> model risk (V-12 to V-15). Week 10 adds market risk: GARCH and GJR-GARCH estimation, five VaR/ES methods,
-> backtests and a look-ahead check, on simulated data and a spot risk factor only (V-16, V-17, V-18, V-21). Week 11 adds counterparty credit risk: exposure simulation, netting, EE, PFE and unilateral CVA with a nested-simulation cross-check (V-19, V-20). Week 12 consolidates the validation report into a release-candidate document with an executive summary, the open findings, the mutation-testing history and a traceability matrix that a test keeps in step with the catalogue. Week 13 is hardening: seven fuzz targets that check model invariants (a replay test in every build, libFuzzer targets and a nightly job in CI), three numerical weaknesses they found and that are fixed (F-22 to F-24), and a mutation-check script with recorded mutants. Week 14 is the release: the first real GitHub Actions run of everything (it found four problems in the CI setup, now fixed: see validation report L-05), a final read-through of the report, and the 1.0.0 version.
+> **Status: release 1.0.0 (library version 1.0.0).** Everything in the table below is implemented and tested. The validation report,
+> `docs/validation_report.md`, is the full document: models and approach, the validation tests V-01 to V-21 and the independent
+> reference tables, the mutation-testing history, the findings (F-01 to F-24) with what was fixed and what is open, the limitations
+> (L-01 onward), and a traceability matrix that a test keeps in step with the test catalogue. The first run of the GitHub Actions
+> workflows found problems in the CI setup (clang-tidy, coverage, Python, g++-14, an apt source) and one defect in a fuzz check;
+> all are fixed (validation report L-05 and the CHANGELOG entry for 1.0.0).
 
 ## What exists today
 

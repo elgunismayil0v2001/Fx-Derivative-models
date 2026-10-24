@@ -34,7 +34,7 @@
 //  * The first draw of the table used unrestricted sampling and only 1 of 24 sets satisfied Feller.
 //    The sampling was changed to force Feller on half of the sets BEFORE the C++ calibration was
 //    run on any table; this is recorded in the generator docstring.
-//  * This file is the week-8 rebuild: the first copy of the code and tests was lost with a
+//  * This file is a rebuild: the first copy of the code and tests was lost with a
 //    container reset before its results were recorded, so every number reported for V-11 comes from
 //    the run of this version.
 

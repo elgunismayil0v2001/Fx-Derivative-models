@@ -6,7 +6,7 @@
 //
 // The Garman-Kohlhagen code keeps its own private copies of the density and distribution function
 // (a deliberate choice: the benchmark model has no dependency on this module). The quantile
-// function is new in week 7 because a delta quote is a probability and a strike needs its inverse.
+// function exists because a delta quote is a probability and a strike needs its inverse.
 
 namespace fxval::numerics {
 

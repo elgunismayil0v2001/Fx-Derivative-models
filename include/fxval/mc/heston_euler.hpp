@@ -27,7 +27,7 @@ struct HestonState {
 //
 // The scheme is biased: the bias shrinks as the step count grows, slowly (it is strong order 1/2
 // in general) and it is worst when the Feller condition 2 kappa theta >= xi^2 fails. Test V-05
-// measures it; V-06 (week 5) compares it with the QE scheme. One Philox block per step gives
+// measures it; V-06 compares it with the QE scheme. One Philox block per step gives
 // both normals.
 class HestonEulerFullTruncation {
 public:

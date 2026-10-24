@@ -70,7 +70,7 @@ TEST(AntitheticStreamTest, ReturnsExactlyTheNegatedNumbersOfTheOrdinaryStream) {
   }
 }
 
-TEST(AntitheticStreamTest, DefaultConstructionIsUnchangedFromWeekFour) {
+TEST(AntitheticStreamTest, DefaultConstructionMatchesTheNonAntitheticStream) {
   // The third constructor argument has a default, so existing call sites keep their numbers.
   NormalStream a(5, 6);
   NormalStream b(5, 6, false);
