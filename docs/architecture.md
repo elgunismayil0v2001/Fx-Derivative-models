@@ -1,7 +1,120 @@
 # Architecture
 
-Status: week 9. The `core`, `pricing`, `numerics`, `models` (Heston), `mc`, `smile`, `calibration` and `exotics` layers exist, and the first program in `apps`. The rest is the planned structure so that
-each module added later has an obvious place and an obvious set of allowed dependencies.
+Status: release 1.0. All layers below exist: `core`, `numerics`, `pricing`, `models` (Heston), `mc`, `smile`, `calibration`, `exotics`, `timeseries`, `risk` and `credit`, the command-line program `fxval-price` in `apps`,
+and the example application `fxval-portfolio` in `examples/portfolio`. The diagrams in the next section are drawn from the actual `#include` lines of the library (checked when they were written); the layer list after them is the
+rule they must satisfy.
+
+## Diagrams
+
+### Library modules and their direct dependencies
+
+An arrow means "includes headers of". Only the direct dependencies that are not implied by another path are drawn (for example
+`mc` depends on `pricing` through `models`). Everything depends on `core`, which is not drawn for that reason.
+
+```mermaid
+flowchart TB
+  classDef lib fill:#e8f0fe,stroke:#4a6fa5,color:#1b2430
+  classDef top fill:#fdf1e3,stroke:#c08a3e,color:#1b2430
+  core["core<br/>errors, typed units, limits, contracts, day count, SHA-256"]:::lib
+  numerics["numerics<br/>quadrature, normal, Brent, Nelder-Mead, Levenberg-Marquardt"]:::lib
+  pricing["pricing<br/>Garman-Kohlhagen, implied vol, barrier closed forms"]:::lib
+  models["models<br/>Heston characteristic function and price"]:::lib
+  mc["mc<br/>Philox streams, GBM, Heston Euler and QE, barrier MC"]:::lib
+  smile["smile<br/>delta quotes, smile slice, vol surface, arbitrage checks"]:::lib
+  calibration["calibration<br/>Heston smile map and calibrator"]:::lib
+  exotics["exotics<br/>Vanna-Volga, GK / VV / Heston comparison"]:::lib
+  timeseries["timeseries<br/>EWMA, GARCH, GJR-GARCH"]:::lib
+  risk["risk<br/>VaR, ES, five portfolio methods, backtests"]:::lib
+  credit["credit<br/>exposure, netting, EE, PFE, CVA"]:::lib
+  price["apps/price<br/>fxval-price (JSON in, report out)"]:::top
+  portfolio["examples/portfolio<br/>fxval-portfolio (value, Greeks, VaR, CVA)"]:::top
+
+  numerics --> core
+  pricing --> numerics
+  models --> pricing
+  mc --> models
+  smile --> pricing
+  calibration --> smile
+  calibration --> mc
+  exotics --> smile
+  exotics --> mc
+  timeseries --> numerics
+  risk --> pricing
+  credit --> mc
+  price --> calibration
+  price --> mc
+  portfolio --> calibration
+  portfolio --> smile
+  portfolio --> risk
+  portfolio --> timeseries
+  portfolio --> credit
+```
+
+### The portfolio application: data flow
+
+```mermaid
+flowchart LR
+  classDef data fill:#fdf1e3,stroke:#c08a3e,color:#1b2430
+  classDef step fill:#e8f0fe,stroke:#4a6fa5,color:#1b2430
+  classDef out fill:#e9f6ee,stroke:#3a8f5d,color:#1b2430
+
+  scenario["Scenario<br/>spot, rates, smile quotes,<br/>forwards, options, credit inputs"]:::data
+  returns["Daily log returns<br/>(CSV or synthetic GARCH)"]:::data
+
+  surface["Volatility surface<br/>smile::SmileSlice + VolSurface"]:::step
+  value["Value and Greeks<br/>pricing::garman_kohlhagen_*<br/>+ forward Greeks"]:::step
+  checks["Model cross-checks<br/>flat ATM vol, calibrated Heston"]:::step
+  ladder["Spot ladder<br/>full revaluation vs delta-gamma"]:::step
+  garch["Volatility forecast<br/>timeseries::fit_garch"]:::step
+  var["VaR and ES, five methods<br/>risk::*_var_es"]:::step
+  exposure["Exposure simulation<br/>credit::simulate_netting_set_values"]:::step
+  cva["EE, PFE, EPE, CVA,<br/>netting benefit<br/>credit::cva_estimate"]:::step
+
+  report["Report<br/>analyse() result"]:::out
+  json["report.json"]:::out
+  html["report.html<br/>(self-contained)"]:::out
+  text["terminal summary"]:::out
+
+  scenario --> surface --> value
+  surface --> checks
+  value --> ladder
+  value --> var
+  returns --> garch --> var
+  surface --> exposure --> cva
+  value --> report
+  checks --> report
+  ladder --> report
+  var --> report
+  cva --> report
+  report --> json
+  report --> html
+  report --> text
+```
+
+### One run of `analyse()`
+
+```mermaid
+sequenceDiagram
+  autonumber
+  participant M as main
+  participant A as analyse
+  participant S as smile
+  participant P as pricing / models
+  participant T as timeseries
+  participant R as risk
+  participant C as credit
+  M->>A: Scenario
+  A->>S: SmileSlice per expiry, VolSurface
+  A->>S: vol(ln(K/F), T) for each option
+  A->>P: GK price and Greeks (positions, ladder)
+  A->>P: calibrate_heston, heston_price (optional)
+  A->>T: fit_garch, standardised_residuals
+  A->>R: risk_portfolio mapped, five VaR methods
+  A->>C: simulate_netting_set_values (netted and per trade)
+  A->>C: exposure_profile, cva_estimate
+  A-->>M: Report (or an Error naming the offending input)
+  M->>M: to_text, to_json, to_html
+```
 
 ## Layers and dependency rule
 
@@ -24,6 +137,8 @@ risk          VaR, ES, portfolio methods, backtests                (implemented,
 credit        exposure, netting, EE, PFE, CVA                      (implemented, week 11)
 apps          fxval-price (implemented, week 6); more programs     (week 6 onward)
               not part of the public API; the only code that uses a JSON parser
+examples      smile scenarios (week 7), fxval-portfolio (release 1.0): use only the public API;
+              fxval-portfolio writes its JSON by hand and needs no JSON parser
 ```
 
 The dependency rule will be enforced by directory-level `target_link_libraries` once the library

@@ -89,6 +89,7 @@ endif()
 # ---------------------------------------------------------------------------
 if(FXVAL_BUILD_EXAMPLES)
   add_subdirectory(examples/smile)
+  add_subdirectory(examples/portfolio)
 endif()
 
 if(FXVAL_BUILD_TESTS)

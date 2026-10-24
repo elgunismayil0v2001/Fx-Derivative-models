@@ -37,6 +37,7 @@ model comparison, and a written validation report.
 | Market risk: EWMA, GARCH(1,1) and GJR-GARCH estimation, historical, normal, Cornish-Fisher, delta-gamma, full-revaluation and filtered-historical VaR/ES, Kupiec, Christoffersen and traffic-light backtests, look-ahead check | working; V-16, V-17, V-18, V-21 and RISK-REF passing; simulated data, spot risk factor only |
 | Counterparty credit risk: exposure simulation of FX forwards and options, netting, EE, PFE, unilateral CVA with a flat hazard rate, nested-simulation cross-check | working; V-19, V-20 and CREDIT-REF passing; spot only, no collateral, no wrong-way risk |
 | Fuzzing and robustness: seven invariant-checking targets (vanilla, barrier, delta, risk, credit, SHA-256, configuration), a deterministic replay in every build, libFuzzer entry points, `scripts/mutation_check.py` | working; see `docs/fuzzing.md`; the `fuzz` CI job found a tolerance defect in a check on a 30-second run (fixed, pinned by a regression); the nightly job has not run yet (L-33) |
+| Example application `fxval-portfolio`: value, Greeks, spot ladder, VaR / ES (five methods, GARCH forecast) and CVA of an FX book, HTML and JSON report | working; synthetic data; 25 tests; maths in `docs/portfolio_mathematics.md` |
 
 ## Build and test
 
@@ -93,6 +94,16 @@ python python/plot_smiles.py docs/results/smile_data docs/results     # needs ma
 Builds the smile for each synthetic scenario, runs the checks and writes the CSV files behind the
 figures `docs/results/smile_*.png`. The quotes are illustrative, not market data.
 
+## Portfolio example
+
+```sh
+build/release/examples/portfolio/fxval-portfolio --html report.html --json report.json
+```
+
+Values an invented EURUSD book (a forward and five options), prints value, Greeks, VaR / ES and CVA, and writes a self-contained HTML page
+(a sample is `docs/results/portfolio_report.html`). `--returns file.csv` replaces the synthetic return history. The mathematics is in
+`docs/portfolio_mathematics.md`, the architecture diagrams in `docs/architecture.md`.
+
 ## Data
 
 `python/data_download.py` downloads free FX and rate history and writes a CSV plus a provenance
@@ -106,7 +117,8 @@ See `docs/model_documentation.md`, section 11.
 * `docs/test_catalogue.md`: the 21 planned validation tests (V-01 to V-21) and their status
 * `docs/validation_report.md`: the validation report (draft for v0.9: Garman-Kohlhagen, Heston, Monte Carlo, smile, calibration, barriers, Vanna-Volga, market risk, counterparty credit risk)
 * `docs/cli.md`: the `fxval-price` program, its configuration, report and exit codes
-* `docs/architecture.md`: layers and rules
+* `docs/architecture.md`: layers and rules, with Mermaid diagrams of the modules and of the portfolio application
+* `docs/portfolio_mathematics.md`: the mathematics of the portfolio example application
 * `docs/adr/`: architecture decision records
 * `ROADMAP.md`, `CHANGELOG.md`, `CONTRIBUTING.md`
 

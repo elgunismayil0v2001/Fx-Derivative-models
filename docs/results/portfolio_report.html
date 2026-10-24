@@ -1,0 +1,257 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FX Portfolio Report</title>
+<style>
+:root {
+  --bg: #f6f7f9; --card: #ffffff; --ink: #1b2430; --muted: #5b6676; --line: #dfe3ea;
+  --c1: #1f5fbf; --c2: #d9822b; --c3: #2e8b57; --c4: #b3382c; --bar: #9db8e6; --good: #2e8b57; --bad: #b3382c;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #12161c; --card: #1a2029; --ink: #e6eaf0; --muted: #9aa5b4; --line: #2b3441;
+    --c1: #6ea2ff; --c2: #f0a65a; --c3: #5cc48a; --c4: #ee7d70; --bar: #3d5f98; --good: #5cc48a; --bad: #ee7d70;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #12161c; --card: #1a2029; --ink: #e6eaf0; --muted: #9aa5b4; --line: #2b3441;
+  --c1: #6ea2ff; --c2: #f0a65a; --c3: #5cc48a; --c4: #ee7d70; --bar: #3d5f98; --good: #5cc48a; --bad: #ee7d70;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink);
+  font: 15px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+main { max-width: 1120px; margin: 0 auto; padding: 24px 16px 56px; }
+h1 { font-size: 24px; margin: 0 0 4px; letter-spacing: -0.01em; }
+h2 { font-size: 17px; margin: 0 0 4px; }
+p.sub, p.note { color: var(--muted); margin: 0 0 14px; font-size: 13.5px; }
+.banner { background: var(--card); border: 1px solid var(--line); border-left: 4px solid var(--c2);
+  padding: 10px 14px; border-radius: 6px; font-size: 13.5px; color: var(--muted); margin: 14px 0 20px; }
+.kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 12px; margin-bottom: 20px; }
+.kpi { background: var(--card); border: 1px solid var(--line); border-radius: 8px; padding: 14px 16px; }
+.kpi .label { font-size: 12.5px; color: var(--muted); }
+.kpi .num { font-size: 24px; font-weight: 650; font-variant-numeric: tabular-nums; margin-top: 2px; }
+.kpi .hint { font-size: 12px; color: var(--muted); margin-top: 2px; }
+section { background: var(--card); border: 1px solid var(--line); border-radius: 8px; padding: 18px 18px 14px; margin-bottom: 16px; }
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+@media (max-width: 820px) { .grid2 { grid-template-columns: 1fr; } }
+.scroll { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; font-variant-numeric: tabular-nums; font-size: 13.5px; }
+th, td { padding: 6px 10px; text-align: right; border-bottom: 1px solid var(--line); white-space: nowrap; }
+th:first-child, td:first-child { text-align: left; }
+th { color: var(--muted); font-weight: 600; font-size: 12.5px; }
+tr.total td { font-weight: 650; border-top: 2px solid var(--line); }
+.neg { color: var(--bad); }
+.chart { width: 100%; height: auto; display: block; }
+.chart text { fill: var(--muted); font-size: 11px; }
+.legend { display: flex; gap: 16px; flex-wrap: wrap; font-size: 12.5px; color: var(--muted); margin: 4px 0 2px; }
+.legend i { display: inline-block; width: 18px; height: 0; border-top: 3px solid; vertical-align: middle; margin-right: 6px; }
+.bars td.bar { width: 38%; padding: 6px 10px; }
+.bars .fill { height: 10px; background: var(--bar); border-radius: 2px; }
+footer { color: var(--muted); font-size: 12.5px; margin-top: 18px; }
+</style>
+</head>
+<body>
+<main>
+  <h1 id="title">FX portfolio report</h1>
+  <p class="sub" id="subtitle"></p>
+  <div class="banner">Synthetic example. The market data, the trades and the return history are invented to show how the
+  library's models fit together. Nothing here describes a real book or a real market.</div>
+  <div class="kpis" id="kpis"></div>
+
+  <section>
+    <h2>Positions and value</h2>
+    <p class="note">Each option is valued with the Garman-Kohlhagen formula at the volatility read from the smile at its strike.
+    The last two columns reprice the same option with one flat ATM volatility and with Heston calibrated to the whole surface.</p>
+    <div class="scroll"><table id="positions"></table></div>
+  </section>
+
+  <section>
+    <h2>Greeks</h2>
+    <p class="note">Position Greeks in domestic currency. Vega is per volatility point, theta per calendar day, rho per basis point,
+    gamma is the value change for a 1% spot move from the second-order term.</p>
+    <div class="scroll"><table id="greeks"></table></div>
+  </section>
+
+  <section>
+    <h2>Spot ladder: full revaluation against the delta-gamma expansion</h2>
+    <p class="note">Profit and loss of the whole book when the spot moves, volatilities and dates fixed. The gap between the two lines is the
+    third and higher order terms, the part a delta-gamma VaR does not see.</p>
+    <div class="legend"><span><i style="border-color:var(--c1)"></i>Full revaluation</span><span><i style="border-color:var(--c2);border-top-style:dashed"></i>Delta-gamma</span></div>
+    <div id="ladder"></div>
+  </section>
+
+  <section>
+    <h2>Market risk</h2>
+    <p class="note" id="riskNote"></p>
+    <div class="grid2">
+      <div class="scroll"><table id="var" class="bars"></table></div>
+      <div><div id="hist"></div></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Counterparty credit risk</h2>
+    <p class="note" id="creditNote"></p>
+    <div class="grid2">
+      <div>
+        <div class="legend"><span><i style="border-color:var(--c1)"></i>Expected exposure</span><span><i style="border-color:var(--c4);border-top-style:dashed"></i>PFE</span></div>
+        <div id="exposure"></div>
+      </div>
+      <div class="scroll"><table id="cva"></table></div>
+    </div>
+  </section>
+
+  <footer>Generated by <code>fxval-portfolio</code>. The formulas are in docs/portfolio_mathematics.md.</footer>
+</main>
+<script>
+"use strict";
+const R = {"pair":"EURUSD","spot":1.085,"domestic_rate":0.045,"foreign_rate":0.028,"total_value":-49491.979677,"total_greeks":{"delta":9904024.0189,"gamma":-19129541.9412,"vega":-110400.484241,"vanna":27826953.3678,"volga":3751683.79297,"theta":-103860.050654,"rho_domestic":3900082.05599,"rho_foreign":-3919474.84727},"positions":[{"label":"Long EUR forward 9M","kind":"forward","quantity":5000000,"strike":1.095,"expiry":0.75,"volatility":0,"value":18960.7347639,"value_flat_atm":null,"value_heston":null,"greeks":{"delta":4896094.82285,"gamma":0,"vega":0,"vanna":0,"volga":0,"theta":-89455.235943,"rho_domestic":3969976.61102,"rho_foreign":-3984197.16209}},{"label":"Long EUR call 3M 1.10","kind":"call","quantity":10000000,"strike":1.1,"expiry":0.25,"volatility":0.0740753437697,"value":113845.605683,"value_flat_atm":114855.840135,"value_heston":112314.252099,"greeks":{"delta":4033237.90633,"gamma":95841611.6728,"vega":2089427.31961,"vanna":14271315.5571,"volga":1838320.63202,"theta":-378820.114891,"rho_domestic":1065554.38067,"rho_foreign":-1094015.78209}},{"label":"Short EUR put 3M 1.07","kind":"put","quantity":-10000000,"strike":1.07,"expiry":0.25,"volatility":0.0774111255386,"value":-85692.2521384,"value_flat_atm":-80275.1985802,"value_heston":-85595.0758824,"greeks":{"delta":3103016.75573,"gamma":-83710269.1654,"vega":-1907135.74215,"vanna":20441371.8901,"volga":-5420841.1614,"theta":234175.753304,"rho_domestic":863116.358026,"rho_foreign":-841693.294991}},{"label":"Short straddle call 6M 1.085","kind":"call","quantity":-4000000,"strike":1.085,"expiry":0.5,"volatility":0.0778924949867,"value":-112851.456143,"value_flat_atm":-111917.959528,"value_heston":-112893.614436,"greeks":{"delta":-2256804.98595,"gamma":-25899863.2117,"vega":-1187469.78018,"vanna":2519332.21499,"volga":-351519.164837,"theta":129043.436339,"rho_domestic":-1167890.97681,"rho_foreign":1224316.70488}},{"label":"Short straddle put 6M 1.085","kind":"put","quantity":-4000000,"strike":1.085,"expiry":0.5,"volatility":0.0778924949867,"value":-76628.4834612,"value_flat_atm":-75694.9868462,"value_heston":-76670.6417547,"greeks":{"delta":1687585.1911,"gamma":-25899863.2117,"vega":-1187469.78018,"vanna":2519332.21499,"volga":-351519.164837,"theta":57919.193294,"rho_domestic":953829.207901,"rho_foreign":-915514.966171}},{"label":"Long EUR put 1Y 1.05","kind":"put","quantity":6000000,"strike":1.05,"expiry":1,"volatility":0.0861185917063,"value":92873.8716185,"value_flat_atm":80680.4326006,"value_heston":91446.9331982,"greeks":{"delta":-1559105.67115,"gamma":20538841.9748,"vega":2082247.49865,"vanna":-11924398.5095,"volga":8037242.65202,"theta":-56723.0827568,"rho_domestic":-1784503.52482,"rho_foreign":1691629.6532}}],"heston":{"v0":0.00539466916614,"kappa":3.63111805126,"theta":0.00829777432149,"xi":0.323935223303,"rho":-0.162360885543,"rms_vol_error":0.000602413519,"converged":true},"ladder":[{"shock":-0.1,"spot":0.9765,"value":-1391504.46247,"pnl":-1342012.4828,"pnl_taylor":-1187185.48111},{"shock":-0.09,"spot":0.98735,"value":-1238693.19362,"pnl":-1189201.21394,"pnl_taylor":-1058333.03424},{"shock":-0.08,"spot":0.9982,"value":-1086709.85775,"pnl":-1037217.87807,"pnl_taylor":-931732.564878},{"shock":-0.07,"spot":1.00905,"value":-936966.382428,"pnl":-887474.402751,"pnl_taylor":-807384.073014},{"shock":-0.06,"spot":1.0199,"value":-791094.829935,"pnl":-741602.850258,"pnl_taylor":-685287.558651},{"shock":-0.05,"spot":1.03075,"value":-650705.771317,"pnl":-601213.79164,"pnl_taylor":-565443.02179},{"shock":-0.04,"spot":1.0416,"value":-517065.766252,"pnl":-467573.786575,"pnl_taylor":-447850.46243},{"shock":-0.03,"spot":1.05245,"value":-390781.305968,"pnl":-341289.326291,"pnl_taylor":-332509.88057},{"shock":-0.02,"spot":1.0633,"value":-271600.215587,"pnl":-222108.23591,"pnl_taylor":-219421.276212},{"shock":-0.01,"spot":1.07415,"value":-158416.204127,"pnl":-108924.22445,"pnl_taylor":-108584.649356},{"shock":0,"spot":1.085,"value":-49491.979677,"pnl":0,"pnl_taylor":0},{"shock":0.01,"spot":1.09585,"value":57167.1147655,"pnl":106659.094443,"pnl_taylor":106332.671854},{"shock":0.02,"spot":1.1067,"value":163411.807291,"pnl":212903.786968,"pnl_taylor":210413.366208},{"shock":0.03,"spot":1.11755,"value":270642.811071,"pnl":320134.790748,"pnl_taylor":312242.08306},{"shock":0.04,"spot":1.1284,"value":379672.607052,"pnl":429164.586728,"pnl_taylor":411818.822411},{"shock":0.05,"spot":1.13925,"value":490757.172242,"pnl":540249.151919,"pnl_taylor":509143.584261},{"shock":0.06,"spot":1.1501,"value":603743.56328,"pnl":653235.542957,"pnl_taylor":604216.368609},{"shock":0.07,"spot":1.16095,"value":718257.765308,"pnl":767749.744985,"pnl_taylor":697037.175457},{"shock":0.08,"spot":1.1718,"value":833869.306325,"pnl":883361.286002,"pnl_taylor":787606.004803},{"shock":0.09,"spot":1.18265,"value":950199.142626,"pnl":999691.122303,"pnl_taylor":875922.856648},{"shock":0.1,"spot":1.1935,"value":1066967.28434,"pnl":1116459.26402,"pnl_taylor":961987.730992}],"market_risk":{"level":0.99,"portfolio_delta_units":9904024.0189,"historical_var":145954.217348,"garch":{"synthetic":true,"observations":1500,"omega":1.27149502201e-06,"alpha":0.0572056869209,"beta":0.900733074409,"persistence":0.95793876133,"sigma_next":0.00491340687967,"sigma_unconditional":0.0054981464423,"log_likelihood":5704.58874466,"converged":true},"methods":[{"method":"Delta-normal","var":122828.404582,"es":140720.145172},{"method":"Delta-gamma (Cornish-Fisher)","var":124299.506152,"es":142673.489253},{"method":"Full revaluation, normal","var":124816.774548,"es":143467.414238},{"method":"Historical simulation","var":145954.217348,"es":164145.428008},{"method":"Filtered historical simulation","var":121339.193582,"es":140716.977206}],"pnl_histogram":{"lower":-206250.378289,"upper":187740.580238,"counts":[1,0,0,6,3,3,5,9,10,16,22,11,33,44,65,54,82,59,96,105,100,116,98,97,82,76,59,55,50,34,32,26,18,12,7,5,3,3,1,2]}},"credit":{"hazard_rate":0.03,"recovery":0.4,"paths":20000,"exposure_volatility":0.0771062801111,"pfe_level":0.95,"epe":78564.6723284,"cva":1357.04271596,"cva_standard_error":8.0510925477,"cva_from_profile":1357.04271596,"standalone_sum":3255.13106367,"netting_benefit":1898.08834771,"dates":[0,0.0416666666667,0.0833333333333,0.125,0.166666666667,0.208333333333,0.25,0.291666666667,0.333333333333,0.375,0.416666666667,0.458333333333,0.5,0.541666666667,0.583333333333,0.625,0.666666666667,0.708333333333,0.75,0.791666666667,0.833333333333,0.875,0.916666666667,0.958333333333,1],"ee":[0,43923.0221452,70388.8752584,89923.4956313,105523.05243,119049.490628,10694.0881042,12809.381271,14881.3506486,16969.2913019,19046.5632986,21177.4059554,138258.617953,141622.425909,145009.819584,148447.91283,151568.044734,154750.409869,81891.8357874,80818.3982409,80315.4019785,80050.6261667,79553.414177,78879.2119785,0],"pfe":[0,224677.095972,339892.327525,426624.170286,510757.858431,584156.150788,58722.1154595,63714.3918046,67397.5668557,70415.2542986,73999.8597066,76932.1777706,513449.516047,538074.071135,561404.218255,577797.828543,600952.758059,618075.539669,386841.699588,398717.015099,418234.863148,437710.044524,452143.375684,467346.141563,0],"standalone":[{"label":"Long EUR forward 9M","cva":1316.8793748,"standard_error":11.1256520338},{"label":"Long EUR call 3M 1.10","cva":473.873613821,"standard_error":3.00460289588},{"label":"Short EUR put 3M 1.07","cva":0,"standard_error":0},{"label":"Short straddle call 6M 1.085","cva":0,"standard_error":0},{"label":"Short straddle put 6M 1.085","cva":0,"standard_error":0},{"label":"Long EUR put 1Y 1.05","cva":1464.37807505,"standard_error":10.083439032}]}};
+const $ = (id) => document.getElementById(id);
+const isNum = (x) => typeof x === "number" && isFinite(x);
+const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;"}[c]));
+
+function num(x, d = 0) {
+  if (!isNum(x)) return "n/a";
+  return x.toLocaleString("en-US", {minimumFractionDigits: d, maximumFractionDigits: d});
+}
+function cell(x, d = 0) {
+  if (!isNum(x)) return '<td>n/a</td>';
+  return '<td' + (x < 0 ? ' class="neg"' : '') + '>' + num(x, d) + '</td>';
+}
+function compact(x) {
+  if (!isNum(x)) return "n/a";
+  const a = Math.abs(x);
+  if (a >= 1e6) return num(x / 1e6, 2) + "M";
+  if (a >= 1e3) return num(x / 1e3, 1) + "k";
+  return num(x, 0);
+}
+function pct(x, d = 2) { return isNum(x) ? num(100 * x, d) + "%" : "n/a"; }
+
+// ---- generic SVG line chart ----
+function niceStep(range, ticks) {
+  const raw = range / ticks, p = Math.pow(10, Math.floor(Math.log10(raw))), f = raw / p;
+  return (f < 1.5 ? 1 : f < 3 ? 2 : f < 7 ? 5 : 10) * p;
+}
+function lineChart(target, o) {
+  const W = o.w || 520, H = o.h || 300, m = {l: 62, r: 14, t: 10, b: 38};
+  const xs = o.x, ys = o.series.flatMap((s) => s.y.filter(isNum));
+  let x0 = Math.min(...xs), x1 = Math.max(...xs), y0 = Math.min(0, ...ys), y1 = Math.max(0, ...ys);
+  if (y1 === y0) { y1 += 1; y0 -= 1; }
+  const step = niceStep(y1 - y0, 5);
+  y0 = Math.floor(y0 / step) * step; y1 = Math.ceil(y1 / step) * step;
+  const X = (v) => m.l + (v - x0) / (x1 - x0 || 1) * (W - m.l - m.r);
+  const Y = (v) => H - m.b - (v - y0) / (y1 - y0) * (H - m.t - m.b);
+  let s = '<svg class="chart" viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="' + esc(o.label) + '">';
+  for (let v = y0; v <= y1 + step / 2; v += step) {
+    s += '<line x1="' + m.l + '" x2="' + (W - m.r) + '" y1="' + Y(v) + '" y2="' + Y(v) + '" stroke="var(--line)"/>';
+    s += '<text x="' + (m.l - 6) + '" y="' + (Y(v) + 4) + '" text-anchor="end">' + esc(o.yFmt(v)) + '</text>';
+  }
+  const xticks = o.xTicks || 5;
+  for (let i = 0; i <= xticks; i++) {
+    const v = x0 + (x1 - x0) * i / xticks;
+    s += '<text x="' + X(v) + '" y="' + (H - m.b + 16) + '" text-anchor="middle">' + esc(o.xFmt(v)) + '</text>';
+  }
+  if (y0 < 0 && y1 > 0) s += '<line x1="' + m.l + '" x2="' + (W - m.r) + '" y1="' + Y(0) + '" y2="' + Y(0) + '" stroke="var(--muted)"/>';
+  if (o.vline !== undefined && x0 <= o.vline && o.vline <= x1) s += '<line x1="' + X(o.vline) + '" x2="' + X(o.vline) + '" y1="' + m.t + '" y2="' + (H - m.b) + '" stroke="var(--muted)" stroke-dasharray="2 3"/>';
+  o.series.forEach((ser) => {
+    const pts = xs.map((v, i) => isNum(ser.y[i]) ? X(v).toFixed(1) + "," + Y(ser.y[i]).toFixed(1) : null).filter(Boolean).join(" ");
+    s += '<polyline fill="none" stroke="' + ser.color + '" stroke-width="2.2" ' + (ser.dash ? 'stroke-dasharray="6 4" ' : '') + 'points="' + pts + '"/>';
+  });
+  s += '<text x="' + ((m.l + W - m.r) / 2) + '" y="' + (H - 4) + '" text-anchor="middle">' + esc(o.xLabel) + '</text>';
+  s += '</svg>';
+  target.innerHTML = s;
+}
+
+function histogram(target, h, varLine) {
+  const W = 520, H = 300, m = {l: 50, r: 14, t: 10, b: 38};
+  const c = h.counts, n = c.length, top = Math.max(1, ...c);
+  const X = (v) => m.l + (v - h.lower) / ((h.upper - h.lower) || 1) * (W - m.l - m.r);
+  const Y = (v) => H - m.b - v / top * (H - m.t - m.b);
+  let s = '<svg class="chart" viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="Distribution of historical simulation profit and loss">';
+  const bw = (W - m.l - m.r) / n;
+  c.forEach((v, i) => { s += '<rect x="' + (m.l + i * bw + 0.5).toFixed(1) + '" y="' + Y(v).toFixed(1) + '" width="' + Math.max(1, bw - 1).toFixed(1) + '" height="' + (H - m.b - Y(v)).toFixed(1) + '" fill="var(--bar)"/>'; });
+  s += '<line x1="' + m.l + '" x2="' + (W - m.r) + '" y1="' + (H - m.b) + '" y2="' + (H - m.b) + '" stroke="var(--muted)"/>';
+  for (let i = 0; i <= 4; i++) {
+    const v = h.lower + (h.upper - h.lower) * i / 4;
+    s += '<text x="' + X(v) + '" y="' + (H - m.b + 16) + '" text-anchor="middle">' + compact(v) + '</text>';
+  }
+  if (isNum(varLine) && -varLine >= h.lower && -varLine <= h.upper) {
+    s += '<line x1="' + X(-varLine) + '" x2="' + X(-varLine) + '" y1="' + m.t + '" y2="' + (H - m.b) + '" stroke="var(--c4)" stroke-width="2"/>';
+    s += '<text x="' + (X(-varLine) + 5) + '" y="' + (m.t + 12) + '" style="fill:var(--c4)">historical VaR</text>';
+  }
+  s += '<text x="' + ((m.l + W - m.r) / 2) + '" y="' + (H - 4) + '" text-anchor="middle">one-day profit and loss (USD)</text></svg>';
+  target.innerHTML = s;
+}
+
+function render() {
+  if (!R) { document.body.insertAdjacentHTML("beforeend", "<p>No data embedded.</p>"); return; }
+  const ccy = R.pair.slice(3), base = R.pair.slice(0, 3);
+  $("title").textContent = base + "/" + ccy + " portfolio report";
+  $("subtitle").textContent = "Spot " + num(R.spot, 4) + " · " + ccy + " rate " + pct(R.domestic_rate) + " · " + base + " rate " + pct(R.foreign_rate) + " · amounts in " + ccy;
+  const mr = R.market_risk, cr = R.credit, g = R.total_greeks;
+  const fhs = mr.methods.find((m) => m.method.startsWith("Filtered")) || mr.methods[mr.methods.length - 1];
+  $("kpis").innerHTML = [
+    ["Portfolio value", num(R.total_value), "sum of all positions"],
+    ["Delta per 1% spot move", num(g.delta * R.spot * 0.01), num(g.delta) + " " + base + " of spot exposure"],
+    [pct(mr.level, 1).replace(".0", "") + " one-day VaR", num(fhs.var), fhs.method.toLowerCase() + ", ES " + num(fhs.es)],
+    ["CVA (netted)", num(cr.cva), "± " + num(cr.cva_standard_error) + " simulation error"]
+  ].map((k) => '<div class="kpi"><div class="label">' + esc(k[0]) + '</div><div class="num">' + esc(k[1]) + '</div><div class="hint">' + esc(k[2]) + '</div></div>').join("");
+
+  // positions
+  let t = "<tr><th>Position</th><th>Quantity</th><th>Strike</th><th>Expiry (y)</th><th>Vol</th><th>Value</th><th>Flat ATM vol</th><th>Heston</th></tr>";
+  R.positions.forEach((p) => {
+    t += "<tr><td>" + esc(p.label) + "</td>" + cell(p.quantity) + "<td>" + num(p.strike, 4) + "</td><td>" + num(p.expiry, 2) + "</td><td>" + (p.kind === "forward" ? "–" : pct(p.volatility)) + "</td>" + cell(p.value) +
+      (p.value_flat_atm === null ? "<td>–</td>" : cell(p.value_flat_atm)) + (p.value_heston === null ? "<td>–</td>" : cell(p.value_heston)) + "</tr>";
+  });
+  t += '<tr class="total"><td>Total</td><td></td><td></td><td></td><td></td>' + cell(R.total_value) + "<td></td><td></td></tr>";
+  $("positions").innerHTML = t;
+  if (R.heston) {
+    $("positions").insertAdjacentHTML("afterend", '<p class="note" style="margin-top:8px">Heston: v0 ' + num(R.heston.v0, 4) + ", kappa " + num(R.heston.kappa, 2) + ", theta " + num(R.heston.theta, 4) + ", xi " + num(R.heston.xi, 2) + ", rho " + num(R.heston.rho, 2) +
+      "; rms error against the surface quotes " + num(100 * R.heston.rms_vol_error, 3) + " vol points" + (R.heston.converged ? "" : " (did not converge)") + ".</p>");
+  }
+
+  // greeks
+  const S = R.spot;
+  const gr = (p) => [p.greeks.delta * S, 0.5 * p.greeks.gamma * S * S * 1e-4, p.greeks.vega / 100, p.greeks.vanna / 100 * S, p.greeks.theta / 365, p.greeks.rho_domestic / 1e4, p.greeks.rho_foreign / 1e4];
+  let gt = "<tr><th>Position</th><th>Delta (units)</th><th>Delta per 1% move</th><th>Gamma, 1% move</th><th>Vega / vol pt</th><th>Theta / day</th><th>Rho " + esc(ccy) + " / bp</th><th>Rho " + esc(base) + " / bp</th></tr>";
+  const row = (label, p, cls) => { const v = gr(p); return "<tr" + (cls ? ' class="' + cls + '"' : "") + "><td>" + esc(label) + "</td>" + cell(p.greeks.delta) + cell(v[0] * 0.01) + cell(v[1]) + cell(v[2]) + cell(v[4]) + cell(v[5]) + cell(v[6]) + "</tr>"; };
+  R.positions.forEach((p) => { gt += row(p.label, p); });
+  gt += row("Total", {greeks: g}, "total");
+  $("greeks").innerHTML = gt;
+
+  // ladder
+  lineChart($("ladder"), {
+    label: "Profit and loss against the spot move", x: R.ladder.map((l) => l.shock),
+    series: [{y: R.ladder.map((l) => l.pnl), color: "var(--c1)"}, {y: R.ladder.map((l) => l.pnl_taylor), color: "var(--c2)", dash: true}],
+    xFmt: (v) => pct(v, 0), yFmt: compact, xLabel: "spot move", vline: 0, w: 1040, h: 320, xTicks: 10
+  });
+
+  // var
+  $("riskNote").textContent = "One-day horizon, " + pct(mr.level, 1) + " level, losses shown as positive numbers. Volatility forecast: GARCH(1,1) fitted to " + num(mr.garch.observations) + " daily returns (" +
+    (mr.garch.synthetic ? "synthetic" : "supplied") + "), next day " + pct(mr.garch.sigma_next) + ", persistence " + num(mr.garch.persistence, 3) + (mr.garch.converged ? "" : ", not converged") + ".";
+  const vmax = Math.max(1, ...mr.methods.map((m) => Math.max(m.var, m.es)));
+  let vt = "<tr><th>Method</th><th>VaR</th><th>ES</th><th></th></tr>";
+  mr.methods.forEach((m) => { vt += "<tr><td>" + esc(m.method) + "</td>" + cell(m.var) + cell(m.es) + '<td class="bar"><div class="fill" style="width:' + Math.max(0, Math.min(100, 100 * m.var / vmax)) + '%"></div></td></tr>'; });
+  $("var").innerHTML = vt;
+  histogram($("hist"), mr.pnl_histogram, mr.historical_var);
+
+  // credit
+  $("creditNote").textContent = "One counterparty, one netting set, no collateral. Hazard rate " + pct(cr.hazard_rate, 1) + ", recovery " + pct(cr.recovery, 0) + ", " + num(cr.paths) + " paths of the spot at volatility " + pct(cr.exposure_volatility) + ". EPE (average expected exposure) " + num(cr.epe) + ". Exposure falls when a trade matures, which is why the lines step down at the option expiries.";
+  lineChart($("exposure"), {
+    label: "Expected exposure and potential future exposure over time", x: cr.dates,
+    series: [{y: cr.ee, color: "var(--c1)"}, {y: cr.pfe, color: "var(--c4)", dash: true}],
+    xFmt: (v) => num(v, 2), yFmt: compact, xLabel: "years from today", xTicks: 5
+  });
+  let ct = "<tr><th>Trade</th><th>Standalone CVA</th></tr>";
+  cr.standalone.forEach((s) => { ct += "<tr><td>" + esc(s.label) + "</td>" + cell(s.cva) + "</tr>"; });
+  ct += '<tr class="total"><td>Sum of standalone</td>' + cell(cr.standalone_sum) + "</tr>";
+  ct += "<tr><td>Netted CVA</td>" + cell(cr.cva) + "</tr>";
+  ct += "<tr><td>Netting benefit</td>" + cell(cr.netting_benefit) + "</tr>";
+  $("cva").innerHTML = ct;
+}
+render();
+</script>
+</body>
+</html>

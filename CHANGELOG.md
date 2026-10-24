@@ -6,6 +6,19 @@ All notable changes are recorded here. The format follows
 
 ## [Unreleased]
 
+### Added
+
+- `examples/portfolio`: the example application `fxval-portfolio`. It values a book of one forward and five vanilla options on one currency pair
+  (volatility from the smile surface at each strike), reports Greeks per position and in total, a spot ladder (full revaluation against the
+  delta-gamma expansion), two model cross-checks (flat ATM volatility, Heston calibrated to the surface), 1-day VaR and ES by the five methods of
+  the risk layer with a GARCH volatility forecast, and exposure, EPE, CVA and netting benefit for the whole book as one netting set. Output: a
+  terminal summary, JSON, and one self-contained HTML page (`docs/results/portfolio_report.html` is a sample). The default data is synthetic.
+- `docs/portfolio_mathematics.md`: the mathematics of that application (formulas, assumptions, the map from each reported number to code and test).
+- `docs/architecture.md`: three Mermaid diagrams (library modules and their direct dependencies, the application's data flow, one run of `analyse()`).
+- `tests/example/test_portfolio_analysis.cpp`: 25 tests (finite differences of the book revaluation, forward Greeks, the forward-to-spot mapping seen by the
+  risk layer, closed-form VaR of a linear book, an independent GARCH fit, the CVA trapezoid formula recomputed, netting inequality, parsing and error cases).
+  Ten deliberate mistakes in the application code were each caught by at least one test. No library code changed.
+
 ## [1.0.0] - 2026-10-23
 
 First release. Scope as frozen in `ROADMAP.md`: smile construction from delta quotes, Heston calibration, barrier and

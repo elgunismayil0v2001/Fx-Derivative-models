@@ -173,6 +173,7 @@ validation tests are what a model-validation team would ask for. Reasoning:
 | `examples/smile/` | `fxval-example-smile`: builds and checks the synthetic smile scenarios and writes the CSV behind the figures. |
 | `configs/scenarios/` | `smile_scenarios.csv`: synthetic, illustrative smile quotes, shared by the example and the V-10 test. |
 | `docs/results/` | Figures and data of the smile scenarios. |
+| `examples/portfolio/` | `fxval-portfolio`: values, risk-measures and credit-adjusts an example FX book with the library's models. `portfolio_analysis.*` is the computation (a static library, `fxval_portfolio_core`), `report_writers.*` and `html_page.hpp` write the terminal, JSON and HTML output, `main.cpp` is the command line. Uses only the public API. |
 | `examples/consumer/` | A tiny external project that links the installed library. |
 | `scripts/mutation_check.py`, `scripts/mutants/*.json` | Plants each recorded change in a scratch copy of the repository and reports whether the tests notice (nightly in CI). |
 | `scripts/run_fuzzers.sh` | Runs the libFuzzer targets for a fixed time on their corpus and regressions. |

@@ -121,6 +121,20 @@ if(FXVAL_BUILD_APPS)
 endif()
 
 # ---------------------------------------------------------------------------
+# Example application (examples/portfolio)
+# ---------------------------------------------------------------------------
+if(FXVAL_BUILD_EXAMPLES)
+  add_executable(fxval_portfolio_example_tests example/test_portfolio_analysis.cpp)
+  target_link_libraries(fxval_portfolio_example_tests PRIVATE fxval_portfolio_core GTest::gtest_main)
+  if(TARGET nlohmann_json::nlohmann_json)
+    target_link_libraries(fxval_portfolio_example_tests PRIVATE nlohmann_json::nlohmann_json)
+    target_compile_definitions(fxval_portfolio_example_tests PRIVATE FXVAL_PORTFOLIO_TEST_HAVE_JSON)
+  endif()
+  fxval_set_warnings(fxval_portfolio_example_tests)
+  gtest_discover_tests(fxval_portfolio_example_tests DISCOVERY_TIMEOUT 60)
+endif()
+
+# ---------------------------------------------------------------------------
 # Fuzz targets: a deterministic replay test in every build, libFuzzer programs on request
 # ---------------------------------------------------------------------------
 add_executable(fxval_fuzz_replay_tests fuzz/test_fuzz_replay.cpp)
